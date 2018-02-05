@@ -1,0 +1,23 @@
+Package: Rcurvep
+Type: Package
+Title: Concentration Response Modeling Using Curvep  
+Version: 0.1.0
+Authors@R: as.person(c(
+    "Jui-Hua Hsieh <juihua.hsieh@gmail.com> [aut, cre]", 
+    "Alexander Sedykh <sunirks@gmail.com > [aut]"
+  ))
+Maintainer: The package maintainer <juihua.hsieh@gmail.com>
+Description: The packages provides an easy-to-use R interface for processing concentration response data using Curvep, a response noise filtering algorithm and functions for deriving a optimal response noise threshold in an experiment.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: dplyr,
+    tibble,
+    boot,
+    tidyr,
+    purrr
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
