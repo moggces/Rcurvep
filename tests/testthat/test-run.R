@@ -1,5 +1,21 @@
 context("running job")
 
+
+test_that("resp original dataset job run with list thresholds", {
+  data("zfishbeh")
+  x <- zfishbeh #%>%
+    #group_by(endpoint, chemical, concs) %>%
+    #slice(1) %>%
+    #split(.$endpoint)
+  outd <- run_curvep_job(x,
+                         directionality = 0,
+                         n_sample = NULL,
+                         threshold = list("1" = 15, "-1" = 30),
+                         other_paras = list(CARR = 20, TrustHi = TRUE))
+  expect_true(sum(colnames(outd) %in% c('input', 'output', 'activity')) == 3, info = "a failed run" )
+})
+
+
 test_that("resp original dataset job run", {
   data("zfishbeh")
   x <- zfishbeh %>%

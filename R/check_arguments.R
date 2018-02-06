@@ -38,7 +38,7 @@
   directionality <- .check_directionality(directionality)
   if (rlang::is_list(threshold))
   {
-    if ( sum(names(threshold) %in% c(1, -1) != length(threshold) ))
+    if ( sum(names(threshold) %in% c(1, -1)) != length(threshold) )
     {
       rlang::abort("threshold is a list but the names are not c(-1, 1)")
     }

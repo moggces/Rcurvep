@@ -132,7 +132,8 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #'   \item Settings, input parameters for this run
 #' }
 #' @export
-#'
+#' @examples
+#' curvep(Conc = c(-8, -7, -6, -5, -4) , Resp = c(0, -3, -5, -15, -30))
 
 #[[Rccp::export]]
 curvep <- function (Conc, Resp, Mask = NULL,

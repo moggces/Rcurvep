@@ -71,9 +71,14 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #' @examples
 #'
 #' # a percentage type dataset
-#'
 #' data(zfishdev)
-#'
+#' x <- zfishdev %>% split(.$endpoint)
+#' outd <- run_curvep_job(x[[1]],
+#'                       directionality = 1,
+#'                       n_sample = 1,
+#'                       threshold = 15,
+#'                       other_paras = list(CARR = 20, TrustHi = TRUE))
+#' # more examples are availabie `browseVignettes(package = "Rcurvep")`
 #'
 run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample, threshold, other_paras = list(), vehicle_data = NULL)
 {

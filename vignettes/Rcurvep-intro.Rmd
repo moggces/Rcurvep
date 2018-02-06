@@ -1,6 +1,6 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "Practical Examples of Using Rcurvep"
+author: "Jui-Hua Hsieh"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,63 +9,156 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+## Introduction
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+Curvep has been extensively used in analyzing concentration-response data (e.g., Tox21 quantitative high throughput screening data). Unlike common concentration-response modeling approaches by fitting data into parametric models such as Hill or logisitic, Curvep is a non-parametric, noise filtering algorithm based on user-defined thresholds such as the baseline noise threshold and maximum deviation curve deviation. 
 
-## Vignette Info
+Among thresholds, it is known that baseline noise threshold (or minimum response threshold) has direct and significant impact on defining actives/inactives of testing substances. In high throughput screening, one common method to set the minimum response threshold is based on responses in the vehicle control wells. However, in some cases, the minimum response threshold derived from the *vehicle control* responses may not reflect the minimum response requirement for the *testing substances* or it is unclear how to derive a threshold based on *vehicle control* responses distribution (e.g., 3 or 2 standard deviation).
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+The examples in this document start with cases that the minimum response threshold is pre-defined and explore cases that minimum response threshold is unknown.
 
-## Styles
+## Installation
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+```{r install, eval = FALSE}
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
+# the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("Rcurvep")
 
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+## Examples
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r loadp, message = FALSE, warning =  FALSE}
+# load required packages
+library(Rcurvep)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
 ```
 
-Also a quote using `>`:
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+### Minimum response threshold is pre-defined
 
-```{r}
-data("zfishdev")
-system.time(simu_dd2s <- zfishdev %>% 
-      tidyr::unite(duid, id, well__substance, directionality, sep = "#") %>%
-      split(.$duid) %>%
-      purrr::map(., function(x) purrr::map(x, list) %>% tibble::as_tibble() %>% dplyr::select(-duid)) %>%
-              dplyr::bind_rows(.id = "duid") %>%
-              tidyr::separate(duid, c("endp", "chem", "dire"), sep = "#", convert = TRUE, remove = FALSE)# %>%
-              #left_join(dmso_varl, by = c("endp" = "id"))
-)
+```{r resp}
+# load concentration response dataset
+data("zfishbeh")
+zfishbeh
 ```
+
+Zebrafish behavior dataset is a dataset with high number of replicates per concentration. Chemicals can induce either hyper-response (increasing) or hypo-response (decreasing).
+
+```{r run_resp}
+
+# a pre-defined threshold for increasing response
+threshold_up <- 15
+outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = NULL, threshold = threshold_up, other_paras = list(CARR = 20, TrustHi = TRUE))
+
+# a pred-defined threshold for decreasing response
+threshold_down <- 30
+outd <- run_curvep_job(zfishbeh, directionality = -1, n_sample = NULL, threshold = threshold_down, other_paras = list(CARR = 20, TrustHi = TRUE))
+
+# or combined
+threshold_l <- list("1" = threshold_up, "-1" = threshold_down)
+outd <- run_curvep_job(zfishbeh, directionality = 0, n_sample = NULL, threshold = threshold_l, other_paras = list(CARR = 20, TrustHi = TRUE))
+
+```
+
+The `n_sample = NULL` allows to run the calculation based on the original data. If there are multiple responses per concentration, the `median()` value is used. However, the calculation can also be done on the simulated curves. The curves are simulated by bootstraping the replicates per concentration independently. 
+
+```{r run_resp_boot}
+
+n_sample_test <- 2
+outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = threshold_up, other_paras = list(CARR = 20, TrustHi = TRUE))
+
+```
+
+For dataset with low number of replicates per concentration, the curves can be simulated by linearly fit the concentration-response data + random errors bootstrapped from responses in the vehicle control wells. 
+
+```{r run_resp_boot_veh}
+error <- rnorm(100, 0, 10)
+outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = threshold_up, other_paras = list(CARR = 20, TrustHi = TRUE), vehicle_data = error)
+```
+
+
+### Minimum response threshold is unknown
+
+When minimum response threshold is unknown, one method is to search possible candidates and the optimal threshold is the lowest threshold can reduce the varience in potency (or concentration) estimation significantly at that threshold. The optimal threshold is called as **benchmark response (BMR)** and the potency at the BMR is called as **benchmark concentration (BMC)**. BMC is particularly important for activity estimation in toxicity field since it could be considered the lowest concentration that an effect is observed (or in our case, can be reliably estimated).
+
+```{r run_resp_boot_bmr, warning = FALSE, message = FALSE}
+
+threshold_range <- seq(5, 10, by = 5) # usually seq(5, 95, by = 5)
+n_sample_test <- 2 # usually for 1000
+outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = threshold_range, other_paras = list(CARR = 20, TrustHi = TRUE))
+
+```
+
+
+## Output
+
+The output from `run_curvep_jon()` contains nested information regarding input, output, and activity. It is easier to use `extract_curvep_data()` to unnest the information. 
+
+### activity summary
+
+```{r cal, cache = TRUE}
+
+outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = 100, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE))
+```
+
+```{r summary_data, message = FALSE, warning = FALSE, dependson = "cal"}
+# extract activity
+act <- extract_curvep_data(outd, "act")
+
+# extract high/low conc
+hl <- extract_curvep_data(outd, "concs_hl")
+
+# combine data
+outd_ext <- list(act, hl) %>% 
+  reduce(inner_join)
+
+result <- outd_ext %>% 
+  group_by(dduid, thres) %>%
+  mutate(POD = ifelse(is.na(POD), conc_highest, POD)) %>%
+  summarise(
+    BMC = median(POD), 
+    BMCL = quantile(POD, 0.025),
+    BMCU = quantile(POD, 0.975),
+    hit_confidence = sum(hit)/n()
+  )
+
+result
+```
+
+### Curve plotting
+
+```{r curve, warning = FALSE, message = FALSE, dependson = "cal"}
+# extract resp_out
+in_concs <- extract_curvep_data(outd, "concs_in")
+out_resps  <- extract_curvep_data(outd, "resps_out")
+
+plotd <- list(in_concs, out_resps) %>% 
+  reduce(inner_join) %>%
+  unnest() %>%
+  group_by(dduid, concs) %>% 
+  summarize(resps = round(median(resps),2)) 
+
+p <- ggplot(plotd %>% filter(dduid == "120_d_D2_pairdist#Caffeine|58-08-2#1@1"), aes(x = concs, y = resps)) + geom_point() + geom_line()
+p + facet_wrap(~ dduid)
+
+
+```
+
+## BMR identication
+
+
+## Limitation
+
+1. The baseline of responses is 0. 
+2. concentration is in `log10(M)` format. M: molar concentration.
+
+
+
+
 

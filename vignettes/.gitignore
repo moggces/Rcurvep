@@ -1,0 +1,8 @@
+figure
+*.html
+*.md
+rsconnect
+.build.timestamp
+Rcurvep-intro.R
+Rcurvep-intro_files
+Rcurvep-intro_cache

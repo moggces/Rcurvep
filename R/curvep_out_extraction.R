@@ -17,7 +17,18 @@
 #' @importFrom magrittr "%>%"
 #' @examples
 #' data(zfishdev)
-
+#' x <- zfishdev %>% split(.$endpoint)
+#' outd <- run_curvep_job(x[[1]],
+#'                       directionality = 1,
+#'                       n_sample = 1,
+#'                       threshold = 15,
+#'                       other_paras = list(CARR = 20, TrustHi = TRUE))
+#' # activities
+#' extract_curvep_data(outd, "act")
+#'
+#' # parameters
+#' extract_curvep_data(outd, "paras")
+#'
 #' @seealso \code{\link{curvep}} for available Curvep parameters
 #'
 #'
