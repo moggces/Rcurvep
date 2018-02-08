@@ -20,8 +20,8 @@ Installation
 ``` r
 # the development version from GitHub:
 # install.packages("devtools")
-devtools::install_github("Rcurvep")
-devtools::install_github("Rcurvep", build_vignettes = TRUE)
+devtools::install_github("moggces/Rcurvep")
+devtools::install_github("moggces/Rcurvep", build_vignettes = TRUE)
 ```
 
 Usage
