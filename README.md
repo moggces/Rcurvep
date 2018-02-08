@@ -21,6 +21,7 @@ Installation
 # the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("Rcurvep")
+devtools::install_github("Rcurvep", build_vignettes = TRUE)
 ```
 
 Usage

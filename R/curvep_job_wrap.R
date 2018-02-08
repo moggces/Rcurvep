@@ -43,18 +43,17 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 }
 
 
-#' A wrap function to run Curvep based on types of datasets
+#' A wrap function to run Curvep based on types of dataset
 #'
-#' Given a type of datasets and parameters,
+#' Given a type of dataset and parameters,
 #' the function generates input for `curvep()`,
-#' performs calculations, generates output, and extracts activity.
+#' performs calculations, and generates output.
 #'
-#' @param dats datasets
-#' @seealso \code{\link{zfishdev}}
-#' @seealso \code{\link{zfishbeh}}
-#'
-#' @param threshold a numeric value for the presumed noise threshold or a numeric vector for threshold finding
-#' @param other_paras (optional) a list of other Curvep parameters to pass on
+#' @param dats datasets such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}
+#' @param directionality an int value (1, 0, -1) to represent the presumed direction of responses for processing; 1 = up, -1 = down, 0 = both
+#' @param n_sample NULL (using orignal data) or an int to indicate the number of curves to generate
+#' @param threshold a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list to indicate the threshold of directions
+#' @param other_paras a list of other Curvep parameters to pass on
 #' @param vehicle_data NULL or a numeric vector of responses in vehicle control wells
 #' @return
 #' \itemize{
@@ -62,7 +61,7 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #'   \item input: a tibble, including the information of concs, resps, and parameters
 #'   \item output: a list, all results from `curvep()`
 #'   \item activity: a tibble, extracted activity information from output
-#'   \item repeat_id: repeat id, NA for the calculation using orignal responses instead of bootstrap samples.
+#'   \item repeat_id: repeat id, NA for the calculation using orignal responses instead of simulated samples.
 #'   \item thres: threshold used in the calculation
 #' }
 #' @seealso \code{\link{curvep}} for available Curvep parameters
@@ -78,9 +77,10 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #'                       n_sample = 1,
 #'                       threshold = 15,
 #'                       other_paras = list(CARR = 20, TrustHi = TRUE))
-#' # more examples are availabie `browseVignettes(package = "Rcurvep")`
+#' # more examples are availabie
+#' vignette("Rcurvep-intro")
 #'
-run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample, threshold, other_paras = list(), vehicle_data = NULL)
+run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, threshold, other_paras = list(), vehicle_data = NULL)
 {
   #arguments check
   dats <- .check_dats(dats)

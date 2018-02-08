@@ -2,17 +2,21 @@
 % Please edit documentation in R/curvep_job_wrap.R
 \name{run_curvep_job}
 \alias{run_curvep_job}
-\title{A wrap function to run Curvep based on types of datasets}
+\title{A wrap function to run Curvep based on types of dataset}
 \usage{
-run_curvep_job(dats, directionality = c(1, 0, -1), n_sample, threshold,
-  other_paras = list(), vehicle_data = NULL)
+run_curvep_job(dats, directionality = c(1, 0, -1), n_sample = NULL,
+  threshold, other_paras = list(), vehicle_data = NULL)
 }
 \arguments{
-\item{dats}{datasets}
+\item{dats}{datasets such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}}
 
-\item{threshold}{a numeric value for the presumed noise threshold or a numeric vector for threshold finding}
+\item{directionality}{an int value (1, 0, -1) to represent the presumed direction of responses for processing; 1 = up, -1 = down, 0 = both}
 
-\item{other_paras}{(optional) a list of other Curvep parameters to pass on}
+\item{n_sample}{NULL (using orignal data) or an int to indicate the number of curves to generate}
+
+\item{threshold}{a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list to indicate the threshold of directions}
+
+\item{other_paras}{a list of other Curvep parameters to pass on}
 
 \item{vehicle_data}{NULL or a numeric vector of responses in vehicle control wells}
 }
@@ -22,14 +26,14 @@ run_curvep_job(dats, directionality = c(1, 0, -1), n_sample, threshold,
   \item input: a tibble, including the information of concs, resps, and parameters
   \item output: a list, all results from `curvep()`
   \item activity: a tibble, extracted activity information from output
-  \item repeat_id: repeat id, NA for the calculation using orignal responses instead of bootstrap samples.
+  \item repeat_id: repeat id, NA for the calculation using orignal responses instead of simulated samples.
   \item thres: threshold used in the calculation
 }
 }
 \description{
-Given a type of datasets and parameters,
+Given a type of dataset and parameters,
 the function generates input for `curvep()`,
-performs calculations, generates output, and extracts activity.
+performs calculations, and generates output.
 }
 \examples{
 
@@ -41,13 +45,10 @@ outd <- run_curvep_job(x[[1]],
                       n_sample = 1,
                       threshold = 15,
                       other_paras = list(CARR = 20, TrustHi = TRUE))
-# more examples are availabie `browseVignettes(package = "Rcurvep")`
+# more examples are availabie
+vignette("Rcurvep-intro")
 
 }
 \seealso{
-\code{\link{zfishdev}}
-
-\code{\link{zfishbeh}}
-
 \code{\link{curvep}} for available Curvep parameters
 }

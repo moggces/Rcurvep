@@ -98,38 +98,39 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #' A function to process a given pair of concentration response data, the background function for `run_curvep_job()`.
 #' @seealso  \code{\link{run_curvep_job}}
 #'
-#' primary parameters:
+#' @section primary parameters:
 #'
-#' @param Conc, array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped
-#' @param Resp, array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls
-#' @param Mask, array of 1/0 flags indicating invalidated measurements (default = NULL)
-#' @param TRSH, base(zero-)line threshold (default = 15)
-#' @param RNGE, target range of responses (default = -100)
+#' @param Conc array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped
+#' @param Resp array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls
+#' @param Mask array of 1/0 flags indicating invalidated measurements (default = NULL)
+#' @param TRSH base(zero-)line threshold (default = 15)
+#' @param RNGE target range of responses (default = -100)
 #' @param MXDV  maximum allowed deviation from monotonicity (default = 5)
 #'
-#' secondary parameters:
-#' @param CARR, carryover detection threshold (default = 0, analysis skipped if set to 0)
-#' @param BSFT, for baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0)
-#' @param USHP, for u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0)
-#' @param TrustHi, for equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE)
-#' @param StrictImp, prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE)
+#' @section secondary parameters:
 #'
-#' @return a list with corrected dose-response measurements and several calculated curve metrics
+#' @param CARR carryover detection threshold (default = 0, analysis skipped if set to 0)
+#' @param BSFT for baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0)
+#' @param USHP for u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0)
+#' @param TrustHi for equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE)
+#' @param StrictImp prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE)
+#'
+#' @return a list with corrected concentration-response measurements and several calculated curve metrics
 #' \itemize{
-#'   \item resp, corrected responses
-#'   \item corr, flags for corrections
-#'   \item ECxx, effective concentration values at various thresholds
-#'   \item Cxx, concentrations for various absolute response levels
-#'   \item Emax, maximum effective concentration, slope of the mid-curve (b/w EC25 and EC75)
+#'   \item resp corrected responses
+#'   \item corr flags for corrections
+#'   \item ECxx effective concentration values at various thresholds
+#'   \item Cxx concentrations for various absolute response levels
+#'   \item Emax maximum effective concentration, slope of the mid-curve (b/w EC25 and EC75)
 #'   \item wConc, response-weighted concentration
-#'   \item wResp, concentration-weighed response
-#'   \item POD, point-of-departure (first concentration with response >TRSH)
-#'   \item AUC, area-under-curve (in units of log-concentration X response)
-#'   \item wAUC, AUC weighted by concentration range and POD / TLOG (-12)
-#'   \item wAUC_pre, AUC weighted by concentration range and POD
-#'   \item nCorrected, number of points corrected (basically, sum of flags in corr)
-#'   \item Comments, warning and notes about the dose-response curve
-#'   \item Settings, input parameters for this run
+#'   \item wResp concentration-weighed response
+#'   \item POD point-of-departure (first concentration with response >TRSH)
+#'   \item AUC area-under-curve (in units of log-concentration X response)
+#'   \item wAUC AUC weighted by concentration range and POD / TLOG (-12)
+#'   \item wAUC_pre AUC weighted by concentration range and POD
+#'   \item nCorrected number of points corrected (basically, sum of flags in corr)
+#'   \item Comments warning and notes about the dose-response curve
+#'   \item Settings input parameters for this run
 #' }
 #' @export
 #' @examples

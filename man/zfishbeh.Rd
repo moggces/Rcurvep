@@ -5,11 +5,11 @@
 \alias{zfishbeh}
 \title{Zebrafish behavior endpoint data}
 \format{a tibble with variables
-\describe{
-\item{endpoint}{toxicity endpoint}
-\item{chemical}{chemical information}
-\item{concs}{concentrations in log10(M) format}
-\item{resps}{normalized responses with baseline = 0}
+\itemize{
+\item endpoint toxicity endpoints
+\item chemical chemical information
+\item concs concentrations in log10(M) format
+\item resps normalized responses with baseline = 0
 }}
 \source{
 Biobide study S‐BBD‐0017/15
@@ -18,6 +18,6 @@ Biobide study S‐BBD‐0017/15
 zfishbeh
 }
 \description{
-Data are processed from Biobide behavior plate  data
+Data are processed from Biobide behavior plate data
 }
 \keyword{datasets}

@@ -11,7 +11,7 @@ Description: The packages provides an easy-to-use R interface for processing con
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: dplyr,
+Imports: dplyr (>= 0.7),
     tibble,
     boot,
     tidyr,

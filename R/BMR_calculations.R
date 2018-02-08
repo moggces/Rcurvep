@@ -1,3 +1,68 @@
+#' Identify baseline noise threshold through activity data from simulated curves
+#'
+#' Provided an activity dataset after `run_curvep_job()` and `extract_curvep_data()`,
+#' the function calculates the pooled variance of potency information (POD) across chemicals
+#' and approaches are used to derive the lowest threshold that variance of POD is sufficiently reduced and even stabilized.
+#'
+#' @param df a tibble
+#' @param id a vector of strings of the column names in `df`, representing the investigated endpoint
+#' @param chemical a string that represents the column name of chemical in `df`
+#' @param threshold a string that represents the column name of threshold in `df`
+#' @param potency a string that represents the column name of potency in `df`
+#'
+#' @return a tibble with added columns
+#' \itemize{
+#'   \item pooled_variance: the pooled varience of the potency
+#'   \item thresDist: the identified threshold based on distance approach
+#'   \item thresCurva: the identified threshold based on curvature + distance approach
+#'   \item p1, p2, distl: the index of points for the line and the calculated distance-to-line value
+#'   \item curvature: the calculated curvature value
+#' }
+#' @importFrom magrittr "%>%"
+#' @importFrom rlang .data
+#'
+#' @export
+#'
+#' @examples
+#' vignette("Rcurvep-intro")
+#'
+identify_basenoise_threshold <- function(df, id, chemical, threshold, potency) {
+
+
+  id <- rlang::syms(id)
+  chemical <- rlang::sym(chemical)
+  threshold <- rlang::sym(threshold)
+  potency <- rlang::sym(potency)
+
+  thres_vars_pre <- df %>%
+    dplyr::group_by(!!!id, !!chemical, !!threshold) %>%
+    dplyr::summarize(sd_pod = sd(!!potency), n_rep = n()) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(!!!id, !!threshold) %>%
+    dplyr::summarize(pooled_variance  = sum((.data$sd_pod^2)*(.data$n_rep - 1))/(sum(.data$n_rep) - n())) %>%
+    dplyr::ungroup()
+
+
+   thres_vars <- thres_vars_pre %>%
+     tidyr::nest(-c(!!!id)) %>%
+     dplyr::mutate(
+       outd = purrr::map(data, function(x) cal_dist_curva(x[[as.character(threshold)]], x$pooled_variance))
+     ) %>%
+     tidyr::unnest()
+
+   select_thres <- thres_vars %>%
+    tidyr::nest(-c(!!!id)) %>%
+    dplyr::mutate(
+      thresCurva = purrr::map(data, function(x) pick_threshold(x[[as.character(threshold)]], x$dist2l, x$curvature, method = "distcurva")),
+      thresDist = purrr::map(data, function(x) pick_threshold(x[[as.character(threshold)]], x$dist2l, method = "dist"))
+
+    ) %>%
+    tidyr::unnest()
+
+  return(select_thres)
+}
+
+
 cal_dist_curva <- function(thres, pvar) {
 
   try(
@@ -38,10 +103,10 @@ cal_dist_curva <- function(thres, pvar) {
   spl_der1 <- predict(spl, deriv = 1)
   spl_der2 <- predict(spl, deriv = 2)
 
-  result <- ribble::tibble(
+  result <- tibble::tibble(
     dist2l = dists,
-    der2 = spl_der2$y,
-    der1 = spl_der1$y,
+    #der2 = spl_der2$y,
+    #der1 = spl_der1$y,
     curvature = spl_der2$y/(((1 + (spl_der1$y)^2))^3/2),
     p1 = p1, p2 = p2)
 
@@ -50,7 +115,7 @@ cal_dist_curva <- function(thres, pvar) {
 }
 
 
-suggest_BMR <- function(thres, dist2l, curvature = NULL, method = c("dist", "distcurva")) {
+pick_threshold <- function(thres, dist2l, curvature = NULL, method = c("dist", "distcurva")) {
   out <- rep(0, times = length(dist2l)) %>% rlang::set_names(thres)
 
   try(

@@ -5,14 +5,17 @@
 #' @param c_out A tibble after `run_curvep_job()`.
 #'
 #' @param type A string to indicate which data to extract. Currently six types are implemented:
-#'   act: all the activity related metrics such as potency and efficacy
-#'   concs_hl: the highest and lowest tested concentration
-#'   concs_in: a vector of input concentrations
-#'   resps_out: a vector of output (clean) responses
-#'   paras_in: manually input parameters
-#'   paras: all the parameters used in the calculation
+#' \itemize{
+#'   \item act: all the activity related metrics such as potency and efficacy
+#'   \item concs_hl: the highest and lowest tested concentration
+#'   \item concs_in: a vector of input concentrations
+#'   \item resps_out: a vector of output (clean) responses
+#'   \item paras_in: user manually input parameters
+#'   \item paras: all the parameters used in the calculation
+#' }
 #'
 #' @return Depending the specified type, a tibble with various columns is returned.
+#'
 #' @export
 #' @importFrom magrittr "%>%"
 #' @examples
