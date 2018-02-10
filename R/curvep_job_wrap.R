@@ -154,13 +154,19 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
       })
   }
 
+  #run background curvep
   dats_out <- dats_si %>%
     purrr::map(function(x) x %>% dplyr::mutate(output = purrr::map(input, run_curvep)))
+
+  #get the activity from curvep out
   dats_out <- dats_out %>%
     purrr::map_df(function(x) x %>% dplyr::mutate(activity = purrr::map(output, tabulate_curvep_output)),.id = "repeat_id") %>%
     dplyr::mutate(repeat_id = as.numeric(repeat_id))
 
+  #make sure repeat_id is numeric
   if (is.null(n_sample)) dats_out <- dats_out %>% dplyr::mutate(repeat_id = as.numeric(NA))
+
+  #split the id to the original input
   dats_out <- dats_out %>% tidyr::separate(dduid, c("endpoint", "chemical", "direction"), sep = "#-")
   return(dats_out)
 
