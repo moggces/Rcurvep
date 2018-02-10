@@ -67,6 +67,7 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #' @seealso \code{\link{curvep}} for available Curvep parameters
 #' @export
 #' @importFrom magrittr "%>%"
+#' @importFrom rlang .data
 #' @examples
 #'
 #' # a percentage type dataset
@@ -93,7 +94,8 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
   #create the duid column
   dats <- dats %>%
     dplyr::mutate(directionality = directionality) %>%
-    tidyr::unite(duid, endpoint, chemical, directionality, sep = "#") %>%
+    #tidyr::unite(duid, endpoint, chemical, directionality, sep = "#") %>%
+    tidyr::unite(duid, endpoint, chemical, sep = "#-") %>%
     dplyr::arrange(duid, concs)
 
   # select the simulation type
@@ -105,37 +107,36 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
   #add the mask if mask does not exist
   if (!rlang::has_name(dats, "mask")) dats$mask <- NA
 
+  #create a new id (dduid with direction)
+  dats2 <- dats %>%
+    #dplyr::left_join(thres_d, by = "directionality_u") %>%
+    tidyr::unite(dduid, duid, directionality_u, sep = "#-", remove = FALSE) %>%
+    dplyr::select(-duid)
+
   #threshold could be a list
   if (rlang::is_list(threshold))
   {
-    #make list as a tibble
-    thres_d <- tibble::tibble(
-      directionality_u = as.integer(names(threshold)), thres = unlist(threshold)
-    )
-    #create a new id (dduid with direction)
-    dats2 <- dats %>%
-      dplyr::left_join(thres_d, by = "directionality_u") %>%
-      tidyr::unite(dduid, duid, directionality_u, sep = "@", remove = FALSE) %>%
-      dplyr::select(-duid)
-
-    #prefer to be used as a dataset
-    dats_si <- dats2 %>%
-      split(.$repeat_id) %>%
-        purrr::map(function(y) {
-          result <- y %>%
-            split(.$dduid) %>%
-            purrr::map_df(function(x)
-              create_curvep_input(
-                concs = x$concs, resps = x$resps, directionality = unique(x$directionality_u),
-                thres = unique(x$thres), mask = x$mask, other_paras = other_paras), .id = "dduid") %>%
-            tidyr::nest(-dduid, .key = "input")
-          return(result)
+      dats_si <- dats2 %>%
+        split(.$repeat_id) %>%
+        purrr::map(function(z) {
+          z %>% split(.$directionality_u) %>%
+            purrr::map2_df(., names(.), function(a, b) {
+              thr_range <- threshold[[b]] %>% rlang::set_names(.)
+              thr_range %>%
+                purrr::map_df(function(y) {
+                  result <- a %>%
+                    split(.$dduid) %>%
+                    purrr::map_df(function(x) create_curvep_input(
+                      concs = x$concs, resps = x$resps, directionality = unique(x$directionality_u),
+                      thres = y, mask = x$mask, other_paras = other_paras), .id = "dduid") %>%
+                    tidyr::nest(-dduid, .key = "input")
+                  return(result)
+                }, .id = "thres") %>% dplyr::mutate(thres = as.numeric(thres))
+            })
         })
+
   } else {
-    # run by certain threshold
-    dats2 <- dats %>%
-      tidyr::unite(dduid, duid, directionality_u, sep = "@", remove = FALSE) %>%
-      dplyr::select(-duid)
+
     thr_range <- threshold %>% rlang::set_names(.)
     dats_si <- dats2 %>%
       split(.$repeat_id) %>%
@@ -159,7 +160,8 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
     purrr::map_df(function(x) x %>% dplyr::mutate(activity = purrr::map(output, tabulate_curvep_output)),.id = "repeat_id") %>%
     dplyr::mutate(repeat_id = as.numeric(repeat_id))
 
-  if (is.null(n_sample)) dats_out <- dats_out %>% dplyr::mutate(repeat_id = NA)
+  if (is.null(n_sample)) dats_out <- dats_out %>% dplyr::mutate(repeat_id = as.numeric(NA))
+  dats_out <- dats_out %>% tidyr::separate(dduid, c("endpoint", "chemical", "direction"), sep = "#-")
   return(dats_out)
 
 }

@@ -4,8 +4,8 @@ context("input parameters")
 test_that("no para input", {
   data("zfishbeh")
   x <- zfishbeh %>%
-    group_by(endpoint, chemical, concs) %>%
-    slice(1) %>%
+    dplyr::group_by(endpoint, chemical, concs) %>%
+    dplyr::slice(1) %>%
     split(.$endpoint)
   outd <- run_curvep_job(x[[1]],
                          directionality = 0,
