@@ -1,5 +1,18 @@
 context("running job")
 
+
+test_that("percent data with n_sample = NULL", {
+  data("zfishdev")
+  x <- zfishdev %>%
+    split(.$endpoint)
+  outd <- run_curvep_job(x[[1]],
+                         directionality = 1,
+                         n_sample = NULL,
+                         threshold = seq(5, 10, by = 5),
+                         other_paras = list(CARR = 20, TrustHi = TRUE))
+  expect_true(sum(colnames(outd) %in% c('input', 'output', 'activity')) == 3, info = "a failed run" )
+})
+
 test_that("resp original dataset job run with list thresholds 1", {
   data("zfishbeh")
   x <- zfishbeh

@@ -9,7 +9,18 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
     if (directionality == 0) direction <- 1
 
     #percentage data simulation
-    dats <- simulate_percent_dataset(dats, direction, n_sample)
+    if (!is.null(n_sample))
+    {
+      dats <- simulate_percent_dataset(dats, direction, n_sample)
+    } else
+    {
+      # calculate percent
+      dats <- dats %>%
+        dplyr::group_by(duid, concs) %>%
+        dplyr::summarise(resps = (n_in/N)*100) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(repeat_id = 1)
+    }
 
     # decide it's concs resps format
   } else if (sum(colnames(dats) %in% c("duid", "concs", "resps")) == 3)
