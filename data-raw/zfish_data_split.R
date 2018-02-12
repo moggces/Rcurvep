@@ -33,6 +33,8 @@ hl <- extract_curvep_data(percentd, "concs_hl")
 zfishdev_act <- list(act, hl) %>%
   purrr::reduce(inner_join) %>%
   dplyr::filter(endpoint == "percent_affected_96" | endpoint == "percent_mortality_96") %>%
-  dplyr::select(-endpoint)
+  tidyr::separate(.data$dduid, c("endpoint", "chemical", "directionality"), sep = "#") %>%
+  dplyr::select(-directionality) %>%
+  dplyr::mutate(direction = 1)
 
 devtools::use_data(zfishdev_act, overwrite =  TRUE)
