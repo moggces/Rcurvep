@@ -23,5 +23,5 @@ test_that("id columns are in the output", {
                          n_sample = NULL,
                          threshold = list("1" = c(15,20), "-1" = 30),
                          other_paras = list(CARR = 20, TrustHi = TRUE))
-  expect_true(sum(colnames(outd) %in% c('endpoint', 'chemical', 'direction', 'thres')) == 4, info = "a failed run" )
+  expect_true(sum(colnames(outd) %in% c('endpoint', 'chemical', 'direction', 'threshold')) == 4, info = "a failed run" )
 })
