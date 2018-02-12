@@ -11,18 +11,20 @@ options(tibble.print_min = 5, tibble.print_max = 5)
 
 ## Overview
 
-Rcurvep: a R package for concentration response modeling using Curvep.
+Rcurvep: an R package for concentration response modeling using Curvep.
 
-The packages provides an easy-to-use R interface for processing concentration response data using Curvep, a response noise filtering algorithm.
+The packages provides an R interface for processing concentration response data using Curvep, a response noise filtering algorithm.
 
-With a predefined response noise threshold in an experiment, it allows to calculate activity (with confidence interval) based on original or simulated concentration response data.
+With a predefined baseline noise threshold (or minimum response threshold) in an experiment, it allows to calculate activity (with confidence interval) based on original or simulated concentration response data.
 
-1. binary incidece data (e.g., mortality data)
-2. high number of replicates (e.g., alternative animal model data)
-3. low number of replicates (e.g., in vitro data)
+If the baseline noise threshold is unknown, the above process can be repeated using a reasonable number of candidates.
+The optimal threshold is identified as the one that variance of potency estimation is sufficiently reduced and even stabilized.
 
-If the response noise threshold is unknown, the above process can be repeated using a reasonable number of options.
-The optimal threshold is identified as the one that varience of potency estimation is sufficiently reduced and even stabilized.
+Currently simulated data can be generated from one of the three types of dataset: 
+
+1. dichotomous binary incidence data (e.g., mortality data from rodent model)
+2. continuous data with high number of replicates (e.g., alternative animal model data)
+3. continous data with low number of replicates (e.g., in vitro data)
 
 ## Installation
 
