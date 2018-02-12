@@ -12,6 +12,7 @@
 #'   \item resps_out: a vector of output (clean) responses
 #'   \item paras_in: user manually input parameters
 #'   \item paras: all the parameters used in the calculation
+#'   \item summary: the hit confidence, as well as the median (med), 95% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC
 #' }
 #'
 #' @return Depending the specified type, a tibble with various columns is returned.
@@ -72,7 +73,25 @@ extract_curvep_data <- function(c_out, type){
       dplyr::select(-output) %>% tidyr::unnest()
   } else if (type == "summary")
   {
-    #by_species %>% summarise_all(funs(Q3 = quantile(., probs = 0.75), Q1 = quantile(., probs = 0.25))
+    act <- extract_curvep_data(c_out, "act")
+    hl <- extract_curvep_data(c_out, "concs_hl")
+    m <- list(act, hl) %>%
+      purrr::reduce(dplyr::inner_join) %>%
+      dplyr::mutate(
+        POD = ifelse(is.na(POD), conc_highest, POD),
+        EC50 = ifelse(is.na(EC50), conc_highest, EC50)) %>%
+      dplyr::group_by(endpoint, chemical, direction, threshold)
+
+    result1 <- m %>%
+      dplyr::summarise_at(
+        vars(one_of("POD", "EC50", "Emax", "wAUC", "wAUC_prev")),
+        funs(med = median(.), ciu = quantile(., probs = 0.975), cil = quantile(., probs = 0.025) )
+      )
+    result2 <- m %>%
+      dplyr::summarize(
+        hit_confidence = sum(hit)/n()
+      )
+    result <- list(result1, result2) %>% purrr::reduce(dplyr::inner_join)
   }
   return(result)
 }

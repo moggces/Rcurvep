@@ -25,3 +25,18 @@ test_that("id columns are in the output", {
                          other_paras = list(CARR = 20, TrustHi = TRUE))
   expect_true(sum(colnames(outd) %in% c('endpoint', 'chemical', 'direction', 'threshold')) == 4, info = "a failed run" )
 })
+
+
+test_that("output activities summary", {
+  data("zfishdev")
+  x <- zfishdev %>%
+    split(.$endpoint)
+  outd <- run_curvep_job(x[[1]],
+                         directionality = 1,
+                         n_sample = 10,
+                         threshold = c(15, 20),
+                         other_paras = list(CARR = 20, TrustHi = TRUE))
+  summ <- extract_curvep_data(outd, "summary")
+  expect_true(sum(colnames(summ) %in% c('POD_med', 'POD_ciu', 'POD_cil', 'hit_confidence')) == 4, info = "a failed run" )
+
+})
