@@ -35,6 +35,7 @@ zfishdev_act <- list(act, hl) %>%
   dplyr::filter(endpoint == "percent_affected_96" | endpoint == "percent_mortality_96") %>%
   tidyr::separate(.data$dduid, c("endpoint", "chemical", "directionality"), sep = "#") %>%
   dplyr::select(-directionality) %>%
-  dplyr::mutate(direction = 1)
+  dplyr::mutate(direction = 1) %>%
+  dplyr::rename(threshold = thres)
 
 devtools::use_data(zfishdev_act, overwrite =  TRUE)
