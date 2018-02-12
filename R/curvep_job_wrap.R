@@ -63,17 +63,19 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #' @param dats datasets such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}
 #' @param directionality an int value (1, 0, -1) to represent the presumed direction of responses for processing; 1 = up, -1 = down, 0 = both
 #' @param n_sample NULL (using orignal data) or an int to indicate the number of curves to generate
-#' @param threshold a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list to indicate the threshold of directions
+#' @param threshold a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list with numeric vectors
 #' @param other_paras a list of other Curvep parameters to pass on
 #' @param vehicle_data NULL or a numeric vector of responses in vehicle control wells
 #' @return
 #' \itemize{
-#'   \item dduid: dataset unique ID, it is the combination of endpoint, chemical, and directionality (from input) as well as directionality used (from calculation).
 #'   \item input: a tibble, including the information of concs, resps, and parameters
 #'   \item output: a list, all results from `curvep()`
 #'   \item activity: a tibble, extracted activity information from output
-#'   \item repeat_id: repeat id, NA for the calculation using orignal responses instead of simulated samples.
-#'   \item thres: threshold used in the calculation
+#'   \item endpoint: input endpoint information
+#'   \item chemical: input chemical information
+#'   \item direction: direction used in the calculation
+#'   \item threshold: threshold used in the calculation
+#'   \item repeat_id: repeat id, NA for the calculation using orignal responses instead of simulated samples
 #' }
 #' @seealso \code{\link{curvep}} for available Curvep parameters
 #' @export
@@ -139,7 +141,7 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
                       thres = y, mask = x$mask, other_paras = other_paras), .id = "dduid") %>%
                     tidyr::nest(-dduid, .key = "input")
                   return(result)
-                }, .id = "thres") %>% dplyr::mutate(thres = as.numeric(thres))
+                }, .id = "threshold") %>% dplyr::mutate(threshold = as.numeric(threshold))
             })
         })
 
@@ -158,7 +160,7 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
                 thres = y, mask = x$mask, other_paras = other_paras), .id = "dduid") %>%
               tidyr::nest(-dduid, .key = "input")
             return(result)
-          }, .id = "thres") %>% dplyr::mutate(thres = as.numeric(thres))
+          }, .id = "threshold") %>% dplyr::mutate(threshold = as.numeric(threshold))
       })
   }
 
