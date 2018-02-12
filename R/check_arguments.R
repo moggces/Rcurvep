@@ -40,9 +40,32 @@
   {
     if ( sum(names(threshold) %in% c(1, -1)) != length(threshold) )
     {
-      rlang::abort("threshold is a list but the names are not c(-1, 1)")
+      rlang::abort("threshold is a list but the names are not 1 or -1")
     }
-  } else if (!is.numeric(as.numeric(threshold)))
+    if (directionality == 0)
+    {
+      if (sum(names(threshold) %in% c(1, -1)) != 2)
+      {
+        rlang::abort("directionality = 0 but the named list threshold does not have 1 and -1")
+      }
+    } else if (directionality == 1)
+    {
+      if (sum(names(threshold) %in% c(1)) != 1)
+      {
+        rlang::abort("directionality = 1 but the named list threshold does not have 1")
+      }
+    } else if (directionality == -1)
+    {
+      if (sum(names(threshold) %in% c(-1)) != 1)
+      {
+        rlang::abort("directionality = -1 but the named list threshold does not have -1")
+      }
+    }
+    if (sum(purrr::map_lgl(threshold, is.numeric)) != length(threshold) )
+    {
+      rlang::abort("threshold is not a numeric vector")
+    }
+  } else if (!is.numeric(threshold))
   {
     rlang::abort("threshold is not a numeric vector")
   }

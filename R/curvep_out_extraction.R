@@ -70,6 +70,9 @@ extract_curvep_data <- function(c_out, type){
     result <- c_out %>% dplyr::select(-input, -activity) %>%
       dplyr::mutate(temp = purrr::map(output, ~.[['Settings']] %>% purrr::flatten_df())) %>%
       dplyr::select(-output) %>% tidyr::unnest()
+  } else if (type == "summary")
+  {
+    #by_species %>% summarise_all(funs(Q3 = quantile(., probs = 0.75), Q1 = quantile(., probs = 0.25))
   }
   return(result)
 }

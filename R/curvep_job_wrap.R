@@ -101,11 +101,9 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
   threshold <- .check_threshold(threshold, directionality)
   other_paras <- .check_other_paras(other_paras)
 
-
   #create the duid column
   dats <- dats %>%
     dplyr::mutate(directionality = directionality) %>%
-    #tidyr::unite(duid, endpoint, chemical, directionality, sep = "#") %>%
     tidyr::unite(duid, endpoint, chemical, sep = "#-") %>%
     dplyr::arrange(duid, concs)
 
@@ -120,7 +118,6 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
 
   #create a new id (dduid with direction)
   dats2 <- dats %>%
-    #dplyr::left_join(thres_d, by = "directionality_u") %>%
     tidyr::unite(dduid, duid, directionality_u, sep = "#-", remove = FALSE) %>%
     dplyr::select(-duid)
 
