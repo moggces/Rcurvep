@@ -75,6 +75,9 @@ extract_curvep_data <- function(c_out, type){
   {
     act <- extract_curvep_data(c_out, "act")
     hl <- extract_curvep_data(c_out, "concs_hl")
+    in_concs <- extract_curvep_data(c_out, "concs_in")
+    out_resps  <- extract_curvep_data(c_out, "resps_out")
+
     m <- list(act, hl) %>%
       purrr::reduce(dplyr::inner_join) %>%
       dplyr::mutate(
@@ -86,12 +89,22 @@ extract_curvep_data <- function(c_out, type){
       dplyr::summarise_at(
         vars(one_of("POD", "EC50", "Emax", "wAUC", "wAUC_prev")),
         funs(med = median(.), ciu = quantile(., probs = 0.975), cil = quantile(., probs = 0.025) )
-      )
+      ) %>% dplyr::ungroup()
+
     result2 <- m %>%
       dplyr::summarize(
         hit_confidence = sum(hit)/n()
-      )
-    result <- list(result1, result2) %>% purrr::reduce(dplyr::inner_join)
+      ) %>% dplyr::ungroup()
+
+    result3 <- list(in_concs, out_resps) %>%
+      purrr::reduce(dplyr::inner_join) %>%
+      tidyr::unnest() %>%
+      dplyr::group_by(endpoint, chemical, direction, threshold, concs) %>%
+      dplyr::summarize(resps = round(median(resps),2)) %>%
+      dplyr::mutate(concs = list(concs), resps = list(resps)) %>% dplyr::ungroup()
+
+
+    result <- list(result1, result2, result3) %>% purrr::reduce(dplyr::inner_join)
   }
   return(result)
 }
