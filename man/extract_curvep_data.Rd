@@ -9,7 +9,7 @@ extract_curvep_data(c_out, type)
 \arguments{
 \item{c_out}{A tibble after `run_curvep_job()`.}
 
-\item{type}{A string to indicate which data to extract. Currently six types are implemented:
+\item{type}{A string to indicate which data to extract. Currently seven types are implemented:
 \itemize{
   \item act: all the activity related metrics such as potency and efficacy
   \item concs_hl: the highest and lowest tested concentration
@@ -17,6 +17,9 @@ extract_curvep_data(c_out, type)
   \item resps_out: a vector of output (clean) responses
   \item paras_in: user manually input parameters
   \item paras: all the parameters used in the calculation
+  \item summary: 1) the hit confidence, 2) the median (med),
+  95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of concs/resps,
+  based on bootstrap samples
 }}
 }
 \value{
@@ -38,6 +41,9 @@ extract_curvep_data(outd, "act")
 
 # parameters
 extract_curvep_data(outd, "paras")
+
+# summary
+extract_curvep_data(outd, "summary")
 
 }
 \seealso{

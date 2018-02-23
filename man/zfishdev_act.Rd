@@ -4,7 +4,7 @@
 \name{zfishdev_act}
 \alias{zfishdev_act}
 \title{Zebrafish development endpoint activity results}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1216000 rows and 18 columns.}
+\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1216000 rows and 20 columns.}
 \usage{
 zfishdev_act
 }

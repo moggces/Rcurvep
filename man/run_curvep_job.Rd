@@ -14,7 +14,7 @@ run_curvep_job(dats, directionality = c(1, 0, -1), n_sample = NULL,
 
 \item{n_sample}{NULL (using orignal data) or an int to indicate the number of curves to generate}
 
-\item{threshold}{a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list to indicate the threshold of directions}
+\item{threshold}{a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list with numeric vectors}
 
 \item{other_paras}{a list of other Curvep parameters to pass on}
 
@@ -22,12 +22,14 @@ run_curvep_job(dats, directionality = c(1, 0, -1), n_sample = NULL,
 }
 \value{
 \itemize{
-  \item dduid: dataset unique ID, it is the combination of endpoint, chemical, and directionality (from input) as well as directionality used (from calculation).
   \item input: a tibble, including the information of concs, resps, and parameters
   \item output: a list, all results from `curvep()`
   \item activity: a tibble, extracted activity information from output
-  \item repeat_id: repeat id, NA for the calculation using orignal responses instead of simulated samples.
-  \item thres: threshold used in the calculation
+  \item endpoint: input endpoint information
+  \item chemical: input chemical information
+  \item direction: direction used in the calculation
+  \item threshold: threshold used in the calculation
+  \item repeat_id: repeat id, NA for the calculation using orignal responses instead of simulated samples
 }
 }
 \description{

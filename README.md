@@ -8,7 +8,7 @@ The packages provides an R interface for processing concentration response data 
 
 With a predefined baseline noise threshold (or minimum response threshold) in an experiment, it allows to calculate activity (with confidence interval) based on original or simulated concentration response data.
 
-If the baseline noise threshold is unknown, the above process can be repeated using a reasonable number of candidates. The optimal threshold is identified as the one that variance of potency estimation is sufficiently reduced and even stabilized.
+If the baseline noise threshold is unknown, the above process can be repeated using a reasonable number of candidates. The optimal threshold is identified as the the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized, under the condiction that there are enough response variations induced by chemicals in the dataset.
 
 Currently simulated data can be generated from one of the three types of dataset:
 

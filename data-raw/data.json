@@ -1,0 +1,16 @@
+{
+  "data": [
+  {
+    "endpoint": 1,
+    "chemical": 2,
+    "concs": [1,2,3,4],
+    "resps": [1,2,3,4]
+  },
+  {
+    "endpoint": 1,
+    "chemical": 3,
+    "concs": [1,2,3,4],
+    "resps": [1,2,3,4]
+  }
+  ]
+}

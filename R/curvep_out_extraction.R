@@ -4,7 +4,7 @@
 #'
 #' @param c_out A tibble after `run_curvep_job()`.
 #'
-#' @param type A string to indicate which data to extract. Currently six types are implemented:
+#' @param type A string to indicate which data to extract. Currently seven types are implemented:
 #' \itemize{
 #'   \item act: all the activity related metrics such as potency and efficacy
 #'   \item concs_hl: the highest and lowest tested concentration
@@ -12,7 +12,9 @@
 #'   \item resps_out: a vector of output (clean) responses
 #'   \item paras_in: user manually input parameters
 #'   \item paras: all the parameters used in the calculation
-#'   \item summary: the hit confidence, as well as the median (med), 95% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC
+#'   \item summary: 1) the hit confidence, 2) the median (med),
+#'   95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of concs/resps,
+#'   based on bootstrap samples
 #' }
 #'
 #' @return Depending the specified type, a tibble with various columns is returned.
@@ -32,6 +34,9 @@
 #'
 #' # parameters
 #' extract_curvep_data(outd, "paras")
+#'
+#' # summary
+#' extract_curvep_data(outd, "summary")
 #'
 #' @seealso \code{\link{curvep}} for available Curvep parameters
 #'

@@ -11,9 +11,9 @@ vignette: >
 
 ## Introduction
 
-Curvep has been extensively used in analyzing concentration-response data (e.g., Tox21 quantitative high throughput screening data). Unlike common concentration-response modeling approaches by fitting data into parametric models such as Hill or logisitic, Curvep is a non-parametric, noise filtering algorithm based on user-defined thresholds such as the baseline noise threshold and maximum curve deviation. 
+Curvep has been extensively used in analyzing concentration-response data (e.g., Tox21 quantitative high throughput screening data). Unlike common concentration-response modeling approaches by fitting data into parametric models such as Hill or logisitic, Curvep is a non-parametric, response noise filtering algorithm based on user-defined thresholds such as the baseline noise threshold and the maximum curve deviation. 
 
-Among thresholds, it is known that baseline noise threshold (or minimum response threshold) has direct and significant impact on defining actives/inactives of testing substances. In high throughput screening, one common method to set the minimum response threshold is based on responses in the vehicle control wells. However, in some cases, the minimum response threshold derived from the *vehicle control* responses may not reflect the minimum response requirement for the *testing substances* or it is unclear how to derive a threshold based on *vehicle control* responses distribution (e.g., 3 or 2 standard deviation).
+Among thresholds, it is known that the baseline noise threshold (or minimum response threshold) has direct and significant impact on defining activity of testing substances. In high throughput screening, one common method to set the minimum response threshold is using responses in the vehicle control wells. However, in some cases, the minimum response threshold derived from the *vehicle control* responses may not reflect the minimum response requirement for the *testing substances* or it is unclear how to derive a threshold based on *vehicle control* responses distribution (e.g., 3 or 2 standard deviation).
 
 The examples in this document start with cases that the baseline noise threshold is pre-defined and explore cases that baseline noise threshold is unknown.
 
@@ -48,7 +48,7 @@ data("zfishbeh")
 zfishbeh
 ```
 
-Zebrafish behavior dataset is a dataset with high number of replicates per concentration. Chemicals can induce either hyper-response (increasing) or hypo-response (decreasing).
+Zebrafish behavior dataset is a dataset with high number of replicates per concentration. Chemicals can induce either hyper-response (increasing) or hypo-response (decreasing). There are `r length(unique(zfishdev$endpoint))` toxicity endpoints, and `r length(unique(zfishdev$chemical))` testing substances in this dataset.  
 
 ```{r run_resp, warning = FALSE, message = FALSE}
 
@@ -85,7 +85,7 @@ outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = 2, threshold = 1
 
 ### Baseline noise threshold is unknown
 
-When baseline noise threshold is unknown, one method is to search possible candidates and the optimal threshold is the lowest threshold can reduce the variance in potency (or concentration) estimation significantly at that threshold. The optimal threshold is called as **benchmark response (BMR)** and the potency at the BMR is called as **benchmark concentration (BMC)**. BMC is particularly important for activity estimation in toxicity field since it could be considered the lowest concentration that an effect is observed (or in our case, can be reliably estimated).
+When baseline noise threshold is unknown, one method is to search possible candidates and the optimal threshold is the lowest threshold that can reduce the variance in potency estimation significantly. The optimal threshold is called as **benchmark response (BMR)** and the potency at the BMR is called as **benchmark concentration (BMC)**. BMC is particularly important for activity estimation in toxicity field since it could be considered the lowest concentration that an effect is observed (or in our case, can be reliably estimated).
 
 ```{r run_resp_boot_bmr, warning = FALSE, message = FALSE}
 
@@ -98,9 +98,9 @@ outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, t
 
 ## Output
 
-The output from `run_curvep_jon()` contains nested information regarding input, output, and activity. It is easier to use `extract_curvep_data()` to unnest the information. 
+The output from `run_curvep_job()` contains nested information regarding input, output, and activity. It is easier to use `extract_curvep_data()` to unnest the information. 
 
-### activity summary
+### Activity summary
 
 Activity data are generated based on `data(zfishbeh)`.
 
@@ -120,9 +120,9 @@ hl <- extract_curvep_data(outd, "concs_hl")
 outd_ext <- list(act, hl) %>% 
   reduce(inner_join)
 
-# calculate confidence interval of BMC
+# calculate 95% confidence interval of BMC and hit confidence
 result <- outd_ext %>% 
-  group_by(dduid, thres) %>%
+  group_by(endpoint, chemical, direction, threshold) %>%
   mutate(POD = ifelse(is.na(POD), conc_highest, POD)) %>%
   summarise(
     BMC = median(POD), 
@@ -131,7 +131,7 @@ result <- outd_ext %>%
     hit_confidence = sum(hit)/n()
   )
 
-result %>% select(-thres)
+result %>% select(-threshold)
 ```
 
 ### Curve plotting
@@ -144,14 +144,22 @@ out_resps  <- extract_curvep_data(outd, "resps_out")
 plotd <- list(in_concs, out_resps) %>% 
   reduce(inner_join) %>%
   unnest() %>%
-  group_by(dduid, concs) %>% 
+  group_by(endpoint, chemical, direction, threshold, concs) %>% 
   summarize(resps = round(median(resps),2)) 
 
-p <- ggplot(plotd %>% filter(dduid == "120_d_D2_pairdist#Caffeine|58-08-2#1@1"), aes(x = concs, y = resps)) + geom_point() + geom_line()
-p + facet_wrap(~ dduid)
-
+p <- ggplot(plotd %>% filter(chemical == "Caffeine|58-08-2"), aes(x = concs, y = resps)) + geom_point() + geom_line()
+p + facet_wrap(~ endpoint)
 
 ```
+
+### Simplified output
+
+Instead of controlling the method of activity aggregation by the user, by default, median (and 95% confidence interval) is applied to summarize the data, including  POD, EC50, Emax, wAUC, and responses. 
+
+```{r sim_out,  dependson = "cal"}
+sum_out <- extract_curvep_data(outd, "summary")
+```
+
 
 ## BMR identication
 
@@ -171,41 +179,41 @@ zfishdev_act <- list(act, hl) %>%
 
 ```
 
-Activity results are put into the function `identify_basenoise_threshold()`.
+Activity results are put into the function `identify_basenoise_threshold()`. The function uses various methods to identify the *elbow* in the curve of threshold (x-axis) vs pooled_variance (y-axis). The *elbow* is the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized. 
 
 ```{r bmr, warning = FALSE, message = FALSE}
 
 data("zfishdev_act")
 
 acts <- zfishdev_act %>% 
-  separate(dduid, c("endpoint", "chemical", "directionality"), sep = "#") %>%
   mutate(POD = ifelse(is.na(POD), conc_highest, POD))
 
-outthres <- identify_basenoise_threshold(acts, id = c("endpoint", "directionality"), chemical = "chemical", threshold = "thres", potency = "POD")
+outthres <- identify_basenoise_threshold(acts, id = c("endpoint", "direction"), chemical = "chemical", threshold = "threshold", potency = "POD")
 
 ```
 
-We should check the threshold vs pooled_variance results and threshold vs curvature results. The ideal curve will look like *percent_affected_96*. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset using `identify_basenoise_threshold()`. 
+We should check the curves of threshold vs pooled_variance results and threshold vs curvature results. In the plot of threshold vs pooled variance, the ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
+Similarly, in the plot of threshold vs curvature, threshold = 25% is also the largest positive curvature after the lowest negative curvature. 
 
 ```{r plot_thres, fig.align = "center", fig.width = 6}
 
 # pooled variance
-p <- ggplot(outthres, aes(x = thres, y = pooled_variance))
+p <- ggplot(outthres, aes(x = threshold, y = pooled_variance))
 p + geom_point() + geom_line() + facet_wrap(~ endpoint)
 
 # curvature
-p <- ggplot(outthres, aes(x = thres, y = curvature))
+p <- ggplot(outthres, aes(x = threshold, y = curvature))
 p + geom_point() + geom_line() + facet_wrap(~ endpoint)
 
 ```
 
-The thresholds identified are:
+Therefore, the thresholds identified are:
 
 ```{r opti_thres}
 
 outthres %>% 
   filter(thresCurva == 1 | thresDist == 1) %>%
-  select(endpoint, directionality, thresCurva, thresDist, thres)
+  select(endpoint, direction, thresCurva, thresDist, threshold)
 
 ```
 

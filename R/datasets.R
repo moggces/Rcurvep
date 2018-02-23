@@ -4,11 +4,11 @@
 #'
 #' @format a tibble with variables
 #' \itemize{
-#' \item endpoint toxicity endpoints
-#' \item chemical chemical information
-#' \item concs concentrations in log10(M) format
-#' \item n_in  number of incidence
-#' \item N  number of animals
+#' \item endpoint: toxicity endpoints
+#' \item chemical: chemical information
+#' \item concs: concentrations in log10(M) format
+#' \item n_in: number of incidence
+#' \item N: number of animals
 #' }
 #'
 #' @source Biobide study S-BBD-00016/15
@@ -21,10 +21,10 @@
 #'
 #' @format a tibble with variables
 #' \itemize{
-#' \item endpoint toxicity endpoints
-#' \item chemical chemical information
-#' \item concs concentrations in log10(M) format
-#' \item resps normalized responses with baseline = 0
+#' \item endpoint: toxicity endpoints
+#' \item chemical: chemical information
+#' \item concs: concentrations in log10(M) format
+#' \item resps: normalized responses with baseline = 0
 #' }
 #'
 #' @source Biobide study S‐BBD‐0017/15

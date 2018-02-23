@@ -6,10 +6,10 @@
 \title{Zebrafish behavior endpoint data}
 \format{a tibble with variables
 \itemize{
-\item endpoint toxicity endpoints
-\item chemical chemical information
-\item concs concentrations in log10(M) format
-\item resps normalized responses with baseline = 0
+\item endpoint: toxicity endpoints
+\item chemical: chemical information
+\item concs: concentrations in log10(M) format
+\item resps: normalized responses with baseline = 0
 }}
 \source{
 Biobide study S‐BBD‐0017/15

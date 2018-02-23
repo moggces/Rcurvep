@@ -1,7 +1,7 @@
 #' Identify baseline noise threshold through activity data from simulated curves
 #'
 #' Provided an activity dataset after `run_curvep_job()` and `extract_curvep_data()`,
-#' the function calculates the pooled variance of potency information (POD) across chemicals
+#' the function calculates the pooled variance of potency information (i.e., POD parameter) across chemicals
 #' and approaches are used to derive the lowest threshold that variance of POD is sufficiently reduced and even stabilized.
 #'
 #' @param df a tibble
