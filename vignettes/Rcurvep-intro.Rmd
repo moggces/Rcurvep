@@ -188,22 +188,17 @@ data("zfishdev_act")
 acts <- zfishdev_act %>% 
   mutate(POD = ifelse(is.na(POD), conc_highest, POD))
 
-outthres <- identify_basenoise_threshold(acts, id = c("endpoint", "direction"), chemical = "chemical", threshold = "threshold", potency = "POD")
+outthres <- identify_basenoise_threshold(acts, endpoint = "endpoint", direction = "direction", chemical = "chemical", threshold = "threshold", potency = "POD", plot = FALSE)
 
 ```
 
-We should check the curves of threshold vs pooled_variance results and threshold vs curvature results. In the plot of threshold vs pooled variance, the ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
-Similarly, in the plot of threshold vs curvature, threshold = 25% is also the largest positive curvature after the lowest negative curvature. 
+We could plot the diagnostic plots by applying the `plot = TRUE`. In the plot of threshold vs pooled variance, the ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
+
 
 ```{r plot_thres, fig.align = "center", fig.width = 6}
 
-# pooled variance
-p <- ggplot(outthres, aes(x = threshold, y = pooled_variance))
-p + geom_point() + geom_line() + facet_wrap(~ endpoint)
+outthres <- identify_basenoise_threshold(acts, endpoint = "endpoint", direction = "direction", chemical = "chemical", threshold = "threshold", potency = "POD", plot = TRUE)
 
-# curvature
-p <- ggplot(outthres, aes(x = threshold, y = curvature))
-p + geom_point() + geom_line() + facet_wrap(~ endpoint)
 
 ```
 
