@@ -5,10 +5,13 @@
 #' and approaches are used to derive the lowest threshold that variance of POD is sufficiently reduced and even stabilized.
 #'
 #' @param df a tibble
-#' @param id a vector of strings of the column names in `df`, representing the investigated endpoint
+#' @param endpoint a string that represents the column name of endpoint in `df`
 #' @param chemical a string that represents the column name of chemical in `df`
 #' @param threshold a string that represents the column name of threshold in `df`
+#' @param direction a string that represents the column name of direction in `df`
 #' @param potency a string that represents the column name of potency in `df`
+#' @param plot default = TRUE, diagnostic plot
+#' @param n_endpoint_page number of endpoints to be plotted per page
 #'
 #' @return a tibble with added columns
 #' \itemize{
@@ -26,38 +29,67 @@
 #' @examples
 #' vignette("Rcurvep-intro")
 #'
-identify_basenoise_threshold <- function(df, id, chemical, threshold, potency) {
+identify_basenoise_threshold <- function(df, endpoint, chemical, threshold, direction, potency, plot = TRUE, n_endpoint_page = 4) {
 
 
-  id <- rlang::syms(id)
+  #id <- rlang::syms(id)
+  endpoint <- rlang::sym(endpoint)
+  direction <- rlang::sym(direction)
   chemical <- rlang::sym(chemical)
   threshold <- rlang::sym(threshold)
   potency <- rlang::sym(potency)
 
   thres_vars_pre <- df %>%
-    dplyr::group_by(!!!id, !!chemical, !!threshold) %>%
+    dplyr::group_by(!!endpoint, !!direction, !!chemical, !!threshold) %>%
     dplyr::summarize(sd_pod = sd(!!potency), n_rep = n()) %>%
     dplyr::ungroup() %>%
-    dplyr::group_by(!!!id, !!threshold) %>%
+    dplyr::group_by(!!endpoint, !!direction, !!threshold) %>%
     dplyr::summarize(pooled_variance  = sum((.data$sd_pod^2)*(.data$n_rep - 1))/(sum(.data$n_rep) - n())) %>%
     dplyr::ungroup()
 
 
    thres_vars <- thres_vars_pre %>%
-     tidyr::nest(-c(!!!id)) %>%
+     tidyr::nest(-c(!!endpoint, !!direction)) %>%
      dplyr::mutate(
        outd = purrr::map(data, function(x) cal_dist_curva(x[[as.character(threshold)]], x$pooled_variance))
      ) %>%
      tidyr::unnest()
 
    select_thres <- thres_vars %>%
-    tidyr::nest(-c(!!!id)) %>%
+    tidyr::nest(-c(!!endpoint, !!direction)) %>%
     dplyr::mutate(
       thresCurva = purrr::map(data, function(x) pick_threshold(x[[as.character(threshold)]], x$dist2l, x$curvature, method = "distcurva")),
       thresDist = purrr::map(data, function(x) pick_threshold(x[[as.character(threshold)]], x$dist2l, method = "dist"))
 
     ) %>%
     tidyr::unnest()
+
+   if (plot == TRUE)
+   {
+     select_thres_g <- select_thres %>%
+       dplyr::select(!!endpoint, !!direction, !!threshold, "pooled_variance", "dist2l", "curvature") %>%
+       tidyr::gather(type, value, c("pooled_variance", "dist2l", "curvature")) %>%
+       dplyr::mutate(type = ordered(type, levels =  c("pooled_variance", "dist2l", "curvature") )) %>%
+       dplyr::mutate(endpoint = !!endpoint, direction = !!direction, threshold = !!threshold) %>%
+       dplyr::mutate(direction = as.factor(direction))
+
+     d <- select_thres_g %>% dplyr::pull(endpoint) %>% unique
+     if (length(d) < n_endpoint_page) n_endpoint_page <- length(d)
+     d <- split(d, ceiling(seq_along(d)/n_endpoint_page))
+
+     pl <- purrr::map(d, function(x) {
+       #outthres_gp <- select_thres_g %>% dplyr::filter(!!rlang::expr((!!endpoint) %in% x))
+       outthres_gp <- select_thres_g %>% dplyr::filter(endpoint %in% x)
+       p <- ggplot2::ggplot(outthres_gp,
+                  #ggplot2::aes_(x = threshold, y = "value", color = as.factor(direction)))
+                  ggplot2::aes(x = threshold, y = value, color = direction))
+       p <- p + ggplot2::geom_point(size = 2) +
+         ggplot2::geom_line() +
+         ggplot2::facet_grid(type ~ endpoint, scales = "free")
+       return(p)
+     })
+     print(pl)
+   }
 
   return(select_thres)
 }

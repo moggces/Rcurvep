@@ -4,18 +4,25 @@
 \alias{identify_basenoise_threshold}
 \title{Identify baseline noise threshold through activity data from simulated curves}
 \usage{
-identify_basenoise_threshold(df, id, chemical, threshold, potency)
+identify_basenoise_threshold(df, endpoint, chemical, threshold, direction,
+  potency, plot = TRUE, n_endpoint_page = 4)
 }
 \arguments{
 \item{df}{a tibble}
 
-\item{id}{a vector of strings of the column names in `df`, representing the investigated endpoint}
+\item{endpoint}{a string that represents the column name of endpoint in `df`}
 
 \item{chemical}{a string that represents the column name of chemical in `df`}
 
 \item{threshold}{a string that represents the column name of threshold in `df`}
 
+\item{direction}{a string that represents the column name of direction in `df`}
+
 \item{potency}{a string that represents the column name of potency in `df`}
+
+\item{plot}{default = TRUE, diagnostic plot}
+
+\item{n_endpoint_page}{number of endpoints to be plotted per page}
 }
 \value{
 a tibble with added columns

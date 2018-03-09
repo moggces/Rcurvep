@@ -7,7 +7,7 @@ Authors@R: as.person(c(
     "Alexander Sedykh <sunirks@gmail.com > [aut]"
   ))
 Maintainer: The package maintainer <juihua.hsieh@gmail.com>
-Description: The packages provides an easy-to-use R interface for processing concentration response data using Curvep, a response noise filtering algorithm and functions for deriving a optimal response noise threshold in an experiment.
+Description: The packages provides an R interface for processing concentration response data using Curvep, a response noise filtering algorithm and functions for deriving a optimal response noise threshold in an experiment.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -15,7 +15,8 @@ Imports: dplyr (>= 0.7),
     tibble,
     boot,
     tidyr,
-    purrr
+    purrr,
+    ggplot2
 Suggests: testthat,
     knitr,
     rmarkdown
