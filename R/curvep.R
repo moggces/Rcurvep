@@ -1,6 +1,8 @@
 #CurveP for R - 2017
 #
-#ToDo / History:
+#ToDo / History
+#  30.04.2018 modified wAUC calculations for better scaling against diverse test ranges
+#
 #  10.18.2017 modified wAUC calculation to any scale of log-doses (could span negative and positive values both)
 #             this now requires TLOG constant to represent the log10(dose) at infinite dilution or at the limit-of-detection
 #             TLOG's default is -12 for assumed log10(M) scale) but could go as low as -24 (Avogadro number based)
@@ -136,10 +138,11 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #' @examples
 #' curvep(Conc = c(-8, -7, -6, -5, -4) , Resp = c(0, -3, -5, -15, -30))
 
+
 #[[Rccp::export]]
-curvep <- function (Conc, Resp, Mask = NULL,
+curvep <- function(Conc, Resp, Mask = NULL,
                     TRSH = 15, RNGE = -100, MXDV = 5, CARR = 0, BSFT = 3, USHP = 4,
-                    TrustHi = FALSE, StrictImp = TRUE, DUMV = -999, TLOG = -12)
+                    TrustHi = FALSE, StrictImp = TRUE, DUMV = -999, TLOG = -24)
 # Conc - array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped
 # Resp - array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls
 # !!!NB: Conc & Resp arrays should be in order from lo to hi concentrations
@@ -679,7 +682,7 @@ curvep <- function (Conc, Resp, Mask = NULL,
 
 			pdr <- sum(lgConc * HTS)
 			wConc <- pdr / sum(HTS)
-			wResp <- pdr / sum(lgConc)
+			wResp <- pdr / sum(lgConc)	#only reasonable if log10(M) units are used that are always the same sign
 		}
 
 		#--- area under curve calculation
@@ -695,8 +698,12 @@ curvep <- function (Conc, Resp, Mask = NULL,
 		{
 		  wAUC_old <- AUC * POD/(lgConc[1] - lgConc[nCols])
 		  #old equation above assumes log10(M) units, and thus is scale-dependent (e..g, switching sign for positive log-doses)
+
+		  #30.04.2018 --
+		  wAUC <- AUC * (lgConc[1] - TLOG) / (POD - TLOG) / (lgConc[nCols] - TLOG)
+
 		  #10.18.2017 --
-		  wAUC <- AUC / (POD - TLOG) / (lgConc[nCols] - lgConc[1])
+		  #wAUC <- AUC / (POD - TLOG) / (lgConc[nCols] - lgConc[1])
 		}
 
 
@@ -713,9 +720,10 @@ curvep <- function (Conc, Resp, Mask = NULL,
 
 		return
 		(
+
 		  list(resp = HTS, corr = Corrections, levels = data.frame(xx = rlevels, ECxx =ECs, Cxx =CAs, row.names = paste(rlevels, "%", sep='')),
-		     Emax = Emax, slope = slope, wConc = wConc, wResp = wResp, EC50 = ECs[which(rlevels == 50)], C50 = CAs[which(rlevels == 50)], POD = POD, AUC=AUC, wAUC=wAUC, wAUC_prev=wAUC_old, nCorrected = n,
-		     Comments = Warn, Settings = sett)
+		       Emax = Emax, slope = slope, wConc = wConc, wResp = wResp, EC50 = ECs[which(rlevels == 50)], C50 = CAs[which(rlevels == 50)], POD = POD, AUC=AUC, wAUC=wAUC, wAUC_prev=wAUC_old, nCorrected = n,
+		       Comments = Warn, Settings = sett)
 		)
 
 } #curvep(...)
@@ -738,25 +746,25 @@ curvep <- function (Conc, Resp, Mask = NULL,
 #debug area
 # load("C:\\DATA\\BMDExpress\\tox21-er-luc-bg1-4e2-agonist-p2_luc.Rdata")
 # lrows <- 1:dim(cebs)[1]
-
+#
 # totstuff <- NULL
-
+#
 # special <- !(cebs$curvep_remark == "OK")
 # length(cebs$curvep_remark[special])
-
+#
 # special1 <- (cebs$curvep_remark == "U_SHAPE")
 # i <- 28099
 # for (i in lrows)
 # #for (i in lrows[special1])
 # {
-  # C <- cebs[i, 14:28]
-  # R <- cebs[i, 29:43]
-  # valid <- !is.na(C) #there are some NAs to handle
-  # results <- curvep(C[valid], R[valid], TRSH = 25, RNGE = 1e+006, CARR = 60, TLOG = -24)
-  # #totstuff <- rbind(totstuff, results$resp)
-  # totstuff <- rbind(totstuff, c(results$AUC, results$wResp, results$wConc, results$EC50, results$wAUC, results$wAUC_prev) )
+#   C <- cebs[i, 14:28]
+#   R <- cebs[i, 29:43]
+#   valid <- !is.na(C) #there are some NAs to handle
+#   results <- curvep(C[valid], R[valid], TRSH = 25, RNGE = 1e+006, CARR = 60, TLOG = -24)
+#   #totstuff <- rbind(totstuff, results$resp)
+#   totstuff <- rbind(totstuff, c(results$AUC, results$wResp, results$wConc, results$EC50, results$wAUC, results$wAUC_prev) )
 # }
-
+#
 # colnames(totstuff) <- c("AUC", "wResp", "wConc", "EC50", "wAUC", "wAUC_prev")
 # write.table(totstuff, file="C:\\DATA\\BMDExpress\\curvep_tlog24_tox21-er-luc-bg1-4e2-agonist-p2_luc_101817.txt", row.names = FALSE, sep = "\t")
 # #points(C[valid], results$resp, col = "red")
@@ -777,7 +785,7 @@ curvep <- function (Conc, Resp, Mask = NULL,
 # #dbi <- (cebs$uniqueID == "N12698")
 # #dbi <- (cebs$uniqueID == "N14476")
 # dbi <- (cebs$uniqueID == "N14477")
-
+#
 # cebs_dbi <- cebs[dbi,]
 # C <- cebs_dbi[14:28]
 # R <- cebs_dbi[29:43]

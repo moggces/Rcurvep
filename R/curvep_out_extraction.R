@@ -92,8 +92,8 @@ extract_curvep_data <- function(c_out, type){
 
     result1 <- m %>%
       dplyr::summarise_at(
-        vars(one_of("POD", "EC50", "Emax", "wAUC", "wAUC_prev")),
-        funs(med = median(.), ciu = quantile(., probs = 0.975), cil = quantile(., probs = 0.025) )
+        dplyr::vars(dplyr::one_of("POD", "EC50", "Emax", "wAUC", "wAUC_prev")),
+        dplyr::funs(med = median(.), ciu = quantile(., probs = 0.975), cil = quantile(., probs = 0.025) )
       ) %>% dplyr::ungroup()
 
     result2 <- m %>%
