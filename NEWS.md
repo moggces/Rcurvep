@@ -11,11 +11,15 @@
 
 * change: TLOG(curvep.r) is to -24
 
-# Note
-* Curvep MASK parameter is not yet implemented
+# Rcurvep 0.3
+
+* new: simplify_output is added for run_curvep_job() to reduce the amount of output
+* change: levels in curvep() is seperated into ECxx, Cxx, and xx
+* change: combine conc_hl to act function in extract_curvep_data()
+* change: input column became a list of list structure
+
 
 # Todo
-* fix n_sample = NULL and simulate_percent_resp for direction = -1
-* add a parameter in extract_curvep_data function to get simulated response curve
-* simplify the run_curvep_job output file so toJSON/fromJSON can work together
+* implement Curvep MASK parameter
+* figure out toJSON/fromJSON conversion
 * allow user to define p1 and p2 in the identify_basenoise_threshold
