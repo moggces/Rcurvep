@@ -37,6 +37,20 @@ test_that("output activities summary", {
                          threshold = c(15, 20),
                          other_paras = list(CARR = 20, TrustHi = TRUE))
   summ <- extract_curvep_data(outd, "summary")
-  expect_true(sum(colnames(summ) %in% c('POD_med', 'POD_ciu', 'POD_cil', 'hit_confidence', "concs", "resps")) == 6, info = "a failed run" )
+  expect_true(sum(colnames(summ) %in% c('POD_med', 'POD_ciu', 'POD_cil', 'hit_confidence', "concs", "resps", "resps_in")) == 7, info = "a failed run" )
+
+})
+
+test_that("output activities summary (no simulation)", {
+  data("zfishdev")
+  x <- zfishdev %>%
+    split(.$endpoint)
+  outd <- run_curvep_job(x[[1]],
+                         directionality = 1,
+                         n_sample = NULL,
+                         threshold = c(15, 20),
+                         other_paras = list(CARR = 20, TrustHi = TRUE))
+  summ <- extract_curvep_data(outd, "summary")
+  expect_true(sum(colnames(summ) %in% c('POD_med', 'POD_ciu', 'POD_cil', 'hit_confidence', "concs", "resps", "resps_in")) == 7, info = "a failed run" )
 
 })

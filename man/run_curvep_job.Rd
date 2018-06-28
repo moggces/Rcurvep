@@ -5,7 +5,8 @@
 \title{A wrap function to run Curvep based on types of dataset}
 \usage{
 run_curvep_job(dats, directionality = c(1, 0, -1), n_sample = NULL,
-  threshold, other_paras = list(), vehicle_data = NULL)
+  threshold, other_paras = list(), vehicle_data = NULL,
+  simplify_output = FALSE)
 }
 \arguments{
 \item{dats}{datasets such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}}
@@ -19,6 +20,8 @@ run_curvep_job(dats, directionality = c(1, 0, -1), n_sample = NULL,
 \item{other_paras}{a list of other Curvep parameters to pass on}
 
 \item{vehicle_data}{NULL or a numeric vector of responses in vehicle control wells}
+
+\item{simplify_output}{(default = FALSE) TRUE to use extract_curvep_data(out, "act") as output}
 }
 \value{
 \itemize{
