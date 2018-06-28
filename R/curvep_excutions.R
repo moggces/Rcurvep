@@ -1,19 +1,20 @@
-create_curvep_input <- function(concs, resps, directionality, thres, mask, other_paras)
-{
+
+create_curvep_input <- function(d, threshold, paras) {
+
   rng <- 1000000
-  if (directionality == -1) { rng <- -1000000 }
+  if (unique(d$directionality_u) == -1) { rng <- -1000000 }
 
-  other_paras['TRSH'] <- thres
-  other_paras['RNGE'] <- rng
+  paras['TRSH'] <- threshold
+  paras['RNGE'] <- rng
 
-  if (sum(is.na(mask)) > 0)
+  if (sum(is.na(d$mask)) > 0)
   {
     #tibble here will be very slow
-    result <- list(concs = list(concs), resps = list(resps), paras = list(other_paras))
+    result <- list(concs = list(d$concs), resps = list(d$resps), paras = paras )
 
   } else
   {
-    result <- list(concs = list(concs), resps = list(resps), mask = list(mask), paras = list(other_paras))
+    result <- list(concs = list(d$concs), resps = list(d$resps), mask = list(d$mask), paras = paras)
   }
   return(result)
 }
@@ -47,10 +48,11 @@ run_curvep <- function(x) {
   return(result)
 }
 
+
 tabulate_curvep_output <- function(x) {
 
   outp <- x
-  vals <- outp[!names(outp) %in% c('resp', 'corr', 'levels', 'Settings')]
+  vals <- outp[!names(outp) %in% c('resp', 'corr', 'xx', 'ECxx', 'Cxx','Settings')]
   result <- vals %>% tibble::as_tibble(validate = FALSE)
   result[result == '-999'] <- NA
   return(result)
