@@ -15,5 +15,7 @@
 * Curvep MASK parameter is not yet implemented
 
 # Todo
+* fix n_sample = NULL and simulate_percent_resp for direction = -1
 * add a parameter in extract_curvep_data function to get simulated response curve
 * simplify the run_curvep_job output file so toJSON/fromJSON can work together
+* allow user to define p1 and p2 in the identify_basenoise_threshold
