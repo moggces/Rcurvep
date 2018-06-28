@@ -109,55 +109,29 @@ Activity data are generated based on `data(zfishbeh)`.
 outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = 100, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE))
 ```
 
+#### 95% confidence interval and active confidence score
+
 ```{r summary_data, message = FALSE, warning = FALSE, dependson = "cal"}
-# extract activity
-act <- extract_curvep_data(outd, "act")
 
-# extract high/low conc
-hl <- extract_curvep_data(outd, "concs_hl")
+# extract summarized activity
+# 95% confidence interval of BMC and hit confidence are calculated
+act_sum <- extract_curvep_data(outd, "summary")
+act_sum %>% select(-threshold, -concs, -resps, -resps_in)
 
-# combine data
-outd_ext <- list(act, hl) %>% 
-  reduce(inner_join)
-
-# calculate 95% confidence interval of BMC and hit confidence
-result <- outd_ext %>% 
-  group_by(endpoint, chemical, direction, threshold) %>%
-  mutate(POD = ifelse(is.na(POD), conc_highest, POD)) %>%
-  summarise(
-    BMC = median(POD), 
-    BMCL = quantile(POD, 0.025),
-    BMCU = quantile(POD, 0.975),
-    hit_confidence = sum(hit)/n()
-  )
-
-result %>% select(-threshold)
 ```
 
-### Curve plotting
+#### Curve plotting using median responses from samples
 
 ```{r curve, warning = FALSE, message = FALSE, dependson = "cal", fig.align = "center", fig.width = 6}
-# extract resp_out
-in_concs <- extract_curvep_data(outd, "concs_in")
-out_resps  <- extract_curvep_data(outd, "resps_out")
+ 
+plotd <- act_sum %>% 
+  filter(chemical == "Caffeine|58-08-2") %>%
+  unnest() 
 
-plotd <- list(in_concs, out_resps) %>% 
-  reduce(inner_join) %>%
-  unnest() %>%
-  group_by(endpoint, chemical, direction, threshold, concs) %>% 
-  summarize(resps = round(median(resps),2)) 
-
-p <- ggplot(plotd %>% filter(chemical == "Caffeine|58-08-2"), aes(x = concs, y = resps)) + geom_point() + geom_line()
+p <- ggplot(plotd, aes(x = concs, y = resps)) + geom_point() + geom_line()
 p + facet_wrap(~ endpoint)
 
-```
-
-### Simplified output
-
-Instead of controlling the method of activity aggregation by the user, by default, median (and 95% confidence interval) is applied to summarize the data, including  POD, EC50, Emax, wAUC, and responses. 
-
-```{r sim_out,  dependson = "cal"}
-sum_out <- extract_curvep_data(outd, "summary")
+  
 ```
 
 
@@ -169,14 +143,12 @@ The complete Zebrafish development dataset was processed (up direction), using 1
 zfishdev_complete # a complete zfishdev dataset; available upon request 
 
 # calculation (not run)
-outd <- run_curvep_job(zfishdev_complete, directionality = 1, n_sample = 1000, threshold = seq(5, 95, by = 5), other_paras = list(CARR = 20, TrustHi = TRUE))
-
-# extraction (not run)
-act <- extract_curvep_data(outd, "act")
-hl <- extract_curvep_data(outd, "concs_hl")
-zfishdev_act <- list(act, hl) %>% 
-  reduce(inner_join)
-
+# simplify_out = TRUE to reduce the amount of output
+outd <- run_curvep_job(zfishdev_complete, 
+                       directionality = 1, n_sample = 1000, 
+                       threshold = seq(5, 95, by = 5), 
+                       other_paras = list(CARR = 20, TrustHi = TRUE),
+                       simplify_output = TRUE)
 ```
 
 Activity results are put into the function `identify_basenoise_threshold()`. The function uses various methods to identify the *elbow* in the curve of threshold (x-axis) vs pooled_variance (y-axis). The *elbow* is the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized. 
@@ -212,7 +184,7 @@ outthres %>%
 
 ```
 
-## Limitation
+## Prerequisites
 
 1. The baseline of responses is 0. 
 2. concentration is in `log10(M)` format. M: molar concentration.

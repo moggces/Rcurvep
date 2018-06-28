@@ -721,7 +721,8 @@ curvep <- function(Conc, Resp, Mask = NULL,
 		return
 		(
 
-		  list(resp = HTS, corr = Corrections, levels = data.frame(xx = rlevels, ECxx =ECs, Cxx =CAs, row.names = paste(rlevels, "%", sep='')),
+		  list(resp = HTS, corr = Corrections, #levels = data.frame(xx = rlevels, ECxx =ECs, Cxx =CAs, row.names = paste(rlevels, "%", sep='')),
+		       ECxx = ECs, Cxx = CAs, xx = rlevels,
 		       Emax = Emax, slope = slope, wConc = wConc, wResp = wResp, EC50 = ECs[which(rlevels == 50)], C50 = CAs[which(rlevels == 50)], POD = POD, AUC=AUC, wAUC=wAUC, wAUC_prev=wAUC_old, nCorrected = n,
 		       Comments = Warn, Settings = sett)
 		)

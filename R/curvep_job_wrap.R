@@ -18,6 +18,12 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
       dats <- dats %>%
         dplyr::group_by(duid, concs) %>%
         dplyr::summarise(resps = (n_in/N)*100) %>%
+        dplyr::mutate(
+          resps = dplyr::case_when(
+            direction == -1 ~ resps - 100,
+            TRUE ~ resps
+          )
+        ) %>%
         dplyr::ungroup() %>%
         dplyr::mutate(repeat_id = 1)
     }
@@ -66,6 +72,7 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #' @param threshold a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list with numeric vectors
 #' @param other_paras a list of other Curvep parameters to pass on
 #' @param vehicle_data NULL or a numeric vector of responses in vehicle control wells
+#' @param simplify_output (default = FALSE) TRUE to use extract_curvep_data(out, "act") as output
 #' @return
 #' \itemize{
 #'   \item input: a tibble, including the information of concs, resps, and parameters
@@ -94,7 +101,7 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #' # more examples are availabie
 #' vignette("Rcurvep-intro")
 #'
-run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, threshold, other_paras = list(), vehicle_data = NULL)
+run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, threshold, other_paras = list(), vehicle_data = NULL, simplify_output = FALSE)
 {
   #arguments check
   dats <- .check_dats(dats)
@@ -109,7 +116,7 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
     tidyr::unite(duid, endpoint, chemical, sep = "#-") %>%
     dplyr::arrange(duid, concs)
 
-  # select the simulation type
+  # select the simulation type or calculate the median/percent response
   dats <- select_type_simulation(dats, directionality, n_sample, vehicle_data)
 
   #add a new column directionality_u
@@ -127,50 +134,45 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
   if (rlang::is_list(threshold))
   {
       dats_si <- dats2 %>%
-        split(.$repeat_id) %>%
-        purrr::map(function(z) {
-          z %>% split(.$directionality_u) %>%
-            purrr::map2_df(., names(.), function(a, b) {
-              thr_range <- threshold[[b]] %>% rlang::set_names(.)
-              thr_range %>%
-                purrr::map_df(function(y) {
-                  result <- a %>%
-                    split(.$dduid) %>%
-                    purrr::map_df(function(x) create_curvep_input(
-                      concs = x$concs, resps = x$resps, directionality = unique(x$directionality_u),
-                      thres = y, mask = x$mask, other_paras = other_paras), .id = "dduid") %>%
-                    tidyr::nest(-dduid, .key = "input")
-                  return(result)
-                }, .id = "threshold") %>% dplyr::mutate(threshold = as.numeric(threshold))
-            })
-        })
+        split(.$directionality_u) %>%
+          purrr::map2_df(., names(.), function(a, b) {
+          thr_range <- threshold[[b]] %>% rlang::set_names(.)
+          thr_range %>%
+            purrr::map_df(function(x) {
+              a %>%
+                tidyr::nest(-dduid, -repeat_id) %>%
+                dplyr::mutate(
+                  input = purrr::map(data, create_curvep_input, threshold = x, paras = other_paras)
+                )
+            }, .id = "threshold")
+          }) %>%
+        dplyr::mutate(threshold = as.numeric(threshold)) %>%
+        dplyr::select(-data)
+
 
   } else {
 
     thr_range <- threshold %>% rlang::set_names(.)
-    dats_si <- dats2 %>%
-      split(.$repeat_id) %>%
-      purrr::map(function(z) {
-        thr_range %>%
-          purrr::map_df(function(y) {
-            result <- z %>%
-              split(.$dduid) %>%
-              purrr::map_df(function(x) create_curvep_input(
-                concs = x$concs, resps = x$resps, directionality = unique(x$directionality_u),
-                thres = y, mask = x$mask, other_paras = other_paras), .id = "dduid") %>%
-              tidyr::nest(-dduid, .key = "input")
-            return(result)
-          }, .id = "threshold") %>% dplyr::mutate(threshold = as.numeric(threshold))
-      })
+    dats_si <- thr_range %>%
+      purrr::map_df(function(x) {
+        dats2 %>%
+          tidyr::nest(-dduid, -repeat_id) %>%
+          dplyr::mutate(
+            input = purrr::map(data, create_curvep_input,
+                                            threshold = x, paras = other_paras)
+          )
+      }, .id = "threshold") %>%
+      dplyr::mutate(threshold = as.numeric(threshold)) %>%
+      dplyr::select(-data)
   }
 
   #run background curvep
   dats_out <- dats_si %>%
-    purrr::map(function(x) x %>% dplyr::mutate(output = purrr::map(input, run_curvep)))
+                dplyr::mutate(output = purrr::map(input, run_curvep))
 
   #get the activity from curvep out
   dats_out <- dats_out %>%
-    purrr::map_df(function(x) x %>% dplyr::mutate(activity = purrr::map(output, tabulate_curvep_output)),.id = "repeat_id") %>%
+    dplyr::mutate(activity = purrr::map(output, tabulate_curvep_output)) %>%
     dplyr::mutate(repeat_id = as.numeric(repeat_id))
 
   #make sure repeat_id is numeric
@@ -178,6 +180,12 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
 
   #split the id to the original input
   dats_out <- dats_out %>% tidyr::separate(dduid, c("endpoint", "chemical", "direction"), sep = "#-")
+
+  #simplify the output (especially for BMR finding)
+  if (simplify_output) {
+    dats_out <- extract_curvep_data(dats_out, "act")
+  }
+
   return(dats_out)
 
 }
