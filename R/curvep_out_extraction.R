@@ -7,14 +7,14 @@
 #' @param type A string to indicate which data to extract. Currently seven types are implemented:
 #' \itemize{
 #'   \item act: all the activity related metrics such as potency and efficacy
-#'   \item concs_hl: the highest and lowest tested concentration
 #'   \item concs_in: a vector of input concentrations
+#'   \item resps_in: a vector of input resps (simulation/original)
 #'   \item resps_out: a vector of output (clean) responses
 #'   \item paras_in: user manually input parameters
 #'   \item paras: all the parameters used in the calculation
 #'   \item summary: 1) the hit confidence, 2) the median (med),
-#'   95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of concs/resps,
-#'   based on bootstrap samples
+#'   95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of resps (input/output)
+#'
 #' }
 #'
 #' @return Depending the specified type, a tibble with various columns is returned.
@@ -44,70 +44,101 @@
 
 extract_curvep_data <- function(c_out, type){
 
+  base_ids <- c("repeat_id", "threshold", "endpoint", "chemical", "direction")
 
   if (type == "act")
   {
-    result <- c_out %>% dplyr::select(-input, -output) %>% tidyr::unnest() %>%
-      dplyr::mutate(hit = ifelse(wAUC != 0, 1, 0))
+    hl <- extract_curvep_data(c_out, "concs_hl")
+    result <- c_out %>%
+      dplyr::select(dplyr::one_of(base_ids, "activity")) %>%
+      tidyr::unnest() %>%
+      dplyr::mutate(hit = ifelse(wAUC != 0, 1, 0)) %>%
+      dplyr::inner_join(
+        hl,  by = c("repeat_id", "threshold", "endpoint", "chemical", "direction")
+      )
+
   } else if (type == "concs_hl")
   {
     result <- c_out %>%
-      dplyr::select(-output, -activity) %>% tidyr::unnest() %>%
-      dplyr::mutate(conc_highest = purrr::map(concs, max), conc_lowest = purrr::map(concs, min)) %>%
-      dplyr::select(-concs, -resps, -paras) %>% tidyr::unnest()
+      dplyr::select(dplyr::one_of(base_ids, "input")) %>%
+      dplyr::mutate(
+        conc_highest = purrr::map_dbl(input, function(x) max(unlist(x$concs))),
+        conc_lowest = purrr::map_dbl(input, function(x) min(unlist(x$concs)))
+      ) %>% dplyr::select(-input)
   } else if (type == "concs_in" )
   {
-    result <- c_out %>% dplyr::select(-output, -activity) %>% tidyr::unnest() %>%
-      dplyr::select(-resps, -paras)
-    return(result)
+    result <- c_out %>%
+      dplyr::select(dplyr::one_of(base_ids, "input")) %>%
+      dplyr::mutate(
+        concs = purrr::map(input, function(x) unlist(x$concs))
+      ) %>% dplyr::select(-input)
+
+  } else if (type == "resps_in" )
+  {
+    result <- c_out %>%
+      dplyr::select(dplyr::one_of(base_ids, "input")) %>%
+      dplyr::mutate(
+        resps_in = purrr::map(input, function(x) unlist(x$resps))
+      ) %>% dplyr::select(-input)
+
   } else if (type == "resps_out")
   {
-    result <- c_out %>% dplyr::select(-input, -activity) %>%
+    result <- c_out %>%
+      dplyr::select(dplyr::one_of(base_ids, "output")) %>%
       dplyr::mutate(resps = purrr::map(output, function(x) x$resp)) %>%
       dplyr::select(-output)
+
   } else if (type == "paras_in")
   {
-    result <- c_out %>% dplyr::select(-output, -activity) %>% tidyr::unnest() %>%
-      dplyr::select(-resps, -concs) %>%
-      dplyr::mutate(temp = purrr::map(paras, function(x) x %>% purrr::flatten_df())) %>%
-      dplyr::select(-paras) %>% tidyr::unnest()
+    result <- c_out %>%
+      dplyr::select(dplyr::one_of(base_ids, "input")) %>%
+      dplyr::mutate(temp = purrr::map(paras, function(x) purrr::flatten_df(x$paras))) %>%
+      dplyr::select(-input) %>% tidyr::unnest()
+
   } else if (type == "paras")
   {
-    result <- c_out %>% dplyr::select(-input, -activity) %>%
+    result <- c_out %>%
+      dplyr::select(dplyr::one_of(base_ids, "output")) %>%
       dplyr::mutate(temp = purrr::map(output, ~.[['Settings']] %>% purrr::flatten_df())) %>%
       dplyr::select(-output) %>% tidyr::unnest()
+
   } else if (type == "summary")
   {
     act <- extract_curvep_data(c_out, "act")
-    hl <- extract_curvep_data(c_out, "concs_hl")
     in_concs <- extract_curvep_data(c_out, "concs_in")
+    in_resps <- extract_curvep_data(c_out, "resps_in")
     out_resps  <- extract_curvep_data(c_out, "resps_out")
 
-    m <- list(act, hl) %>%
-      purrr::reduce(dplyr::inner_join, by = c("repeat_id", "threshold", "endpoint", "chemical", "direction")) %>%
+    m <- act %>%
       dplyr::mutate(
         POD = ifelse(is.na(POD), conc_highest, POD),
         EC50 = ifelse(is.na(EC50), conc_highest, EC50)) %>%
       dplyr::group_by(endpoint, chemical, direction, threshold)
 
+    # summarize => confidence interval
     result1 <- m %>%
       dplyr::summarise_at(
         dplyr::vars(dplyr::one_of("POD", "EC50", "Emax", "wAUC", "wAUC_prev")),
         dplyr::funs(med = median(.), ciu = quantile(., probs = 0.975), cil = quantile(., probs = 0.025) )
       ) %>% dplyr::ungroup()
 
+    # summarize => hit confidence
     result2 <- m %>%
       dplyr::summarize(
         hit_confidence = sum(hit)/n()
       ) %>% dplyr::ungroup()
 
-    result3 <- list(in_concs, out_resps) %>%
+    # summarize => median response in/out
+    result3 <- list(in_concs, in_resps, out_resps) %>%
       purrr::reduce(dplyr::inner_join, by = c("repeat_id", "threshold", "endpoint", "chemical", "direction" )) %>%
       tidyr::unnest() %>%
       dplyr::group_by(endpoint, chemical, direction, threshold, concs) %>%
-      dplyr::summarize(resps = round(median(resps),2)) %>%
-      dplyr::summarize(concs = list(concs), resps = list(resps)) %>% dplyr::ungroup()
-
+      dplyr::summarize(
+        resps = round(median(resps),2),
+        resps_in = round(median(resps_in), 2),
+      ) %>%
+      dplyr::summarize(concs = list(concs), resps = list(resps), resps_in = list(resps_in)) %>%
+      dplyr::ungroup()
 
     result <- list(result1, result2, result3) %>%
       purrr::reduce(dplyr::inner_join, by = c( "threshold", "endpoint", "chemical", "direction" ) )
