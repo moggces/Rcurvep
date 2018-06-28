@@ -22,6 +22,10 @@ sum_act_re <- sum_json %>% jsonlite::unserializeJSON()
 
 # complete data
 
+##
+outd_json <- outd %>% jsonlite::toJSON()
+outd_re <- outd_json %>% jsonlite::fromJSON()
+
 ## verbose version ONLY (works)
 outd_json <- outd %>% jsonlite::serializeJSON()
 outd_re <- outd_json %>% jsonlite::unserializeJSON()
