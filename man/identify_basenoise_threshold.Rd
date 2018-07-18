@@ -5,7 +5,7 @@
 \title{Identify baseline noise threshold through activity data from simulated curves}
 \usage{
 identify_basenoise_threshold(df, endpoint, chemical, threshold, direction,
-  potency, plot = TRUE, n_endpoint_page = 4)
+  potency, p1 = NULL, p2 = NULL, plot = TRUE, n_endpoint_page = 4)
 }
 \arguments{
 \item{df}{a tibble}
@@ -19,6 +19,10 @@ identify_basenoise_threshold(df, endpoint, chemical, threshold, direction,
 \item{direction}{a string that represents the column name of direction in `df`}
 
 \item{potency}{a string that represents the column name of potency in `df`}
+
+\item{p1}{default = NULL, or a number to manually set the first threshold index for the distance approach}
+
+\item{p2}{default = NULL, or a number to manually set last threshold index for the distance approach}
 
 \item{plot}{default = TRUE, diagnostic plot}
 

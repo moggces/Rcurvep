@@ -18,8 +18,11 @@
 * change: combine conc_hl to act function in extract_curvep_data()
 * change: input column became a list of list structure
 
+# Rcurvep 0.3.1
+
+* change: expose the p1 and p2 for identify_basenoise_threshold
 
 # Todo
 * implement Curvep MASK parameter
 * figure out toJSON/fromJSON conversion
-* allow user to define p1 and p2 in the identify_basenoise_threshold
+
