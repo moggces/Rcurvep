@@ -1,3 +1,96 @@
+make_comment_as_flat_resp <- function(out_resps, act, comment_pattern) {
+  bad_ind <- which(stringr::str_detect(act$Comments, comment_pattern))
+  out_resps <- out_resps[bad_ind,] %>%
+    dplyr::mutate(resps = purrr::map(resps, function(x) {x[x != 0] <- 0; return(x)}))
+  return(out_resps)
+}
+
+make_comment_as_inactive <- function(act, comment_pattern) {
+  result <- act %>%
+    dplyr::mutate(
+      hit = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ 0,
+        TRUE ~ hit
+      ),
+      POD = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ as.numeric(NA),
+        TRUE ~ POD
+      ),
+      EC50 = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ as.numeric(NA),
+        TRUE ~ EC50
+      ),
+      C50 = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ as.numeric(NA),
+        TRUE ~ C50
+      ),
+      wConc = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ as.numeric(NA),
+        TRUE ~ wConc
+      ),
+      wAUC = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ 0,
+        TRUE ~ wAUC
+      ),
+      AUC = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ 0,
+        TRUE ~ AUC
+      ),
+      wAUC_prev = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ 0,
+        TRUE ~ wAUC_prev
+      ),
+      Emax = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ 0,
+        TRUE ~ Emax
+      ),
+      wResp = dplyr::case_when(
+        stringr::str_detect(Comments, comment_pattern) ~ 0,
+        TRUE ~ wResp
+      )
+    )
+  return(result)
+}
+
+make_inactive_potency_as_highest_conc <- function(act) {
+  result <- act %>%
+    dplyr::mutate(
+      POD = ifelse(is.na(POD), conc_highest, POD),
+      EC50 = ifelse(is.na(EC50), conc_highest, EC50))
+  return(result)
+}
+
+add_confidence_interval <- function(m) {
+  result <- m %>%
+    dplyr::summarise_at(
+      dplyr::vars(dplyr::one_of("POD", "EC50", "Emax", "wAUC", "wAUC_prev")),
+      dplyr::funs(med = median(.), ciu = quantile(., probs = 0.975), cil = quantile(., probs = 0.025) )
+    ) %>% dplyr::ungroup()
+  return(result)
+}
+
+add_hit_confidence <- function(m) {
+  result <- m %>%
+    dplyr::summarize(
+      hit_confidence = sum(hit)/n()
+    ) %>% dplyr::ungroup()
+  return(result)
+}
+
+calculate_median_resps <- function(in_concs, in_resps, out_resps) {
+  result <- list(in_concs, in_resps, out_resps) %>%
+    purrr::reduce(dplyr::inner_join, by = c("repeat_id", "threshold", "endpoint", "chemical", "direction" )) %>%
+    tidyr::unnest() %>%
+    dplyr::group_by(endpoint, chemical, direction, threshold, concs) %>%
+    dplyr::summarize(
+      resps = round(median(resps),2),
+      resps_in = round(median(resps_in), 2),
+    ) %>%
+    dplyr::summarize(concs = list(concs), resps = list(resps), resps_in = list(resps_in)) %>%
+    dplyr::ungroup()
+  return(result)
+}
+
 #' Unnest Curvep input, output, or activity lists
 #'
 #' The function unnest the input, output, or activity lists after `run_curvep_job()`
@@ -14,7 +107,7 @@
 #'   \item paras: all the parameters used in the calculation
 #'   \item summary: 1) the hit confidence, 2) the median (med),
 #'   95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of resps (input/output)
-#'
+#' @param modifier A string to match the Curvep Comments column to batch modifiy the activity (active -> inactive)
 #' }
 #'
 #' @return Depending the specified type, a tibble with various columns is returned.
@@ -38,11 +131,15 @@
 #' # summary
 #' extract_curvep_data(outd, "summary")
 #'
+#' # make comments that contain "INVERSE" string as inactive
+#'
+#' extract_curvep_data(outd, "act", "INVERSE")
+#'
 #' @seealso \code{\link{curvep}} for available Curvep parameters
 #'
 #'
 
-extract_curvep_data <- function(c_out, type){
+extract_curvep_data <- function(c_out, type, modifier = NULL){
 
   base_ids <- c("repeat_id", "threshold", "endpoint", "chemical", "direction")
 
@@ -56,6 +153,9 @@ extract_curvep_data <- function(c_out, type){
       dplyr::inner_join(
         hl,  by = c("repeat_id", "threshold", "endpoint", "chemical", "direction")
       )
+    if (!is.null(modifier)) {
+      result <- make_comment_as_inactive(result, modifier)
+    }
 
   } else if (type == "concs_hl")
   {
@@ -105,40 +205,26 @@ extract_curvep_data <- function(c_out, type){
   } else if (type == "summary")
   {
     act <- extract_curvep_data(c_out, "act")
+    if (!is.null(modifier)) {act <- make_comment_as_inactive(act, modifier)}
     in_concs <- extract_curvep_data(c_out, "concs_in")
     in_resps <- extract_curvep_data(c_out, "resps_in")
     out_resps  <- extract_curvep_data(c_out, "resps_out")
+    if (!is.null(modifier)) {
+      out_resps <- make_comment_as_flat_resp(out_resps, act, modifier)
+    }
 
     m <- act %>%
-      dplyr::mutate(
-        POD = ifelse(is.na(POD), conc_highest, POD),
-        EC50 = ifelse(is.na(EC50), conc_highest, EC50)) %>%
+      make_inactive_potency_as_highest_conc() %>%
       dplyr::group_by(endpoint, chemical, direction, threshold)
 
-    # summarize => confidence interval
-    result1 <- m %>%
-      dplyr::summarise_at(
-        dplyr::vars(dplyr::one_of("POD", "EC50", "Emax", "wAUC", "wAUC_prev")),
-        dplyr::funs(med = median(.), ciu = quantile(., probs = 0.975), cil = quantile(., probs = 0.025) )
-      ) %>% dplyr::ungroup()
+    # summarize => confidence interval ("POD", "EC50", "Emax", "wAUC", "wAUC_prev")
+    result1 <- add_confidence_interval(m)
 
     # summarize => hit confidence
-    result2 <- m %>%
-      dplyr::summarize(
-        hit_confidence = sum(hit)/n()
-      ) %>% dplyr::ungroup()
+    result2 <- add_hit_confidence(m)
 
     # summarize => median response in/out
-    result3 <- list(in_concs, in_resps, out_resps) %>%
-      purrr::reduce(dplyr::inner_join, by = c("repeat_id", "threshold", "endpoint", "chemical", "direction" )) %>%
-      tidyr::unnest() %>%
-      dplyr::group_by(endpoint, chemical, direction, threshold, concs) %>%
-      dplyr::summarize(
-        resps = round(median(resps),2),
-        resps_in = round(median(resps_in), 2),
-      ) %>%
-      dplyr::summarize(concs = list(concs), resps = list(resps), resps_in = list(resps_in)) %>%
-      dplyr::ungroup()
+    result3 <- calculate_median_resps(in_concs, in_resps, out_resps)
 
     result <- list(result1, result2, result3) %>%
       purrr::reduce(dplyr::inner_join, by = c( "threshold", "endpoint", "chemical", "direction" ) )

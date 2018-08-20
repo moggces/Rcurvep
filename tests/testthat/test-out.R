@@ -54,3 +54,18 @@ test_that("output activities summary (no simulation)", {
   expect_true(sum(colnames(summ) %in% c('POD_med', 'POD_ciu', 'POD_cil', 'hit_confidence', "concs", "resps", "resps_in")) == 7, info = "a failed run" )
 
 })
+
+
+test_that("remove comment activities", {
+  data("zfishdev")
+  x <- zfishdev %>%
+    split(.$endpoint)
+  outd <- run_curvep_job(x[[1]],
+                         directionality = 1,
+                         n_sample = 10,
+                         threshold = 5,
+                         other_paras = list(CARR = 20, TrustHi = TRUE))
+  acts <- extract_curvep_data(outd, "act", modifier = "CHECK")
+  expect_true(sum(acts$hit[grepl("CHECK",acts$Comments)]) == 0)
+
+})
