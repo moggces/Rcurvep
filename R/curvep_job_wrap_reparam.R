@@ -21,7 +21,7 @@ recreate_curvep_input <- function(input, threshold, direction, paras) {
 #' @param directionality NULL for not changing the directionality, only 1 or -1 is allowed
 #' @param threshold NULL for not changing the threshold, only one positive numeric threshold is allowed
 #' @param other_paras a list of other Curvep parameters to pass on
-#' @param simplify_output (default = FALSE) TRUE to use extract_curvep_data(out, "act")
+#' @param simplify_output (default = FALSE) warning! large output, set TRUE (extract_curvep_data(out, "act") is performed) for threshold finding calculations
 #'
 #' @return see \code{\link{run_curvep_job}}
 #' @export
