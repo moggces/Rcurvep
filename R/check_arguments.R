@@ -9,9 +9,21 @@
   }
 }
 
+.check_dats_reparam  <- function(dats)
+{
+  if (
+    sum(colnames(dats) %in% c("threshold", "endpoint", "chemical", "direction", "repeat_id", "input")) != 6 )
+  {
+    rlang::abort("dataset is not the unsimplified output from run_curvep_job()")
+  } else
+  {
+    return(dats)
+  }
+}
+
 .check_directionality <- function(directionality)
 {
-  if (sum(directionality %in% c(1, 0, -1)) != 1)
+  if (length(directionality) != 1 | sum(directionality %in% c(1, 0, -1)) != 1)
   {
     rlang::abort("only 1, 0, or -1 is allowed")
   } else
@@ -19,6 +31,17 @@
     return(directionality)
   }
 }
+
+.check_directionality_reparam <- function(directionality)
+{
+  if (!is.null(directionality)) {
+    if (length(directionality) != 1 | sum(directionality %in% c(1,-1)) != 1) {
+      rlang::abort("only 1,-1, NULL is allowed")
+    }
+  }
+  return(directionality)
+}
+
 
 .check_n_sample <- function(n_sample)
 {
@@ -68,6 +91,16 @@
   } else if (!is.numeric(threshold))
   {
     rlang::abort("threshold is not a numeric vector")
+  }
+  return(threshold)
+}
+
+.check_threshold_reparam <- function(threshold) {
+
+  if (!is.null(threshold)) {
+    if (is.list(threshold) | length(threshold) != 1 | !is.numeric(threshold) | threshold < 0) {
+      rlang::abort("only allow one numeric positive threshold")
+    }
   }
   return(threshold)
 }
