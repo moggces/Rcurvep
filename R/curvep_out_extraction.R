@@ -1,7 +1,12 @@
 make_comment_as_flat_resp <- function(out_resps, act, comment_pattern) {
   bad_ind <- which(stringr::str_detect(act$Comments, comment_pattern))
-  out_resps <- out_resps[bad_ind,] %>%
-    dplyr::mutate(resps = purrr::map(resps, function(x) {x[x != 0] <- 0; return(x)}))
+  out_resps <- out_resps %>%
+    dplyr::mutate(
+      resps = dplyr::case_when(
+        row_number() %in% bad_ind ~ purrr::map(resps, function(x) {x[x != 0] <- 0; return(x)}),
+        TRUE ~ resps
+      )
+    )
   return(out_resps)
 }
 
