@@ -10,6 +10,8 @@
 #' @param threshold a string that represents the column name of threshold in `df`
 #' @param direction a string that represents the column name of direction in `df`
 #' @param potency a string that represents the column name of potency in `df`
+#' @param p1 default = NULL, or a number to manually set the first threshold index for the distance approach
+#' @param p2 default = NULL, or a number to manually set last threshold index for the distance approach
 #' @param plot default = TRUE, diagnostic plot
 #' @param n_endpoint_page number of endpoints to be plotted per page
 #'
@@ -29,7 +31,7 @@
 #' @examples
 #' vignette("Rcurvep-intro")
 #'
-identify_basenoise_threshold <- function(df, endpoint, chemical, threshold, direction, potency, plot = TRUE, n_endpoint_page = 4) {
+identify_basenoise_threshold <- function(df, endpoint, chemical, threshold, direction, potency, p1 = NULL, p2 = NULL, plot = TRUE, n_endpoint_page = 4) {
 
 
   #id <- rlang::syms(id)
@@ -51,7 +53,7 @@ identify_basenoise_threshold <- function(df, endpoint, chemical, threshold, dire
    thres_vars <- thres_vars_pre %>%
      tidyr::nest(-c(!!endpoint, !!direction)) %>%
      dplyr::mutate(
-       outd = purrr::map(data, function(x) cal_dist_curva(x[[as.character(threshold)]], x$pooled_variance))
+       outd = purrr::map(data, function(x) cal_dist_curva(x[[as.character(threshold)]], x$pooled_variance, p1 = p1, p2 = p2))
      ) %>%
      tidyr::unnest()
 
@@ -95,15 +97,24 @@ identify_basenoise_threshold <- function(df, endpoint, chemical, threshold, dire
 }
 
 
-cal_dist_curva <- function(thres, pvar) {
+cal_dist_curva <- function(thres, pvar, p1 = NULL, p2 = NULL) {
 
   try(
     if (length(thres) != length(pvar)) {
       stop("the length of two vectors do not match")
     }
   )
-  p1 <- which.max(pvar)
-  p2 <- which.min(pvar)
+
+  if (is.null(p1)) { p1 <- which.max(pvar) }
+  if (is.null(p2)) { p2 <- which.min(pvar) }
+
+
+  try(
+    if (p1 > p2 | p1 > length(thres) | p2 > length(thres)) {
+      stop("p1 and p2 do not in the range of the threshold index")
+    }
+  )
+
 
   d <- data.frame(thres = thres, pvar = pvar)
 
@@ -167,7 +178,7 @@ pick_threshold <- function(thres, dist2l, curvature = NULL, method = c("dist", "
     curvaturev <- curvature %>% rlang::set_names(thres)
     lv <- rep(FALSE, times = length(dist2l)) %>% rlang::set_names(thres)
 
-       lv[(maxdi):(maxdi + 3)] <- TRUE #limit to four numbers
+    lv[(maxdi):(maxdi + 3)] <- TRUE #limit to four numbers
     topl <- intersect(order(curvaturev, decreasing = TRUE), which(lv))
     topli <- 1
     maxcurv <- topl[topli] #index in the whole vector
