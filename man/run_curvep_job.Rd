@@ -21,7 +21,7 @@ run_curvep_job(dats, directionality = c(1, 0, -1), n_sample = NULL,
 
 \item{vehicle_data}{NULL or a numeric vector of responses in vehicle control wells}
 
-\item{simplify_output}{(default = FALSE) TRUE to use extract_curvep_data(out, "act") as output}
+\item{simplify_output}{(default = FALSE) warning! large output, set TRUE (extract_curvep_data(out, "act") is performed) for threshold finding calculations}
 }
 \value{
 \itemize{

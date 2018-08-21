@@ -3,6 +3,7 @@
 export(curvep)
 export(extract_curvep_data)
 export(identify_basenoise_threshold)
+export(reparam_curvep_job)
 export(run_curvep_job)
 importFrom(magrittr,"%>%")
 importFrom(rlang,.data)

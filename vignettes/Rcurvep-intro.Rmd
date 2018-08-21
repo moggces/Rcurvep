@@ -64,6 +64,7 @@ outd <- run_curvep_job(zfishbeh, directionality = -1, n_sample = NULL, threshold
 threshold_l <- list("1" = threshold_up, "-1" = threshold_down)
 outd <- run_curvep_job(zfishbeh, directionality = 0, n_sample = NULL, threshold = threshold_l, other_paras = list(CARR = 20, TrustHi = TRUE))
 
+
 ```
 
 The `n_sample = NULL` allows to run the calculation based on the original data. If there are multiple responses per concentration, the `median()` value is used to collapse the data. However, the calculation can also be done on the simulated curves. The curves are simulated by bootstraping the replicates per concentration. 
@@ -74,6 +75,16 @@ n_sample_test <- 2
 outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE))
 
 ```
+
+Sometimes we would like to see how parameters change can affect the results on the same dataset 
+
+```{r}
+
+CARR_cutoff <- 50
+outd <- reparam_curvep_job(outd, other_paras = list(CARR = CARR_cutoff, TrustHi = TRUE))
+
+```
+
 
 For dataset with low number of replicates per concentration, the curves can be simulated by linearly fit the concentration-response data + random errors bootstrapped from responses in the vehicle control wells. 
 
@@ -116,6 +127,10 @@ outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = 100, threshold =
 # extract summarized activity
 # 95% confidence interval of BMC and hit confidence are calculated
 act_sum <- extract_curvep_data(outd, "summary")
+
+# can also extract summarized activity but making any "INVERSE" monotonic curves as inactive
+#act_sum <- extract_curvep_data(outd, "summary", modifier = "INVERSE")
+
 act_sum %>% select(-threshold, -concs, -resps, -resps_in)
 
 ```

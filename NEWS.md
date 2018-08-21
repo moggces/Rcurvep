@@ -22,6 +22,10 @@
 
 * change: expose the p1 and p2 for identify_basenoise_threshold
 
+# Rcurvep 0.4
+* new: add modifier parameter for extract_curvep_data()
+* new: add reparam_curvep_job() to recalculate based on run_curvep_job() complex output
+
 # Todo
 * implement Curvep MASK parameter
 * figure out toJSON/fromJSON conversion
