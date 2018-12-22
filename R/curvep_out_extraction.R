@@ -112,8 +112,8 @@ calculate_median_resps <- function(in_concs, in_resps, out_resps) {
 #'   \item paras: all the parameters used in the calculation
 #'   \item summary: 1) the hit confidence, 2) the median (med),
 #'   95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of resps (input/output)
-#' @param modifier A string to match the Curvep Comments column to batch modifiy the activity (active -> inactive)
 #' }
+#' @param modifier A string to match the Curvep Comments column to batch modifiy the activity (active -> inactive)
 #'
 #' @return Depending the specified type, a tibble with various columns is returned.
 #'
