@@ -143,8 +143,8 @@ plot_fit_value <- function(dd) {
 ### calculate R2 between original values and fitted values
 
 ```{r}
-cal_fitted_r2 <- function(dd) {
-  result <- cor(dd$pooled_variance, dd$fitted_value)^2
+cal_fitted_cor <- function(dd) {
+  result <- cor(dd$pooled_variance, dd$fitted_value)
   return(result)
 }
 ```
@@ -155,9 +155,9 @@ cal_fitted_r2 <- function(dd) {
 ```{r}
 add_threshold_flag <- function(threshold_data, exp_fit, linear_fit) {
   
-  exp_out <- map_dbl(exp_fit, ~ cal_fitted_r2(.x[[1]])) %>% 
+  exp_out <- map_dbl(exp_fit, ~ cal_fitted_cor(.x[[1]])) %>% 
     tibble(exp_r2 = ., endpoint = names(exp_fit))
-  linear_out <- map_dbl(linear_fit, ~ cal_fitted_r2(.x[[1]])) %>% 
+  linear_out <- map_dbl(linear_fit, ~ cal_fitted_cor(.x[[1]])) %>% 
     tibble(linear_r2 = ., endpoint = names(linear_fit))
   
   exp_out <- exp_out %>%
@@ -208,6 +208,8 @@ plot_fit_value(map_df(glmd, ~ .x[[1]]))
 ```
 
 The fits do not look good.
+  split(.$endpoint) %>%
+  map(., lm_fit)
 
 ### lm_log_fit
 
@@ -238,11 +240,11 @@ The fits do not look good.
 ## Identification of parameters to single out the exponential distribution vs others
 
 ```{r}
-map_dbl(nlsd, ~ cal_fitted_r2(.x[[1]]))
+map_dbl(nlsd, ~ cal_fitted_cor(.x[[1]]))
 ```
 
 ```{r}
-map_dbl(lmd, ~ cal_fitted_r2(.x[[1]]))
+map_dbl(lmd, ~ cal_fitted_cor(.x[[1]]))
 ```
 
 The **linear** curve shows high R2 in both nls + exponential fit and lm (linear fit).
@@ -290,7 +292,7 @@ The 120_a_L1_distmoved endpoint got a 'warning' flag and the percent_mortality_9
 Based on the current dataset, 
 
 1. the nls + exponential fit approach can generate reasonable fit (visually).
-2. the R2 approach by combining information from both nls + exponential fit and linear fit approach can reliably provide the flag for the endpoints that should not use the threshold approach. 
+2. the correlation approach by combining information from both nls + exponential fit and linear fit approach can reliably provide the flag for the endpoints that should not use the threshold approach. 
 
 
 

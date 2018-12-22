@@ -1,7 +1,7 @@
 ---
 title: "Test various fitting approaches for exponential curve fit"
 author: "Jui-Hua Hsieh"
-date: "2018-12-20"
+date: "2018-12-22"
 output:
   html_document:
     keep_md: true
@@ -149,8 +149,8 @@ plot_fit_value <- function(dd) {
 
 
 ```r
-cal_fitted_r2 <- function(dd) {
-  result <- cor(dd$pooled_variance, dd$fitted_value)^2
+cal_fitted_cor <- function(dd) {
+  result <- cor(dd$pooled_variance, dd$fitted_value)
   return(result)
 }
 ```
@@ -162,9 +162,9 @@ cal_fitted_r2 <- function(dd) {
 ```r
 add_threshold_flag <- function(threshold_data, exp_fit, linear_fit) {
   
-  exp_out <- map_dbl(exp_fit, ~ cal_fitted_r2(.x[[1]])) %>% 
+  exp_out <- map_dbl(exp_fit, ~ cal_fitted_cor(.x[[1]])) %>% 
     tibble(exp_r2 = ., endpoint = names(exp_fit))
-  linear_out <- map_dbl(linear_fit, ~ cal_fitted_r2(.x[[1]])) %>% 
+  linear_out <- map_dbl(linear_fit, ~ cal_fitted_cor(.x[[1]])) %>% 
     tibble(linear_r2 = ., endpoint = names(linear_fit))
   
   exp_out <- exp_out %>%
@@ -219,6 +219,8 @@ plot_fit_value(map_df(glmd, ~ .x[[1]]))
 ![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 The fits do not look good.
+  split(.$endpoint) %>%
+  map(., lm_fit)
 
 ### lm_log_fit
 
@@ -254,22 +256,22 @@ The fits do not look good.
 
 
 ```r
-map_dbl(nlsd, ~ cal_fitted_r2(.x[[1]]))
+map_dbl(nlsd, ~ cal_fitted_cor(.x[[1]]))
 ```
 
 ```
 ##   120_a_L1_distmoved  percent_affected_96 percent_mortality_96 
-##            0.9819616            0.9606155            0.6242799
+##            0.9909397            0.9801099            0.7901139
 ```
 
 
 ```r
-map_dbl(lmd, ~ cal_fitted_r2(.x[[1]]))
+map_dbl(lmd, ~ cal_fitted_cor(.x[[1]]))
 ```
 
 ```
 ##   120_a_L1_distmoved  percent_affected_96 percent_mortality_96 
-##            0.9673699            0.3451323            0.6337978
+##            0.9835497            0.5874796            0.7961142
 ```
 
 The **linear** curve shows high R2 in both nls + exponential fit and lm (linear fit).
@@ -354,7 +356,7 @@ The 120_a_L1_distmoved endpoint got a 'warning' flag and the percent_mortality_9
 Based on the current dataset, 
 
 1. the nls + exponential fit approach can generate reasonable fit (visually).
-2. the R2 approach by combining information from both nls + exponential fit and linear fit approach can reliably provide the flag for the endpoints that should not use the threshold approach. 
+2. the correlation approach by combining information from both nls + exponential fit and linear fit approach can reliably provide the flag for the endpoints that should not use the threshold approach. 
 
 
 
