@@ -72,7 +72,7 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #' @param threshold a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list with numeric vectors
 #' @param other_paras a list of other Curvep parameters to pass on
 #' @param vehicle_data NULL or a numeric vector of responses in vehicle control wells
-#' @param simplify_output (default = FALSE) warning! large output, set TRUE (extract_curvep_data(out, "act") is performed) for threshold finding calculations
+#' @param simplify_output (default = FALSE, warning! large output), if set TRUE (extract_curvep_data(out, "act") is performed)
 #' @return
 #' \itemize{
 #'   \item input: a tibble, including the information of concs, resps, and parameters

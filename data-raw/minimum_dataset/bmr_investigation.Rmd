@@ -1,0 +1,81 @@
+---
+title: "test min number of chemicals"
+output: html_notebook
+---
+
+1. start to random select 5 compounds many times (out of 30) 
+2. plot the threshold finding results
+3. expect some are OK (define OK) some are not
+4. understand why some are not
+5. there are two factors: n_bootstrap and n_chemicals and one outcome: OK 
+6. we know the right answer is 25% using all chemicals and n_boot = 1000
+7. the selection of subset has to mimic the overall set
+
+
+```{r, message=FALSE, warning=FALSE}
+library(here)
+library(Rcurvep)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+```
+
+```{r}
+zfishdev_raw <- readRDS("./data-raw/zfishdev.rds")
+zfishdev_raw <- zfishdev_raw %>%
+  select(-directionality) %>%
+  filter(
+    id == "percent_affected_96"
+  ) %>%
+  rename(
+    endpoint = id,
+    chemical = well__substance
+  )
+```
+
+```{r}
+chem_names <- zfishdev_raw %>% pull(chemical) %>% unique()
+tested_list <- map(1:5, ~ sample(chem_names, 5))
+```
+
+```{r}
+run_wrap <- function(total_data, filtered_chem, n_sample) {
+  inp <- total_data %>% 
+  filter(
+    chemical %in% filtered_chem
+  )
+  acts <- run_curvep_job(inp, 
+                       directionality = 1, n_sample = n_sample, 
+                       threshold = seq(5, 95, by = 5), 
+                       other_paras = list(CARR = 20, TrustHi = TRUE),
+                       simplify_output = TRUE)
+  return(acts)
+}
+
+n_sample <- 100
+act_data <- map(tested_list, run_wrap, total_data = zfishdev_raw, n_sample = n_sample)
+saveRDS(act_data, here("data-raw", "random5_100.rds"))
+```
+
+```{r}
+n_sample <- 1000
+act_data <- map(tested_list, run_wrap, total_data = zfishdev_raw, n_sample = n_sample)
+saveRDS(act_data, here("data-raw", "random5_1000.rds"))
+```
+
+
+```{r}
+
+plot_wrap <- function(act) {
+  act <- act %>% 
+  mutate(POD = ifelse(is.na(POD), conc_highest, POD))
+  outthres <- identify_basenoise_threshold(
+    act, endpoint = "endpoint", direction = "direction", chemical = "chemical", threshold = "threshold", potency = "POD", plot = TRUE)
+return(outthres)
+}
+
+map(act_data[5], plot_wrap)
+```
+
+
