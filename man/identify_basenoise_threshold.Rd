@@ -4,8 +4,10 @@
 \alias{identify_basenoise_threshold}
 \title{Identify baseline noise threshold through activity data from simulated curves}
 \usage{
-identify_basenoise_threshold(df, endpoint, chemical, threshold, direction,
-  potency, p1 = NULL, p2 = NULL, plot = TRUE, n_endpoint_page = 4)
+identify_basenoise_threshold(df, endpoint = "endpoint",
+  chemical = "chemical", threshold = "threshold", direction = "direction",
+  potency = "POD", p1 = NULL, p2 = NULL, plot = TRUE,
+  n_endpoint_page = 4)
 }
 \arguments{
 \item{df}{a tibble}
@@ -33,7 +35,7 @@ a tibble with added columns
 \itemize{
   \item pooled_variance: the pooled varience of the potency
   \item thresDist: the identified threshold based on distance approach
-  \item thresCurva: the identified threshold based on curvature + distance approach
+  \item thresDistComment: the flag to suggest whether to use the thresDist (OK, cautionary, inadvisable)
   \item p1, p2, distl: the index of points for the line and the calculated distance-to-line value
   \item curvature: the calculated curvature value
 }
@@ -44,6 +46,8 @@ the function calculates the pooled variance of potency information (i.e., POD pa
 and approaches are used to derive the lowest threshold that variance of POD is sufficiently reduced and even stabilized.
 }
 \examples{
-vignette("Rcurvep-intro")
+data("zfishdev_act")
+acts <- zfishdev_act \%>\% mutate(POD = ifelse(is.na(POD), conc_highest, POD))
+outthres <- identify_basenoise_threshold(acts)
 
 }

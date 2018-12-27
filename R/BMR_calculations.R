@@ -35,7 +35,7 @@
 #'
 identify_basenoise_threshold <- function(
   df, endpoint = "endpoint", chemical = "chemical",
-  threshold = "threshold", direction = "direction", potency = "potency", p1 = NULL, p2 = NULL, plot = TRUE, n_endpoint_page = 4) {
+  threshold = "threshold", direction = "direction", potency = "POD", p1 = NULL, p2 = NULL, plot = TRUE, n_endpoint_page = 4) {
 
   endpoint <- rlang::sym(endpoint)
   direction <- rlang::sym(direction)
@@ -113,7 +113,7 @@ cal_pooled_variances_per_endpoint_direction <- function(df, endpoint, chemical, 
 #' @export
 #'
 #' @examples
-#' #' data("zfishdev_act")
+#' data("zfishdev_act")
 #' acts <- zfishdev_act %>% mutate(POD = ifelse(is.na(POD), conc_highest, POD))
 #' outthres <- identify_basenoise_threshold(acts)
 #'
