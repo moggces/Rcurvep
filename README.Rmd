@@ -1,11 +1,9 @@
 ---
-output: 
-  github_document:
-    html_preview: false
+output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, fig.path = "README_figs/README-")
 options(tibble.print_min = 5, tibble.print_max = 5)
 ```
 
@@ -22,9 +20,9 @@ The optimal threshold is identified as the the lowest threshold where variance o
 
 Currently simulated data can be generated from one of the three types of dataset: 
 
-1. dichotomous binary incidence data (e.g., mortality data from rodent model)
-2. continuous data with high number of replicates (e.g., alternative animal model data)
-3. continous data with low number of replicates (e.g., in vitro data)
+1. dichotomous binary incidence data by bootstraping incidence data (e.g., mortality data from alternative animal model data)
+2. continuous data with high number of replicates by bootstraping experimental data (e.g., alternative animal model data)
+3. continous data with low number of replicates by linear-fit of experimental data with vehicle control responses as random noise (e.g., in vitro data)
 
 ## Installation
 
@@ -36,6 +34,16 @@ devtools::install_github("moggces/Rcurvep", build_vignettes = TRUE)
 ```
 
 ## Usage
+
+### baseline noise threshold identification
+
+```{r, warning=FALSE, message=FALSE}
+data("zfishdev_act")
+acts <- dplyr::mutate(zfishdev_act, POD = ifelse(is.na(POD), conc_highest, POD))
+outthres <- Rcurvep::identify_basenoise_threshold(acts)
+```
+
+## More Usage
 
 To learn more about Rcurvep, start with the vignettes:
 `browseVignettes(package = "Rcurvep")`
