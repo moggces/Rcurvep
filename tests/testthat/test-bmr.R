@@ -1,5 +1,15 @@
 context("BMR")
 
+test_that("NA in potency column", {
+  data("zfishdev_act")
+
+  expect_error(
+    identify_basenoise_threshold(zfishdev_act), "NA is not allowed in the potency column",
+    ignore.case = TRUE
+  )
+
+})
+
 test_that("BMR selection", {
   data("zfishdev_act")
   zfish2 <- dplyr::mutate(zfishdev_act, POD = ifelse(is.na(POD), conc_highest, POD))

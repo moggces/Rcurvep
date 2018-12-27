@@ -76,6 +76,8 @@ cal_pooled_variances_per_endpoint_direction <- function(df, endpoint, chemical, 
   threshold <- rlang::sym(threshold)
   potency <- rlang::sym(potency)
 
+  if (sum(is.na(df[[as.character(potency)]])) > 0) stop("NA is not allowed in the potency column")
+
   #calculate the pooled variance for each endpoint at a threshold
   result <- df %>%
     dplyr::group_by(!!endpoint, !!direction, !!chemical, !!threshold) %>%
@@ -146,7 +148,8 @@ cal_exponential_inflection <- function(df, xvar, yvar, p1 = NULL, p2 = NULL) {
     ) %>%
     dplyr::mutate(
       thresDistComment = comment_threshold(.$thresDist, .[[as.character(xvar)]], .[[as.character(yvar)]])
-    )
+    ) %>%
+    dplyr::select(-rowid)
 
   return(select_thres)
 }
