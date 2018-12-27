@@ -86,14 +86,6 @@ outd <- reparam_curvep_job(outd, other_paras = list(CARR = CARR_cutoff, TrustHi 
 ```
 
 
-For dataset with low number of replicates per concentration, the curves can be simulated by linearly fit the concentration-response data + random errors bootstrapped from responses in the vehicle control wells. 
-
-```{r run_resp_boot_veh}
-error <- rnorm(100, 0, 10)
-outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = 2, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE), vehicle_data = error)
-```
-
-
 ### Baseline noise threshold is unknown
 
 When baseline noise threshold is unknown, one method is to search possible candidates and the optimal threshold is the lowest threshold that can reduce the variance in potency estimation significantly. The optimal threshold is called as **benchmark response (BMR)** and the potency at the BMR is called as **benchmark concentration (BMC)**. BMC is particularly important for activity estimation in toxicity field since it could be considered the lowest concentration that an effect is observed (or in our case, can be reliably estimated).
@@ -102,7 +94,7 @@ When baseline noise threshold is unknown, one method is to search possible candi
 
 threshold_range <- seq(5, 10, by = 5) # usually seq(5, 95, by = 5)
 n_sample_test <- 2 # usually for 1000
-outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = threshold_range, other_paras = list(CARR = 20, TrustHi = TRUE))
+acts <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = threshold_range, other_paras = list(CARR = 20, TrustHi = TRUE), simplify_output = TRUE)
 
 ```
 
@@ -159,7 +151,7 @@ zfishdev_complete # a complete zfishdev dataset; available upon request
 
 # calculation (not run)
 # simplify_out = TRUE to reduce the amount of output
-outd <- run_curvep_job(zfishdev_complete, 
+acts <- run_curvep_job(zfishdev_complete, 
                        directionality = 1, n_sample = 1000, 
                        threshold = seq(5, 95, by = 5), 
                        other_paras = list(CARR = 20, TrustHi = TRUE),
@@ -175,27 +167,32 @@ data("zfishdev_act")
 acts <- zfishdev_act %>% 
   mutate(POD = ifelse(is.na(POD), conc_highest, POD))
 
-outthres <- identify_basenoise_threshold(acts, endpoint = "endpoint", direction = "direction", chemical = "chemical", threshold = "threshold", potency = "POD", plot = FALSE)
+outthres <- identify_basenoise_threshold(acts,  plot = FALSE)
 
 ```
 
-We could plot the diagnostic plots by applying the `plot = TRUE`. In the plot of threshold vs pooled variance, the ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
+We could plot the diagnostic plots by applying the `plot = TRUE`. 
 
 
 ```{r plot_thres, fig.align = "center", fig.width = 6}
 
-outthres <- identify_basenoise_threshold(acts, endpoint = "endpoint", direction = "direction", chemical = "chemical", threshold = "threshold", potency = "POD", plot = TRUE)
+outthres <- identify_basenoise_threshold(acts,  plot = TRUE)
+# or use generate_diagnostic_plot(outthres) directly
 
+# you can also calculate the threshold based on your own data
+# cal_exponential_inflection(filter(outthres, endpoint == "percent_affected_96"), xvar = "threshold", yvar = "pooled_variance")
 
 ```
 
-Therefore, the thresholds identified are:
+In the plot of threshold vs pooled variance, the ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
+
+The suggestions can be found in the *thresDistComment* column.
 
 ```{r opti_thres}
 
 outthres %>% 
-  filter(thresCurva == 1 | thresDist == 1) %>%
-  select(endpoint, direction, thresCurva, thresDist, threshold)
+  filter(thresDist == 1) %>%
+  select(endpoint, direction, threshold, thresDist, thresDistComment)
 
 ```
 
