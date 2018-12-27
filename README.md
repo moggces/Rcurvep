@@ -19,6 +19,13 @@ Currently simulated data can be generated from one of the three types of dataset
 Installation
 ------------
 
+``` r
+# the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("moggces/Rcurvep")
+devtools::install_github("moggces/Rcurvep", build_vignettes = TRUE)
+```
+
 Usage
 -----
 
