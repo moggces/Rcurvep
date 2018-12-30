@@ -28,6 +28,6 @@ Generate diagnostic plots for inspecting the quality of the identified baseline 
 data("zfishdev_act")
 acts <- zfishdev_act \%>\% mutate(POD = ifelse(is.na(POD), conc_highest, POD))
 outthres <- identify_basenoise_threshold(acts, plot = FALSE)
-generate_diagnostic_plot(outthres)
+generate_diagnostic_plot(outthres[['stats']])
 
 }

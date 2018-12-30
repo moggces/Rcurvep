@@ -6,8 +6,7 @@
 \usage{
 identify_basenoise_threshold(df, endpoint = "endpoint",
   chemical = "chemical", threshold = "threshold", direction = "direction",
-  potency = "POD", p1 = NULL, p2 = NULL, plot = TRUE,
-  n_endpoint_page = 4)
+  potency = "POD", plot = TRUE, n_endpoint_page = 4)
 }
 \arguments{
 \item{df}{a tibble}
@@ -22,22 +21,27 @@ identify_basenoise_threshold(df, endpoint = "endpoint",
 
 \item{potency}{a string that represents the column name of potency in `df`}
 
-\item{p1}{default = NULL, or a number to manually set the first threshold index for the distance approach}
-
-\item{p2}{default = NULL, or a number to manually set last threshold index for the distance approach}
-
 \item{plot}{default = TRUE, diagnostic plot}
 
 \item{n_endpoint_page}{number of endpoints to be plotted per page}
 }
 \value{
-a tibble with added columns
-\itemize{
-  \item pooled_variance: the pooled varience of the potency
-  \item thresDist: the identified threshold based on distance approach
-  \item thresDistComment: the flag to suggest whether to use the thresDist (OK, cautionary, inadvisable)
-  \item p1, p2, distl: the index of points for the line and the calculated distance-to-line value
-  \item curvature: the calculated curvature value
+a list with two tibbles
+
+\describe{
+  \item{stats}{
+  y_exp_fit, y_lm_fit: the fitted y values (exponential or linear)
+  dist2l_exp, dist2l_raw: the calculated distance-to-line value based on fitted y values (exponential) or raw y values
+  curvature: the calculated curvature value using smooth.spline fit results
+  p1_raw, p2_raw: the index of points for the line using the raw y values
+  }
+  \item{outcome}{
+  thresDist_raw: the identified threshold based on distance approach using the raw y values
+  thresDist_exp: the identified threshold based on distance approach using the y values from the fitted exponential curve
+  thresComment: the flag to suggest whether to use the thresDist (OK, cautionary, check)
+  p1_raw, p2_raw: the index of points for the line using the raw y values
+  cor_exp_fit, cor_lm_fit: the Pearson's correlation between the fitted y values (exponential or linear) and the raw y values
+  }
 }
 }
 \description{
