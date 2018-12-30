@@ -1,0 +1,279 @@
+---
+title: "threshold based on exponential fit and add comment"
+output: html_notebook
+---
+
+## load required R packages
+
+```{r, warning=FALSE, message=FALSE}
+
+library(here)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(stringr)
+library(readr)
+library(Rcurvep)
+
+
+```
+
+## load datasets
+
+```{r}
+percentd <- read_tsv(
+  here("data-raw", "bmr_exclude", "percent_thres_all.txt"), col_types = cols())
+distmd <- read_tsv(
+  here("data-raw", "bmr_exclude", "distmoved_thres_all.txt"), col_types = cols())
+simid <- read_tsv(
+  here("data-raw", "bmr_exclude", "simi_thres_all.txt"), col_types = cols())
+
+allcurved <- percentd %>% bind_rows(distmd) %>% bind_rows(simid)
+
+allcurved <- allcurved %>%
+  select(endpoint, direction, threshold, pooled_variance)
+
+```
+
+## Functions
+
+### exponential model fit
+
+```{r}
+cal_exponential_fit <- function(thres, vars) {
+  dd <- data.frame(x = thres, y = vars)
+
+  mod_nls <- stats::nls(y ~ exp(a + b * x),
+             data = dd, start = list(a = 0, b = 0))
+  
+  return(mod_nls)
+  
+}
+```
+
+### linear model fit
+
+```{r}
+cal_linear_fit <- function(thres, vars) {
+  dd <- data.frame(x = thres, y = vars)
+
+  mod_lm <- stats::lm(y ~ x , data = dd)
+  
+  return(mod_lm)
+  
+}
+```
+
+
+### distance to line
+
+```{r}
+#https://dataplatform.cloud.ibm.com/analytics/notebooks/54d79c2a-f155-40ec-93ec-ed05b58afa39/view?access_token=6d8ec910cf2a1b3901c721fcb94638563cd646fe14400fecbb76cea6aaae2fb1
+cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
+  
+
+  if (is.null(p1)) { p1 <- which.max(vars) }
+  if (is.null(p2)) { p2 <- which.min(vars) }
+
+
+  try(
+    if (p1 > p2 | p1 > length(thres) | p2 > length(thres)) {
+      warning("p1 and p2 do not in the range of the threshold index")
+      dists <- rep(as.numeric(NA), length(thres))
+    }
+  )
+  
+  
+  d <- data.frame(x = thres, y = vars)
+  
+  
+  while (p1 < p2)
+  {
+    l1 <- d[p1, ] %>% purrr::as_vector()
+    l2 <- d[p2, ] %>% purrr::as_vector()
+
+    dists <- apply(d, 1, function(x) {
+      x <- purrr::as_vector(x)
+      v1 <- l1 - l2
+      v2 <- x - l1
+      m <- cbind(v1,v2)
+      d <- abs(det(m))/sqrt(sum(v1*v1))
+      return(d)
+    })
+
+    dists[!(seq(1:length(dists)) %in% p1:p2)] <- NA
+    l3 <- d[which.max(dists),] %>% purrr::as_vector()
+    if (abs(l3[2] - l2[2]) < abs(l3[2] - l1[2])) {
+      break
+    } else
+    {
+      p1 <- p1 + 1
+    }
+  }
+  
+  result <- tibble::tibble(
+    dist2l = dists,
+    p1 = p1, p2 = p2)
+  
+  return(result)
+}
+```
+
+
+### threshold at the max distance
+
+```{r}
+thres_at_max_dist2l <- function(thres, dist2l) {
+  return(thres[which.max(dist2l)])
+}
+```
+
+
+### correlation
+
+```{r}
+cal_cor_original_fitted <- function(ori_vars, fitted_vars) {
+  return(cor(ori_vars, fitted_vars))
+}
+```
+
+
+### comment threshold
+
+```{r}
+comment_threshold <- function(exp_cor, linear_cor) {
+  comment <- "OK"
+  if (exp_cor >= 0.95 & linear_cor >= 0.95 ) {
+    comment <- "cautionary"
+  } else if (exp_cor < 0.95 & abs(linear_cor - exp_cor) < 0.2 ) {
+    comment <- "check"
+  }
+  return(comment)
+}
+```
+
+### curvature
+
+
+```{r}
+
+cal_curvature <- function(thres, vars) {
+  
+  spl <- smooth.spline(thres, vars)
+  spl_der1 <- predict(spl, deriv = 1)
+  spl_der2 <- predict(spl, deriv = 2)
+  curvature <-  spl_der2$y/(((1 + (spl_der1$y)^2))^3/2)
+  return(curvature)
+}
+
+```
+
+### add all together 
+
+```{r}
+cal_knee_point <- function(df, xvar, yvar, p1_raw = NULL, p2_raw = NULL) {
+  
+  xvar_c <- as.character(xvar)
+  yvar_c <- as.character(yvar)
+  
+  # get fitted y values (exponential and linear)
+  # calculate distance to line based on exponential fit
+  # calculate curvature 
+  result1 <- df %>%
+    dplyr::select(dplyr::one_of(c(xvar_c, yvar_c))) %>%
+    dplyr::mutate(
+      y_exp_fit =  stats::fitted(cal_exponential_fit(.[[xvar_c]], .[[yvar_c]])),
+      y_lm_fit = stats::fitted(cal_linear_fit(.[[xvar_c]], .[[yvar_c]]))
+    ) %>%
+    dplyr::mutate(
+      dist2l_exp = cal_dist2l(.[[xvar_c]], .[['y_exp_fit']], p1 = NULL, p2 = NULL)[['dist2l']],
+      curvature = cal_curvature(.[[xvar_c]], .[[yvar_c]])
+    ) %>%
+    tibble::rowid_to_column(.)
+  
+  # calculate distance to line based on raw values  
+  raw_dists <- cal_dist2l(
+    df[[xvar_c]], df[[yvar_c]], p1 = p1_raw, p2 = p2_raw
+    ) %>%
+    dplyr::rename_all(dplyr::funs(stringr::str_c(., "_raw"))) %>%
+    tibble::rowid_to_column(.)
+  
+  # join two tables
+  result1 <- result1 %>% 
+    dplyr::inner_join(raw_dists, by = "rowid") %>% 
+    dplyr::select(-rowid)
+  
+  # get the thresholds based on max distance
+  # calculate correlation between fitted y and original y
+  # use the correlation to derive a comment on the thresholds
+  result2 <- tibble::tibble(
+    thresDist_raw = thres_at_max_dist2l(result1$threshold, result1$dist2l_raw),
+    p1_raw = unique(result1$p1_raw),
+    p2_raw = unique(result1$p2_raw),
+    thresDist_exp = thres_at_max_dist2l(result1$threshold, result1$dist2l_exp),
+    cor_exp_fit = cal_cor_original_fitted(result1[[yvar_c]], result1$y_exp_fit),
+    cor_lm_fit = cal_cor_original_fitted(result1[[yvar_c]], result1$y_lm_fit)
+  ) %>%
+  dplyr::mutate(
+    thresComment = comment_threshold(.$cor_exp_fit, .$cor_lm_fit)
+  )
+    
+  return(list(stats = result1, outcome = result2))
+}
+```
+
+
+
+## Calculations
+
+
+```{r}
+outcurve <- allcurved %>%
+ nest(-endpoint, -direction) %>%
+ mutate(
+   knee_out = map(data, function(x) cal_knee_point(x, "threshold", "pooled_variance"))
+ ) %>%
+ select(-data) 
+
+```
+
+### the statistics behide
+
+```{r}
+outcurve %>%
+  mutate(stats = map(knee_out, ~ .x[[1]])) %>%
+  select(-knee_out) %>%
+  unnest()
+```
+
+### the output
+
+```{r}
+outcurve %>%
+  mutate(stats = map(knee_out, ~ .x[[2]])) %>%
+  select(-knee_out) %>%
+  unnest()
+```
+
+### temporary test the data from other notebook
+
+```{r}
+#test_boot_100 
+test_out <- map_df(test_boot_100, ~ .x[[1]], .id = "id") %>% 
+  select(id, endpoint, direction, threshold, pooled_variance) %>%
+  nest(-endpoint, -direction, -id) %>%
+ mutate(
+   knee_out = map(data, function(x) cal_knee_point(x, "threshold", "pooled_variance"))
+ ) %>%
+ select(-data)
+```
+
+```{r}
+test_out %>%
+  mutate(stats = map(knee_out, ~ .x[[2]])) %>%
+  select(-knee_out) %>%
+  unnest()
+```
+
+
