@@ -253,13 +253,28 @@ generate_diagnostic_plot <- function(
   if (length(d) < n_endpoint_page) n_endpoint_page <- length(d)
   d <- split(d, ceiling(seq_along(d)/n_endpoint_page))
 
-  #get the slope and intercept
+  #get the slope and intercept for raw data
   lm_fitd <- df %>%
     tidyr::nest(-endpoint, -p1_raw, -p2_raw) %>%
     dplyr::mutate(
       temp = purrr::pmap(., function(...) {
         l <- list(...)
-        get_linear_coeff_by_p1p2(l$data, l$p1_raw, l$p2_raw)})
+        get_linear_coeff_by_p1p2(l$data, "threshold", "pooled_variance", l$p1_raw, l$p2_raw)})
+    ) %>%
+    dplyr::select(-data) %>%
+    tidyr::unnest() %>%
+    dplyr::mutate(
+      type = "pooled_variance",
+      type = ordered(type, levels =  c("pooled_variance", "dist2l_raw", "dist2l_exp") )
+    )
+
+  #get the slope and intercept for the exp fit data
+  lm_fitd_exp <- df %>%
+    tidyr::nest(-endpoint, -p1_raw, -p2_raw) %>%
+    dplyr::mutate(
+      temp = purrr::pmap(., function(...) {
+        l <- list(...)
+        get_linear_coeff_by_p1p2(l$data, "threshold", "y_exp_fit", 1, nrow(l$data))})
     ) %>%
     dplyr::select(-data) %>%
     tidyr::unnest() %>%
@@ -290,8 +305,12 @@ generate_diagnostic_plot <- function(
         data = lm_fitd, ggplot2::aes(
           slope = slope, intercept = intercept), linetype = "dashed", color = "black"
       ) +
+      ggplot2::geom_abline(
+        data = lm_fitd_exp, ggplot2::aes(
+          slope = slope, intercept = intercept), linetype = "dashed", color = "red"
+      ) +
       ggplot2::geom_line(
-        data = exp_fitd, ggplot2::aes(x = threshold, y = y_exp_fit), linetype = "dashed", color = "red") +
+        data = exp_fitd, ggplot2::aes(x = threshold, y = y_exp_fit), linetype = "solid", color = "red") +
       ggplot2::facet_grid(type ~ endpoint, scales = "free")
     return(p)
   })
@@ -300,9 +319,12 @@ generate_diagnostic_plot <- function(
 }
 
 
-get_linear_coeff_by_p1p2 <- function(dd, p1, p2) {
+get_linear_coeff_by_p1p2 <- function(dd, xvar, yvar, p1, p2) {
   dd <- dd[c(p1, p2),]
-  mod_lm <- lm(pooled_variance ~ threshold, data = dd)
+  xvar <- rlang::sym(xvar)
+  yvar <- rlang::sym(yvar)
+  forma <- rlang::new_formula(yvar, xvar)
+  mod_lm <- lm(forma, data = dd)
   result <- data.frame(as.list(mod_lm$coefficients)) %>%
     rlang::set_names(c("intercept", "slope"))
   return(result)

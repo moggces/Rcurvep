@@ -30,7 +30,7 @@ test_that("run with non default column names", {
 test_that("user selected p2", {
   data("zfishdev_act")
   zfish2 <- dplyr::mutate(zfishdev_act, POD = ifelse(is.na(POD), conc_highest, POD))
-  zfish2 <- zfish2 %>% filter(endpoint == "percent_affected_96")
+  zfish2 <- zfish2 %>% dplyr::filter(endpoint == "percent_affected_96")
   result <- identify_basenoise_threshold(zfish2)
   result <- cal_knee_point(result[[1]], "threshold", "pooled_variance", p2_raw = 7)
   expect_true(unique(result[[2]]$p2_raw) == 7)
