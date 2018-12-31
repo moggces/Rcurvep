@@ -168,9 +168,10 @@ cal_knee_point <- function(df, xvar, yvar, p1_raw = NULL, p2_raw = NULL) {
   result1 <- df %>%
     dplyr::select(dplyr::one_of(c(xvar_c, yvar_c))) %>%
     dplyr::mutate(
-      y_exp_fit =  fitted(cal_exponential_fit(.[[xvar_c]], .[[yvar_c]])),
+      y_exp_fit =  try(fitted(cal_exponential_fit(.[[xvar_c]], .[[yvar_c]])), silent = TRUE),
       y_lm_fit = fitted(cal_linear_fit(.[[xvar_c]], .[[yvar_c]]))
     ) %>%
+    dplyr::mutate_at("y_exp_fit", as.numeric) %>%
     dplyr::mutate(
       dist2l_exp = cal_dist2l(.[[xvar_c]], .[['y_exp_fit']], p1 = NULL, p2 = NULL)[['dist2l']],
       curvature = cal_curvature(.[[xvar_c]], .[[yvar_c]])
@@ -324,17 +325,28 @@ get_linear_coeff_by_p1p2 <- function(dd, xvar, yvar, p1, p2) {
   xvar <- rlang::sym(xvar)
   yvar <- rlang::sym(yvar)
   forma <- rlang::new_formula(yvar, xvar)
-  mod_lm <- lm(forma, data = dd)
-  result <- data.frame(as.list(mod_lm$coefficients)) %>%
-    rlang::set_names(c("intercept", "slope"))
+
+  result <- data.frame(intercept = as.numeric(NA), slope = as.numeric(NA))
+  try({
+    mod_lm <- lm(forma, data = dd)
+    result <- data.frame(as.list(mod_lm$coefficients)) %>%
+      rlang::set_names(c("intercept", "slope"))
+  })
+
   return(result)
 }
 
 cal_exponential_fit <- function(thres, vars) {
   dd <- data.frame(x = thres, y = vars)
 
+  mod_lm <- lm(log(y) ~ x , data = dd)
+
+  #mod_nls <- nls(y ~ exp(a + b * x),
+  #                      data = dd, start = list(a = 0, b = 0))
+
   mod_nls <- nls(y ~ exp(a + b * x),
-                        data = dd, start = list(a = 0, b = 0))
+                        data = dd, start = list(a = coef(mod_lm)[1], b = coef(mod_lm)[2]))
+
 
   return(mod_nls)
 
@@ -353,12 +365,12 @@ cal_linear_fit <- function(thres, vars) {
 cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
 
 
-  if (is.null(p1)) { p1 <- which.max(vars) }
-  if (is.null(p2)) { p2 <- which.min(vars) }
+  if (is.null(p1)) { p1 <- which.max(vars); if (length(p1) == 0) p1 <- 0}
+  if (is.null(p2)) { p2 <- which.min(vars); if (length(p2) == 0) p2 <- 0 }
 
 
   try(
-    if (p1 > p2 | p1 > length(thres) | p2 > length(thres)) {
+    if ( p1 > p2 | p1 > length(thres) | p2 > length(thres)) {
       warning("p1 and p2 do not in the range of the threshold index")
       dists <- rep(as.numeric(NA), length(thres))
     }
@@ -400,7 +412,9 @@ cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
 }
 
 thres_at_max_dist2l <- function(thres, dist2l) {
-  return(thres[which.max(dist2l)])
+  ind_max <- thres[which.max(dist2l)]
+  if ( length(ind_max) == 0 ) ind_max <- as.numeric(NA)
+  return(ind_max)
 }
 
 cal_cor_original_fitted <- function(ori_vars, fitted_vars) {
@@ -408,11 +422,18 @@ cal_cor_original_fitted <- function(ori_vars, fitted_vars) {
 }
 
 comment_threshold <- function(exp_cor, linear_cor) {
-  comment <- "OK"
+
+  if (is.na(exp_cor) | is.na(linear_cor) )
+  {
+    return("check")
+  }
+
   if (exp_cor >= 0.95 & linear_cor >= 0.95 ) {
     comment <- "cautionary"
   } else if (exp_cor < 0.95 & abs(linear_cor - exp_cor) < 0.2 ) {
     comment <- "check"
+  } else {
+    comment <- "OK"
   }
   return(comment)
 }
