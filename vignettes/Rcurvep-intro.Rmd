@@ -186,13 +186,11 @@ outthres <- identify_basenoise_threshold(acts,  plot = TRUE)
 
 In the plot of threshold vs pooled variance, the ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
 
-The suggestions can be found in the *thresDistComment* column.
+The identified baseline noise thresholds using either the raw pooled variance data or results from the exponential fitting (*thresDist_raw* and *thresDist_exp* columns). The comment for threshold based on the results from the exponential fitting and linear fitting can be found in the *thresComment*, *cor_exp_fit*, and *cor_lm_fit* columns.
 
 ```{r opti_thres}
 
-outthres %>% 
-  filter(thresDist == 1) %>%
-  select(endpoint, direction, threshold, thresDist, thresDistComment)
+outthres[['outcome']]
 
 ```
 
