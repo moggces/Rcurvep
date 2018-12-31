@@ -32,6 +32,14 @@
 * new: add an comment (thresDistComment) that shows if the identified baseline threshold is usable
 * change: thresCurva approach is removed
 
+# Rcurvep 0.5
+* new: add a method to calculate the baseline noise threshold based on the exponential fitting (thresDist_exp column)
+* new: statistical outputs from identify_basenoise_threshold() are reported ( y_exp_fit, y_lm_fit, dist2l_exp, cor_exp_fit, cor_lm_fit)
+* change: identify_basenoise_threshold() output becomes a list instead of a tibble; first element contains the statistical data and the second element contains the baseline noise threshold information
+* change: cal_exponential_inflection() is renamed as cal_knee_point()
+* change: p1, p2 => p1_raw, p2_raw; dist2l => dist2l_raw
+
+
 
 # Todo
 * implement Curvep MASK parameter
