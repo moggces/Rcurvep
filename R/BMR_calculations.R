@@ -370,8 +370,8 @@ cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
 
 
   try(
-    if ( p1 > p2 | p1 > length(thres) | p2 > length(thres)) {
-      warning("p1 and p2 do not in the range of the threshold index")
+    if ( p1 >= p2 | p1 > length(thres) | p2 > length(thres)) {
+      warning("p1 has to be smaller than p2, p1 and p2 do not in the range of the threshold index")
       dists <- rep(as.numeric(NA), length(thres))
     }
   )
