@@ -1,7 +1,7 @@
 Package: Rcurvep
 Type: Package
 Title: Concentration Response Modeling Using Curvep  
-Version: 0.5
+Version: 0.5.1
 Authors@R: as.person(c(
     "Jui-Hua Hsieh <juihua.hsieh@gmail.com> [aut, cre]", 
     "Alexander Sedykh <sunirks@gmail.com > [aut]"

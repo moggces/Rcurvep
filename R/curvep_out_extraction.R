@@ -100,9 +100,9 @@ calculate_median_resps <- function(in_concs, in_resps, out_resps) {
   return(result)
 }
 
-#' Unnest Curvep input, output, or activity lists
+#' Unnest Curvep input, output, or activity lists.
 #'
-#' The function unnest the input, output, or activity lists after `run_curvep_job()`
+#' The function unnest the input, output, or activity lists after `run_curvep_job()`.
 #'
 #' @param c_out A tibble after `run_curvep_job()`.
 #'
@@ -230,32 +230,6 @@ extract_curvep_data <- function(c_out, type, modifier = NULL){
     sum_input <- list(act, in_concs, in_resps, out_resps) %>%
       purrr::reduce(dplyr::inner_join, by = c(base_ids, "repeat_id"))
     result <- summarize_curvep_output(sum_input, col_names = c("POD", "EC50", "Emax", "wAUC", "wAUC_prev"), modifier = modifier, conf_level = 0.95)
-
-
-    # act <- extract_curvep_data(c_out, "act")
-    # if (!is.null(modifier)) {act <- make_comment_as_inactive(act, modifier)}
-    # in_concs <- extract_curvep_data(c_out, "concs_in")
-    # in_resps <- extract_curvep_data(c_out, "resps_in")
-    # out_resps  <- extract_curvep_data(c_out, "resps_out")
-    # if (!is.null(modifier)) {
-    #   out_resps <- make_comment_as_flat_resp(out_resps, act, modifier)
-    # }
-    #
-    # m <- act %>%
-    #   make_inactive_potency_as_highest_conc() %>%
-    #   dplyr::group_by(endpoint, chemical, direction, threshold)
-    #
-    # # summarize => confidence interval ("POD", "EC50", "Emax", "wAUC", "wAUC_prev")
-    # result1 <- add_confidence_interval(m, level = 0.95)
-    #
-    # # summarize => hit confidence
-    # result2 <- add_hit_confidence(m)
-    #
-    # # summarize => median response in/out
-    # result3 <- calculate_median_resps(in_concs, in_resps, out_resps)
-    #
-    # result <- list(result1, result2, result3) %>%
-    #   purrr::reduce(dplyr::inner_join, by = c( "threshold", "endpoint", "chemical", "direction" ) )
   }
 
   # append the class information
@@ -265,6 +239,32 @@ extract_curvep_data <- function(c_out, type, modifier = NULL){
   return(result)
 }
 
+#' Summarize the activity output after curvep based on bootstrap samples.
+#' The summarized values include hit_confidence, confidence interval for the activity values,
+#' and median responses per concentration.
+#'
+#' @param a_out a tibble from the extract_curvep_data(type != "summary") or run_curvep_job(simplify_output = TRUE)
+#' @param col_names default values include POD, EC50, Emax, wAUC, wAUC_prev
+#' @param modifier A string to match the Curvep Comments column to batch modifiy the activity,
+#' including hit, potency related values, and adjusted responses (active -> inactive)
+#' @param conf_level default value = 0.95 (95\%)
+#'
+#' @return a tibble with summary data: 1) the hit confidence, 2) the median (med),
+#'   95\% confidence interval (ciu, cil) of activity values, 3) median of responses of concentrations (input/output)
+#' 3) is only calculated when input tables have resps, concs, and resps_in columns
+#' @export
+#'
+#' @examples
+#' data(zfishdev)
+#' x <- zfishdev %>% split(.$endpoint)
+#' acts <- run_curvep_job(x[[1]],
+#'                       directionality = 1,
+#'                       n_sample = 10,
+#'                       threshold = 15,
+#'                       other_paras = list(CARR = 20, TrustHi = TRUE), simplify_output = TRUE)
+#' # activities
+#' acts_sum <- summarize_curvep_output(acts, conf_level = 0.9)
+#'
 summarize_curvep_output <- function(a_out, col_names = c("POD", "EC50", "Emax", "wAUC", "wAUC_prev"), modifier = NULL, conf_level = 0.95) {
 
 
