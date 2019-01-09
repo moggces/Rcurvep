@@ -152,10 +152,9 @@ calculate_median_resps <- function(in_concs, in_resps, out_resps) {
 extract_curvep_data <- function(c_out, type, modifier = NULL){
 
   # test the class
-  if (!is(c_out, "Rcurvep")) {
+  if (!is(c_out, "rcurvep_out_nested")) {
     warning("input is not the nested data frame from the run_curvep_job()")
   }
-
 
   base_ids <- c("threshold", "endpoint", "chemical", "direction")
 
@@ -229,12 +228,13 @@ extract_curvep_data <- function(c_out, type, modifier = NULL){
     out_resps  <- extract_curvep_data(c_out, "resps_out")
     sum_input <- list(act, in_concs, in_resps, out_resps) %>%
       purrr::reduce(dplyr::inner_join, by = c(base_ids, "repeat_id"))
+
     result <- summarize_curvep_output(sum_input, col_names = c("POD", "EC50", "Emax", "wAUC", "wAUC_prev"), modifier = modifier, conf_level = 0.95)
   }
 
   # append the class information
   if (type != "summary") {
-    class(result) <- c(class(result), "Rcurvep")
+    class(result) <- c("rcurvep_out", class(result))
   }
   return(result)
 }
@@ -269,7 +269,7 @@ summarize_curvep_output <- function(a_out, col_names = c("POD", "EC50", "Emax", 
 
 
   # test the class
-  if (!is(a_out, "Rcurvep")) {
+  if (!is(a_out, "rcurvep_out")) {
     warning("input is not the activity file from extract_curvep_data() ")
   }
 
