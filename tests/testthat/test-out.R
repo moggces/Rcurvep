@@ -69,3 +69,16 @@ test_that("remove comment activities", {
   expect_true(sum(acts$hit[grepl("CHECK",acts$Comments)]) == 0)
 
 })
+
+test_that("summarize curvep act data", {
+  data("zfishdev")
+  x <- zfishdev %>%
+    split(.$endpoint)
+  outd <- run_curvep_job(x[[1]],
+                         directionality = 1,
+                         n_sample = 10,
+                         threshold = 5,
+                         other_paras = list(CARR = 20, TrustHi = TRUE), simplify_output = TRUE)
+  acts <- summarize_curvep_output(outd, col_names = c("POD", "EC50"), modifier = "INVERSE", conf_level = 0.9)
+  expect_true(ncol(acts) == 11)
+})

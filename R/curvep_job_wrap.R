@@ -183,7 +183,10 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
 
   #simplify the output (especially for BMR finding)
   if (simplify_output) {
+    class(dats_out) <- c(class(dats_out), "Rcurvep")
     dats_out <- extract_curvep_data(dats_out, "act")
+  } else {
+    class(dats_out) <- c(class(dats_out), "Rcurvep")
   }
 
   return(dats_out)
