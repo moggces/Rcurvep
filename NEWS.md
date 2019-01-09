@@ -39,6 +39,10 @@
 * change: cal_exponential_inflection() is renamed as cal_knee_point()
 * change: p1, p2 => p1_raw, p2_raw; dist2l => dist2l_raw
 
+# Rcurvep 0.5.1
+* new: summarize_curvep_output() to get confidence interval of activites by bypassing the extract_curvep_data()
+* change: use SSasymp to fit the exponential decay curve
+
 
 
 # Todo

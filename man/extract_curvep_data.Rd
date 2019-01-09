@@ -2,7 +2,7 @@
 % Please edit documentation in R/curvep_out_extraction.R
 \name{extract_curvep_data}
 \alias{extract_curvep_data}
-\title{Unnest Curvep input, output, or activity lists}
+\title{Unnest Curvep input, output, or activity lists.}
 \usage{
 extract_curvep_data(c_out, type, modifier = NULL)
 }
@@ -21,13 +21,14 @@ extract_curvep_data(c_out, type, modifier = NULL)
   95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of resps (input/output)
 }}
 
-\item{modifier}{A string to match the Curvep Comments column to batch modifiy the activity (active -> inactive)}
+\item{modifier}{A string to match the Curvep Comments column to batch modifiy the activity,
+including hit, potency related values, and adjusted responses (active -> inactive)}
 }
 \value{
 Depending the specified type, a tibble with various columns is returned.
 }
 \description{
-The function unnest the input, output, or activity lists after `run_curvep_job()`
+The function unnest the input, output, or activity lists after `run_curvep_job()`.
 }
 \examples{
 data(zfishdev)
