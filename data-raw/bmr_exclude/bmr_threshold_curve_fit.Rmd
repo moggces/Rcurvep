@@ -81,6 +81,37 @@ nls_fit <- function(dd) {
 
 ```
 
+### nls fit with starting point
+
+```{r}
+nls_fit_sp <- function(dd) {
+  
+  mod_lm <- lm(log(pooled_variance) ~ threshold , data = dd)
+  mod <- nls(pooled_variance ~ exp(a + b * threshold), 
+             data = dd, start = list(a = coef(mod_lm)[1], b = coef(mod_lm)[2]))
+  result <- dd %>%
+    mutate(
+      fitted_value = fitted(mod)
+    )
+  return(list(update_dataset = result, model = mod))
+}
+```
+
+
+### nls fit with starting point search function
+http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/&sa=D&source=hangouts&ust=1547125299019000&usg=AFQjCNGzoP26jIUYQnAS9Z5Eb4aO66IzPg
+
+```{r}
+nls_fit_SS <- function(dd) {
+  mod <- nls(pooled_variance ~ SSasymp(threshold, yf, y0, log_alpha), data = dd)
+  result <- dd %>%
+    mutate(
+      fitted_value = fitted(mod)
+    )
+  return(list(update_dataset = result, model = mod))
+}
+```
+
 ### lm + log(y)
 
 ```{r}
@@ -196,6 +227,29 @@ plot_fit_value(map_df(nlsd, ~ .x[[1]]))
 
 The fits look good. Yet it will be better if the second one can fit better
 
+### nls fit + sp
+
+```{r, fig.width = 8, fig.height = 4}
+
+nlsd <- sigcurved %>% 
+  split(.$endpoint) %>%
+  map(., nls_fit_sp)
+
+plot_fit_value(map_df(nlsd, ~ .x[[1]]))
+```
+
+
+### nls fit + SS
+
+```{r, fig.width = 8, fig.height = 4}
+
+nlsdS <- sigcurved %>% 
+  split(.$endpoint) %>%
+  map(., nls_fit_SS)
+
+plot_fit_value(map_df(nlsdS, ~ .x[[1]]))
+```
+
 ### glm_gamma_fit
 
 ```{r, fig.width = 8, fig.height = 4}
@@ -240,7 +294,7 @@ The fits do not look good.
 ## Identification of parameters to single out the exponential distribution vs others
 
 ```{r}
-map_dbl(nlsd, ~ cal_fitted_cor(.x[[1]]))
+map_dbl(nlsdS, ~ cal_fitted_cor(.x[[1]]))
 ```
 
 ```{r}
@@ -265,7 +319,7 @@ The 120_a_L1_distmoved endpoint got a 'warning' flag and the percent_mortality_9
 ```{r, fig.width=8}
 nlsd_all <- allcurved %>% 
   split(.$endpoint) %>%
-  map(., nls_fit)
+  map(., nls_fit_SS)
 
 plot_fit_value(map_df(nlsd_all, ~ .x[[1]])) 
 ```
@@ -291,7 +345,7 @@ The 120_a_L1_distmoved endpoint got a 'warning' flag and the percent_mortality_9
 
 Based on the current dataset, 
 
-1. the nls + exponential fit approach can generate reasonable fit (visually).
+1. the nls + exponential fit approach can generate reasonable fit, especially when SSasymp and a new equation is used .
 2. the correlation approach by combining information from both nls + exponential fit and linear fit approach can reliably provide the flag for the endpoints that should not use the threshold approach. 
 
 

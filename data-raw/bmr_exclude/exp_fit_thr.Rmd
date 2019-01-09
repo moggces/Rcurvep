@@ -44,9 +44,9 @@ allcurved <- allcurved %>%
 cal_exponential_fit <- function(thres, vars) {
   dd <- data.frame(x = thres, y = vars)
 
-  mod_nls <- stats::nls(y ~ exp(a + b * x),
-             data = dd, start = list(a = 0, b = 0))
-  
+  #mod_nls <- stats::nls(y ~ exp(a + b * x),
+  #          data = dd, start = list(a = 0, b = 0))
+  mod_nls <- nls(y ~ SSasymp(x, yf, y0, log_alpha), data = dd)
   return(mod_nls)
   
 }
@@ -256,24 +256,6 @@ outcurve %>%
   unnest()
 ```
 
-### temporary test the data from other notebook
 
-```{r}
-#test_boot_100 
-test_out <- map_df(test_boot_100, ~ .x[[1]], .id = "id") %>% 
-  select(id, endpoint, direction, threshold, pooled_variance) %>%
-  nest(-endpoint, -direction, -id) %>%
- mutate(
-   knee_out = map(data, function(x) cal_knee_point(x, "threshold", "pooled_variance"))
- ) %>%
- select(-data)
-```
-
-```{r}
-test_out %>%
-  mutate(stats = map(knee_out, ~ .x[[2]])) %>%
-  select(-knee_out) %>%
-  unnest()
-```
 
 

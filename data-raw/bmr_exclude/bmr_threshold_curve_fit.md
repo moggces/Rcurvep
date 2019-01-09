@@ -1,7 +1,7 @@
 ---
 title: "Test various fitting approaches for exponential curve fit"
 author: "Jui-Hua Hsieh"
-date: "2018-12-22"
+date: "2019-01-09"
 output:
   html_document:
     keep_md: true
@@ -76,6 +76,39 @@ sigcurved <- allcurved %>%
 nls_fit <- function(dd) {
   mod <- nls(pooled_variance ~ exp(a + b * threshold), 
              data = dd, start = list(a = 0, b = 0))
+  result <- dd %>%
+    mutate(
+      fitted_value = fitted(mod)
+    )
+  return(list(update_dataset = result, model = mod))
+}
+```
+
+### nls fit with starting point
+
+
+```r
+nls_fit_sp <- function(dd) {
+  
+  mod_lm <- lm(log(pooled_variance) ~ threshold , data = dd)
+  mod <- nls(pooled_variance ~ exp(a + b * threshold), 
+             data = dd, start = list(a = coef(mod_lm)[1], b = coef(mod_lm)[2]))
+  result <- dd %>%
+    mutate(
+      fitted_value = fitted(mod)
+    )
+  return(list(update_dataset = result, model = mod))
+}
+```
+
+
+### nls fit with starting point search function
+http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/&sa=D&source=hangouts&ust=1547125299019000&usg=AFQjCNGzoP26jIUYQnAS9Z5Eb4aO66IzPg
+
+
+```r
+nls_fit_SS <- function(dd) {
+  mod <- nls(pooled_variance ~ SSasymp(threshold, yf, y0, log_alpha), data = dd)
   result <- dd %>%
     mutate(
       fitted_value = fitted(mod)
@@ -201,9 +234,36 @@ nlsd <- sigcurved %>%
 plot_fit_value(map_df(nlsd, ~ .x[[1]])) 
 ```
 
-![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 The fits look good. Yet it will be better if the second one can fit better
+
+### nls fit + sp
+
+
+```r
+nlsd <- sigcurved %>% 
+  split(.$endpoint) %>%
+  map(., nls_fit_sp)
+
+plot_fit_value(map_df(nlsd, ~ .x[[1]]))
+```
+
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+
+
+### nls fit + SS
+
+
+```r
+nlsdS <- sigcurved %>% 
+  split(.$endpoint) %>%
+  map(., nls_fit_SS)
+
+plot_fit_value(map_df(nlsdS, ~ .x[[1]]))
+```
+
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
 
 ### glm_gamma_fit
 
@@ -216,7 +276,7 @@ glmd <- sigcurved %>%
 plot_fit_value(map_df(glmd, ~ .x[[1]]))
 ```
 
-![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
 The fits do not look good.
   split(.$endpoint) %>%
@@ -233,7 +293,7 @@ lm_logd <- sigcurved %>%
 plot_fit_value(map_df(lm_logd, ~ .x[[1]]))
 ```
 
-![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 The fits do not look good.
 
@@ -248,7 +308,7 @@ lmd <- sigcurved %>%
 plot_fit_value(map_df(lmd, ~ .x[[1]]))
 ```
 
-![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 The fits do not look good.
 
@@ -256,12 +316,12 @@ The fits do not look good.
 
 
 ```r
-map_dbl(nlsd, ~ cal_fitted_cor(.x[[1]]))
+map_dbl(nlsdS, ~ cal_fitted_cor(.x[[1]]))
 ```
 
 ```
 ##   120_a_L1_distmoved  percent_affected_96 percent_mortality_96 
-##            0.9909397            0.9801099            0.7901139
+##            0.9974406            0.9937695            0.7966239
 ```
 
 
@@ -305,12 +365,12 @@ The 120_a_L1_distmoved endpoint got a 'warning' flag and the percent_mortality_9
 ```r
 nlsd_all <- allcurved %>% 
   split(.$endpoint) %>%
-  map(., nls_fit)
+  map(., nls_fit_SS)
 
 plot_fit_value(map_df(nlsd_all, ~ .x[[1]])) 
 ```
 
-![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 
 ```r
@@ -321,7 +381,7 @@ lmd_all <- allcurved %>%
 plot_fit_value(map_df(lmd_all, ~ .x[[1]]))
 ```
 
-![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+![](bmr_threshold_curve_fit_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 
 
@@ -355,7 +415,7 @@ The 120_a_L1_distmoved endpoint got a 'warning' flag and the percent_mortality_9
 
 Based on the current dataset, 
 
-1. the nls + exponential fit approach can generate reasonable fit (visually).
+1. the nls + exponential fit approach can generate reasonable fit, especially when SSasymp and a new equation is used .
 2. the correlation approach by combining information from both nls + exponential fit and linear fit approach can reliably provide the flag for the endpoints that should not use the threshold approach. 
 
 
