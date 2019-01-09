@@ -339,14 +339,7 @@ get_linear_coeff_by_p1p2 <- function(dd, xvar, yvar, p1, p2) {
 cal_exponential_fit <- function(thres, vars) {
   dd <- data.frame(x = thres, y = vars)
 
-  mod_lm <- lm(log(y) ~ x , data = dd)
-
-  #mod_nls <- nls(y ~ exp(a + b * x),
-  #                      data = dd, start = list(a = 0, b = 0))
-
-  mod_nls <- nls(y ~ exp(a + b * x),
-                        data = dd, start = list(a = coef(mod_lm)[1], b = coef(mod_lm)[2]))
-
+  mod_nls <-  nls(y ~ SSasymp(x, yf, y0, log_alpha), data = dd)
 
   return(mod_nls)
 
