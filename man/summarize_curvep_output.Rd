@@ -2,9 +2,7 @@
 % Please edit documentation in R/curvep_out_extraction.R
 \name{summarize_curvep_output}
 \alias{summarize_curvep_output}
-\title{Summarize the activity output after curvep based on bootstrap samples.
-The summarized values include hit_confidence, confidence interval for the activity values,
-and median responses per concentration.}
+\title{Summarize the activity output after Curvep based on bootstrap samples.}
 \usage{
 summarize_curvep_output(a_out, col_names = c("POD", "EC50", "Emax", "wAUC",
   "wAUC_prev"), modifier = NULL, conf_level = 0.95)
@@ -25,7 +23,6 @@ a tibble with summary data: 1) the hit confidence, 2) the median (med),
 3) is only calculated when input tables have resps, concs, and resps_in columns
 }
 \description{
-Summarize the activity output after curvep based on bootstrap samples.
 The summarized values include hit_confidence, confidence interval for the activity values,
 and median responses per concentration.
 }

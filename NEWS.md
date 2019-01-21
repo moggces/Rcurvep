@@ -43,6 +43,8 @@
 * new: summarize_curvep_output() to get confidence interval of activites by bypassing the extract_curvep_data()
 * change: use SSasymp to fit the exponential decay curve
 
+# Rcurvep 0.5.2
+* change: fix comment_threshold()
 
 
 # Todo

@@ -1,3 +1,5 @@
+[![Travis-CI Build Status](https://travis-ci.org/moggces/Rcurvep.svg?branch=master)](https://travis-ci.org/moggces/Rcurvep)
+
 
 Overview
 --------

@@ -79,6 +79,7 @@ test_that("summarize curvep act data", {
                          n_sample = 10,
                          threshold = 5,
                          other_paras = list(CARR = 20, TrustHi = TRUE), simplify_output = TRUE)
+  #outd <- outd %>% select(-wAUC_prev) #it will not work
   acts <- summarize_curvep_output(outd, col_names = c("POD", "EC50"), modifier = "INVERSE", conf_level = 0.9)
   expect_true(ncol(acts) == 11)
 })

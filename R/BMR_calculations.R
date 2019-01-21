@@ -421,12 +421,18 @@ comment_threshold <- function(exp_cor, linear_cor) {
     return("check")
   }
 
-  if (exp_cor >= 0.95 & linear_cor >= 0.95 ) {
-    comment <- "cautionary"
-  } else if (exp_cor < 0.95 & abs(linear_cor - exp_cor) < 0.2 ) {
-    comment <- "check"
+  if (abs(linear_cor - exp_cor) <= 0.2) {
+    if (exp_cor >= 0.90) {
+      comment <- "cautionary"
+    } else {
+      comment <- "check"
+    }
   } else {
-    comment <- "OK"
+    if (exp_cor >= 0.95) {
+      comment <- "OK"
+    } else {
+      comment <- "cautionary"
+    }
   }
   return(comment)
 }

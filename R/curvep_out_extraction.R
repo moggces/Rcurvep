@@ -239,7 +239,8 @@ extract_curvep_data <- function(c_out, type, modifier = NULL){
   return(result)
 }
 
-#' Summarize the activity output after curvep based on bootstrap samples.
+#' Summarize the activity output after Curvep based on bootstrap samples.
+#'
 #' The summarized values include hit_confidence, confidence interval for the activity values,
 #' and median responses per concentration.
 #'
