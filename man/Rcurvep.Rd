@@ -6,13 +6,18 @@
 \alias{Rcurvep-package}
 \title{Rcurvep: an R package for concentration response modeling using Curvep}
 \description{
-The packages provides an R interface for processing concentration response data using Curvep, a response noise filtering algorithm.
+The package provides an R interface for processing concentration response data
+using Curvep, a response noise filtering algorithm.
 }
 \details{
-With a predefined baseline noise threshold (or minimum response threshold) in an experiment, it allows to calculate activity (with confidence interval) based on original or simulated concentration response data.
+With a predefined baseline noise threshold (or a minimum response threshold) in an experiment,
+the program can calculate activity (with confidence interval) based on original or simulated concentration response data.
 
-If the baseline noise threshold is unknown, the above process can be repeated using a reasonable number of threshold candidates.
-The optimal threshold is identified as the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized, under the condiction that there are enough response variations induced by chemicals in the dataset.
+If the baseline noise threshold is unknown, the above process can be repeated
+using a reasonable number of threshold candidates.
+The optimal threshold is identified as the lowest threshold
+where variance of potency estimation is sufficiently reduced and even stabilized,
+under the condiction that there are enough response variations induced by chemicals in the dataset.
 
 Currently simulated data can be generated from one of the three types of dataset:
 

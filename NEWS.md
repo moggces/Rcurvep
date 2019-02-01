@@ -46,6 +46,16 @@
 # Rcurvep 0.5.2
 * change: fix comment_threshold()
 
+# Rcurvep 0.6.0
+* new: print.rcurvep_thres_stats() -> print()
+* change: run_curvep_job() -> run_curvep_batch()
+* change: extract_curvep_data() -> withdraw.rcurvep_out_nested() -> withdraw()
+* change: reparam_curvep_job() -> reparam.rcurvep_out_nested() -> reparam()
+* change: extract_curvep_data(summary = TRUE) -> summary.rcurvep_out() -> summary()
+* change: identify_basenoise_threshold() -> get_baseline_threshold()
+* change: generate_diagnostic_plot() -> plot.rcurvep_thres_stats() -> plot()
+
+
 
 # Todo
 * implement Curvep MASK parameter

@@ -1,0 +1,273 @@
+---
+title: "Investigate the minimum number of chemicals in biobide 80 "
+output: html_notebook
+author: "Jui-Hua Hsieh"
+---
+
+## Introduction
+
+
+## Goal
+
+By controling the two parameters (n of compounds) and (n of bootstrap samples), investigate the stability of threshold identification methods. (i.e., using raw, non fitted values or using fitted values from exponential fitting (starting values from SSasymp only ) 
+
+## Datset
+
+The stored bootstrap sample results (n = 1000) for the 88 compounds
+
+## Steps
+
+1. permutate samples 10, 100, 1000
+2. permute number of compounds, 5, 10, 15, 20, 25, 30, up to 80
+3. for each combination (boostrap sample x number of compounds), run 1000 times
+4. calculate the metrics 
+  a) mean, se of the threshold based on raw values or exponential fit)
+  b) fraction of thresholds that need to be checked
+  c) fraction of bad exponential fit
+
+
+## load R packages
+
+```{r, message=FALSE, warning=FALSE}
+library(here)
+library(Rcurvep)
+library(tibble)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(purrr)
+library(ggplot2)
+```
+
+
+## prepare the dataset
+
+```{r}
+zfishdev_boot <- readRDS(here("data-raw", "big_dataset", "biobide_percent_boot_1000_nonoise_newformat.rds"))
+bootd <- zfishdev_boot %>% filter(endpoint == "119") ## percent_affected_96"
+
+acts <- bootd
+```
+
+# Active (50) / inactive (38) distribution
+
+```{r}
+sum_act <- bootd %>% mutate(wAUC_prev = as.numeric(NA)) %>%
+  summarize_curvep_output(., col_names = c("POD"), modifier = "INVERSE")
+sum_act_hit <- sum_act %>% 
+  group_by(chemical, endpoint, direction) %>% 
+  summarize(hit_confidence = mean(hit_confidence))
+
+actived <- sum_act_hit %>% filter(hit_confidence > 0.5)
+inactived <- sum_act_hit %>% filter(hit_confidence <= 0.5)
+
+p1 <- ggplot(sum_act_hit, aes(x = hit_confidence)) + geom_histogram()
+p1
+```
+
+In total, regardless of the curvep threshold used, there are  `r nrow(actived)` active compounds out of `r nrow(sum_act_hit)` compounds. The inactive compound names are: `r inactived %>% pull(chemical)`.
+
+
+## Function to subset the stored data based on number of chemicals and number of bootstrap samples
+
+```{r}
+subset_boot_data <- function(dd, n_chemical, n_sample) {
+  sel_sample_ids <- seq(1:1000)
+  if (n_sample != 1000) sel_sample_ids <- sample(1:1000, n_sample)
+  
+  
+  chem_names <- dd %>% pull(chemical) %>% unique()
+  sel_chem_names <- sample(chem_names, n_chemical)
+
+  dd_p <- dd %>% 
+    filter(chemical %in% sel_chem_names) %>% 
+    filter(repeat_id %in% sel_sample_ids)
+  acts <- dd_p %>% #extract_curvep_data(dd_p, "act") %>% 
+    mutate(POD = ifelse(is.na(POD), conc_highest, POD)) 
+  
+  result <- acts %>% identify_basenoise_threshold(., plot = FALSE)
+  
+  return(list(thres_d = result[[1]], thres_o = result[[2]], sel_chem = sel_chem_names, sel_sample = sel_sample_ids))
+  
+}
+```
+
+## save results
+
+```{r}
+save_subset_result <- function(n_chemical, n_sample, times, original_data, dir) {
+  result <- map(1:times, function(z) {
+    result <- subset_boot_data(dd = original_data, n_chemical = n_chemical, n_sample = n_sample)
+    })
+  saveRDS(result, file.path(dir, paste0(n_chemical, "-", n_sample, "-", times, ".rds")))
+}
+```
+
+## update the stored result (for v0.5.2)
+
+```{r}
+update_perm_rds <- function(filn, indir, outdir) {
+   d_l <- readRDS(file.path(indir, filn))
+   d_l_c <- d_l
+   map(1:length(d_l), function(y) {
+     new_comment <- d_l[[y]][[1]] %>% 
+       nest(-endpoint, -direction) %>% 
+       mutate(knee_out = purrr::map(data, function(x) cal_knee_point(x, "threshold", "pooled_variance")[[2]])) %>% 
+       select(-data) %>% 
+       unnest()
+     d_l_c[[y]][[2]] <- new_comment
+    }
+   )
+   saveRDS(d_l_c, file.path(outdir, paste0(filn, ".rds")))
+}
+```
+
+## load the stored results 
+
+
+```{r}
+read_perm_rds <- function(filn, dir) {
+  print(filn)
+  pars <- str_replace(filn, ".rds", "") %>% 
+    str_split(., "-") %>% unlist() %>% as.numeric() %>% 
+    set_names(c("n_chemical", "n_perm", "n_times"))
+  
+  result <- readRDS(file.path(dir, filn)) %>%
+    map_df(., ~ .x[[2]], .id = "perm_id") %>%
+    mutate(
+      n_chemical = pars[["n_chemical"]],
+      n_perm = pars[['n_perm']]
+    )
+  return(result)
+}
+```
+
+
+## calculate the metrics
+
+```{r}
+
+calculate_metrics <- function(dd) {
+  permd_sum1 <- dd %>%
+    group_by(n_chemical, n_perm, endpoint, direction) %>%
+    summarise(
+      fraction_check = sum(thresComment == "check")/n(),
+      fraction_badfit = sum(cor_exp_fit < 0.95 | is.na(cor_exp_fit))/n(),
+      fraction_caution = sum(thresComment == "cautionary")/n()
+    ) 
+  permd_sum2 <- dd %>%
+    filter(thresComment != "check") %>%
+    group_by(n_chemical, n_perm, endpoint, direction) %>%
+    summarize(
+       mean_thresDist_raw = mean(thresDist_raw, na.rm = TRUE),
+      se_thresDist_raw = sd(thresDist_raw, na.rm = TRUE)/sqrt(n()),
+      mean_thresDist_exp = mean(thresDist_exp, na.rm = TRUE),
+      se_thresDist_exp = sd(thresDist_exp, na.rm = TRUE)/sqrt(n())
+    )
+  
+  permd_sum <- inner_join(permd_sum1, permd_sum2)
+  
+  return(permd_sum)
+}
+
+
+```
+
+## Run the analysis
+
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
+set.seed(19800925)
+paras <- expand.grid(seq(5, 80, by = 5), c(10, 100,1000)) %>% set_names(c("n_chemical", "n_sample"))
+
+system.time(pmap(paras, save_subset_result, times = 1000, dir = here("data-raw", "big_dataset", "perm_percent80"), original_data = acts))
+
+
+```
+
+
+## update perm rds files
+
+```{r}
+permd2 <- list.files(here("data-raw", "big_dataset", "perm_percent80", "v0.5.1"), pattern = "rds")
+map_df(permd2, function(x) {update_perm_rds(filn = x, indir = here("data-raw", "big_dataset", "perm_percent80", "v0.5.1"), outdir = here("data-raw", "big_dataset", "perm_percent80"))})
+
+```
+
+## Calculate the metrics
+
+```{r}
+permd <- list.files(here("data-raw", "big_dataset", "perm_percent80"), pattern = "rds")
+permd <- map_df(permd, function(x) {read_perm_rds(filn = x, dir = here("data-raw", "big_dataset", "perm_percent80"))})
+```
+
+```{r}
+permd_sum <- calculate_metrics(permd) %>% mutate(ver = "SSasymp")
+permd_sum <- permd_sum %>% group_by(ver, add = TRUE)
+```
+
+
+### fraction of check vs n_chemical
+
+```{r}
+p1 <- ggplot(permd_sum, aes(x = n_chemical, y = fraction_check, color = as.factor(n_perm)))
+p1 <- p1 + geom_point() + 
+  geom_line() + facet_grid(ver ~ ., scales = "free")
+p1
+```
+
+### fraction of bad exponential fit vs n_chemical
+
+```{r}
+p2 <- ggplot(permd_sum, aes(x = n_chemical, y = fraction_caution, color = as.factor(n_perm)))
+p2 <- p2 + geom_point() + 
+  geom_line()  +  facet_grid(ver ~ ., scales = "free")
+p2
+```
+
+## collect mean and se of the thresholds
+
+```{r}
+permd_sum_thres <- permd_sum %>%
+  select(mean_thresDist_raw, mean_thresDist_exp) %>%
+  gather(thres_type, mean_thres, mean_thresDist_raw, mean_thresDist_exp) %>%
+  mutate(
+    thres_type = str_replace(thres_type, "mean_", "")
+  ) %>%
+  inner_join(
+    permd_sum %>%
+      select(se_thresDist_raw, se_thresDist_exp) %>%
+      gather(thres_type, se_thres, se_thresDist_raw, se_thresDist_exp) %>%
+      mutate(
+        thres_type = str_replace(thres_type, "se_", "")
+      )
+  )
+```
+
+```{r}
+
+p3 <- ggplot(permd_sum_thres, aes(x = n_chemical, y = mean_thres, color = as.factor(n_perm)))
+p3 <- p3 + geom_point() + 
+  geom_line() +
+  facet_grid(thres_type ~ ver, scales = "free") + 
+  geom_hline(yintercept = 25) + 
+  scale_y_continuous(breaks = seq(18, 36, by = 2)) + 
+  scale_x_continuous(breaks = seq(5, 80, by = 5)) +
+  geom_errorbar(aes(ymin = mean_thres - se_thres, ymax = mean_thres + se_thres), width = 0.2) 
+p3
+```
+
+## check the fraction of badfit and fraction of check when using bootstrap = 100 
+
+```{r}
+permd_sum %>%
+  filter(n_perm == 100 & n_chemical <= 40) %>%
+  arrange(fraction_check)
+```
+
+```{r}
+permd_sum %>%
+  filter(n_perm == 100 & n_chemical <= 40) %>%
+  arrange(fraction_badfit)
+```
+
+## Summary

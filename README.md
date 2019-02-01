@@ -1,16 +1,12 @@
-[![Travis-CI Build Status](https://travis-ci.org/moggces/Rcurvep.svg?branch=master)](https://travis-ci.org/moggces/Rcurvep)
-
 
 Overview
 --------
 
-Rcurvep: an R package for concentration response modeling using Curvep.
+The package provides an R interface for processing concentration response data using Curvep, a response noise filtering algorithm.
 
-The packages provides an R interface for processing concentration response data using Curvep, a response noise filtering algorithm.
+With a predefined baseline noise threshold (or a minimum response threshold) in an experiment, the program can calculate activity (with confidence interval) based on original or simulated concentration response data.
 
-With a predefined baseline noise threshold (or minimum response threshold) in an experiment, it allows to calculate activity (with confidence interval) based on original or simulated concentration response data.
-
-If the baseline noise threshold is unknown, the above process can be repeated using a reasonable number of threshold candidates. The optimal threshold is identified as the the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized, under the condition that there are enough response variations induced by chemicals in the dataset.
+If the baseline noise threshold is unknown, the above process can be repeated using a reasonable number of threshold candidates. The optimal threshold is identified as the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized, under the condiction that there are enough response variations induced by chemicals in the dataset.
 
 Currently simulated data can be generated from one of the three types of dataset:
 
@@ -36,6 +32,13 @@ Usage
     ## $`1`
 
 ![](README_figs/README-unnamed-chunk-2-1.png)
+
+    ## 
+    ## Threshold is: 25 ( OK ) for the endpoint: percent_affected_96 at: increasing direction
+    ## Threshold is: 55 ( check ) for the endpoint: percent_mortality_96 at: increasing direction
+
+    ## Threshold is: 25 ( OK ) for the endpoint: percent_affected_96 at: increasing direction
+    ## Threshold is: 55 ( check ) for the endpoint: percent_mortality_96 at: increasing direction
 
 More Usage
 ----------

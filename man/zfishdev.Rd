@@ -4,7 +4,7 @@
 \name{zfishdev}
 \alias{zfishdev}
 \title{Zebrafish development endpoint data}
-\format{a tibble with variables
+\format{a tbl with columns:
 \itemize{
 \item endpoint: toxicity endpoints
 \item chemical: chemical information

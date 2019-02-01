@@ -121,3 +121,25 @@
   }
   return(other_paras)
 }
+
+.check_plot_firstin <- function(x) {
+  if (inherits(x, "rcurvep_thres_stats"))
+  {
+    df <- x[["stats"]]
+
+  } else {
+    df <- x
+
+  }
+}
+
+.check_plot_paras <- function(...) {
+  dots <- list(...)
+
+  endpoint <- ifelse(!is.null(dots$endpoint), dots$endpoint, "endpoint")
+  direction <- ifelse(!is.null(dots$direction), dots$direction, "direction")
+  threshold <- ifelse(!is.null(dots$threshold), dots$threshold, "threshold")
+  n_endpoint_page <- ifelse(!is.null(dots$n_endpoint_page), dots$n_endpoint_page, 4)
+
+  return(list(df = df, endpoint = endpoint, direction = direction, threshold = threshold, n_endpoint_page = n_endpoint_page))
+}

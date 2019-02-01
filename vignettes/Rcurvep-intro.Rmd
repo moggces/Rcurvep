@@ -4,16 +4,16 @@ author: "Jui-Hua Hsieh"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Practical Examples of Using Rcurvep}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ## Introduction
 
-Curvep has been extensively used in analyzing concentration-response data (e.g., Tox21 quantitative high throughput screening data). Unlike common concentration-response modeling approaches by fitting data into parametric models such as Hill or logisitic, Curvep is a non-parametric, response noise filtering algorithm based on user-defined thresholds such as the baseline noise threshold and the maximum curve deviation. 
+Curvep has been extensively used in analyzing concentration-response data (e.g., Tox21 quantitative high throughput screening data). Unlike common concentration-response modeling approaches by fitting data into parametric models such as Hill or logistic, Curvep is a non-parametric, response noise filtering algorithm based on user-defined thresholds such as the baseline noise threshold and the maximum curve deviation. 
 
-Among thresholds, it is known that the baseline noise threshold (or minimum response threshold) has direct and significant impact on defining activity of testing substances. In high throughput screening, one common method to set the minimum response threshold is using responses in the vehicle control wells. However, in some cases, the minimum response threshold derived from the *vehicle control* responses may not reflect the minimum response requirement for the *testing substances* or it is unclear how to derive a threshold based on *vehicle control* responses distribution (e.g., 3 or 2 standard deviation).
+Among thresholds, it is known that the baseline noise threshold (or minimum response threshold) has significant impact on defining activity of testing substances. In high throughput screening, one common method to set the noise threshold is to use responses in the vehicle control wells. However, in some cases, the noise threshold derived from the *vehicle control* responses may not reflect the noise in the assay for the *testing substances* or it is unclear how to derive a threshold based on *vehicle control* responses distribution (e.g., 3 or 2 standard deviation).
 
 The examples in this document start with cases that the baseline noise threshold is pre-defined and explore cases that baseline noise threshold is unknown.
 
@@ -54,15 +54,15 @@ Zebrafish behavior dataset is a dataset with high number of replicates per conce
 
 # a pre-defined threshold for increasing response
 threshold_up <- 15
-outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = NULL, threshold = threshold_up, other_paras = list(CARR = 20, TrustHi = TRUE))
+outd <- run_curvep_batch(zfishbeh, directionality = 1, n_sample = NULL, threshold = threshold_up, other_paras = list(CARR = 20, TrustHi = TRUE))
 
 # a pred-defined threshold for decreasing response
 threshold_down <- 30
-outd <- run_curvep_job(zfishbeh, directionality = -1, n_sample = NULL, threshold = threshold_down, other_paras = list(CARR = 20, TrustHi = TRUE))
+outd <- run_curvep_batch(zfishbeh, directionality = -1, n_sample = NULL, threshold = threshold_down, other_paras = list(CARR = 20, TrustHi = TRUE))
 
 # or combined
 threshold_l <- list("1" = threshold_up, "-1" = threshold_down)
-outd <- run_curvep_job(zfishbeh, directionality = 0, n_sample = NULL, threshold = threshold_l, other_paras = list(CARR = 20, TrustHi = TRUE))
+outd <- run_curvep_batch(zfishbeh, directionality = 0, n_sample = NULL, threshold = threshold_l, other_paras = list(CARR = 20, TrustHi = TRUE))
 
 
 ```
@@ -72,7 +72,7 @@ The `n_sample = NULL` allows to run the calculation based on the original data. 
 ```{r run_resp_boot}
 
 n_sample_test <- 2
-outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE))
+outd <- run_curvep_batch(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE))
 
 ```
 
@@ -81,7 +81,7 @@ Sometimes we would like to see how parameters change can affect the results on t
 ```{r}
 
 CARR_cutoff <- 50
-outd <- reparam_curvep_job(outd, other_paras = list(CARR = CARR_cutoff, TrustHi = TRUE))
+outd <- reparam(outd, other_paras = list(CARR = CARR_cutoff, TrustHi = TRUE))
 
 ```
 
@@ -93,15 +93,16 @@ When baseline noise threshold is unknown, one method is to search possible candi
 ```{r run_resp_boot_bmr, warning = FALSE, message = FALSE}
 
 threshold_range <- seq(5, 10, by = 5) # usually seq(5, 95, by = 5)
-n_sample_test <- 2 # usually for 1000
-acts <- run_curvep_job(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = threshold_range, other_paras = list(CARR = 20, TrustHi = TRUE), simplify_output = TRUE)
+n_sample_test <- 2 # 100 is suggested
+acts <- run_curvep_batch(zfishbeh, directionality = 1, n_sample = n_sample_test, threshold = threshold_range, other_paras = list(CARR = 20, TrustHi = TRUE), simplify_output = TRUE)
 
 ```
 
+Setting `simplify_output = TRUE` can greatly reduce the amount of output, particularly useful when trying to the optimal threshold.
 
 ## Output
 
-The output from `run_curvep_job()` contains nested information regarding input, output, and activity. It is easier to use `extract_curvep_data()` to unnest the information. 
+The output from `run_curvep_batch()` contains nested information regarding input, output, and activity. It is easier to use `withdraw()` to unnest the information. 
 
 ### Activity summary
 
@@ -109,21 +110,24 @@ Activity data are generated based on `data(zfishbeh)`.
 
 ```{r cal, cache = TRUE}
 
-outd <- run_curvep_job(zfishbeh, directionality = 1, n_sample = 100, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE))
+outd <- run_curvep_batch(zfishbeh, directionality = 1, n_sample = 100, threshold = 15, other_paras = list(CARR = 20, TrustHi = TRUE))
 ```
 
-#### 95% confidence interval and active confidence score
+#### Get 95% confidence interval of potency and activity confidence score
 
 ```{r summary_data, message = FALSE, warning = FALSE, dependson = "cal"}
 
-# extract summarized activity
+# withdraw summarized activity and processed concentration responses
 # 95% confidence interval of BMC and hit confidence are calculated
-act_sum <- extract_curvep_data(outd, "summary")
+act_sum <- withdraw(outd, "summary")
 
-# can also extract summarized activity but making any "INVERSE" monotonic curves as inactive
-#act_sum <- extract_curvep_data(outd, "summary", modifier = "INVERSE")
+# the summary can be based on modified activities using the flag from Curvep 
+# Often, "INVERSE" monotonic curves are considered as inactive
+act_sum <- withdraw(outd, "summary", modifier = "INVERSE")
 
-act_sum %>% select(-threshold, -concs, -resps, -resps_in)
+# or focus only on summarized activies
+#act_sum <- withdraw(outd, "act", modifier = "INVERSE") %>% summary(.)
+
 
 ```
 
@@ -144,55 +148,65 @@ p + facet_wrap(~ endpoint)
 
 ## BMR identication
 
-The complete Zebrafish development dataset was processed (up direction), using 1000 simulated curves, threshold from 5% to 95% with 5% increment. 
+The complete Zebrafish development dataset was processed (up direction), using 100 simulated curves, threshold from 5% to 95% with 5% increment. 
 
 ```{r bmr_notrun, eval = FALSE}
-zfishdev_complete # a complete zfishdev dataset; available upon request 
+data(zfishdev_all)
 
 # calculation (not run)
 # simplify_out = TRUE to reduce the amount of output
-acts <- run_curvep_job(zfishdev_complete, 
-                       directionality = 1, n_sample = 1000, 
+set.seed(300)
+zfishdev_act <- run_curvep_batch(zfishdev_all, 
+                       directionality = 1, n_sample = 100, 
                        threshold = seq(5, 95, by = 5), 
                        other_paras = list(CARR = 20, TrustHi = TRUE),
                        simplify_output = TRUE)
 ```
 
-Activity results are put into the function `identify_basenoise_threshold()`. The function uses various methods to identify the *elbow* in the curve of threshold (x-axis) vs pooled_variance (y-axis). The *elbow* is the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized. 
+Activity results can be put into the function `get_baseline_threshold()`. The function intends to identify the *knee* in the exponential-like curve of threshold (x-axis) vs pooled_variance (y-axis). The *knee* is the lowest threshold where variance of potency estimation is sufficiently reduced and even stabilized. 
 
 ```{r bmr, warning = FALSE, message = FALSE}
 
 data("zfishdev_act")
 
-acts <- zfishdev_act %>% 
-  mutate(POD = ifelse(is.na(POD), conc_highest, POD))
-
-outthres <- identify_basenoise_threshold(acts,  plot = FALSE)
-
+outthres <- get_baseline_threshold(zfishdev_act,  plot = FALSE)
+outthres
 ```
 
-We could plot the diagnostic plots by applying the `plot = TRUE`. 
-
+It is important to inspect the plots that were used to derive the threshold.
 
 ```{r plot_thres, fig.align = "center", fig.width = 6}
 
-outthres <- identify_basenoise_threshold(acts,  plot = TRUE)
-# or use generate_diagnostic_plot(outthres) directly
-
-# you can also calculate the threshold based on your own data
-# cal_exponential_inflection(filter(outthres, endpoint == "percent_affected_96"), xvar = "threshold", yvar = "pooled_variance")
+outthres <- plot(outthres,  plot = TRUE)
+# or use get_baseline_threshold(acts,  plot = TRUE)
 
 ```
 
-In the plot of threshold vs pooled variance, the ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
+In the plot of threshold vs pooled variance, the more ideal curve should look like *percent_affected_96*. At threshold = 25%, the pooled_variance is stabilized. However, for the endpoint, *percent_mortality_96*, there are not enough response variations in the dataset (i.e., almost all chemicals are **clear inactive**), therefore, we cannot derive the baseline noise threshold for this endpoint in this dataset. 
 
-The identified baseline noise thresholds using either the raw pooled variance data or results from the exponential fitting (*thresDist_raw* and *thresDist_exp* columns). The comment for threshold based on the results from the exponential fitting and linear fitting can be found in the *thresComment*, *cor_exp_fit*, and *cor_lm_fit* columns.
+Currently two methods are provided to get the thresholds:
+  1. max distance based on original/raw pooled variance (black)
+  2. max distance based on pooled variance from the exponential fit model (red)
 
-```{r opti_thres}
+The second method is less stable than the first one. However, sometimes the local max may be reported instead of the more accurate one after checking the plots. 
 
-outthres[['outcome']]
+Once the threshold is set, the analysis can be re-run using more replicates. 
 
+## Final analysis on this dataset
+
+```{r, eval = FALSE}
+
+dd <- zfishdev_all %>% filter(endpoint == "percent_affected_96")
+outd <- run_curvep_batch(dd, 
+                       directionality = 1, n_sample = 1000, 
+                       threshold = 25, 
+                       other_paras = list(CARR = 20, TrustHi = TRUE))
+outd_sum <- withdraw(outd, "summary", modifier = "INVERSE")
+
+# find the active chemicals
+outd_sum %>% filter(hit_confidence > 0.5) %>% pull(chemical)
 ```
+
 
 ## Prerequisites
 

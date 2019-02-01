@@ -1,33 +1,38 @@
-#' Identify baseline noise threshold through activity data from simulated curves
+#' Get baseline noise threshold through activity data calculated from simulated curves
 #'
-#' Provided an activity dataset after `run_curvep_job()` and `extract_curvep_data()`,
+#' Given an activity dataset after `run_curvep_batch()` and `withdraw()`,
 #' the function calculates the pooled variance of potency information (i.e., POD parameter) across chemicals
-#' and approaches are used to derive the lowest threshold that variance of POD is sufficiently reduced and even stabilized.
+#' derives the baseline noise threshold, which is the lowest threshold that variance of POD is sufficiently reduced and stabilized.
 #'
-#' @param df a tibble
-#' @param endpoint a string that represents the column name of endpoint in `df`
-#' @param chemical a string that represents the column name of chemical in `df`
-#' @param threshold a string that represents the column name of threshold in `df`
-#' @param direction a string that represents the column name of direction in `df`
-#' @param potency a string that represents the column name of potency in `df`
-#' @param plot default = TRUE, diagnostic plot
+#' @param df a tbl
+#' @param endpoint a chr that represents the column name of endpoint in `df`
+#' @param chemical a chr that represents the column name of chemical in `df`
+#' @param threshold a chr that represents the column name of threshold in `df`
+#' @param direction a chr that represents the column name of direction in `df`
+#' @param potency a chr that represents the column name of potency in `df`
+#' @param plot default = TRUE, for diagnostic plots
 #' @param n_endpoint_page number of endpoints to be plotted per page
 #'
-##' @return a list with two tibbles
+#' @return an object of class 'rcurvep_thres_stats' with two named tbls:
 #'
 #' \describe{
 #'   \item{stats}{
-#'   y_exp_fit, y_lm_fit: the fitted y values (exponential or linear)
-#'   dist2l_exp, dist2l_raw: the calculated distance-to-line value based on fitted y values (exponential) or raw y values
-#'   curvature: the calculated curvature value using smooth.spline fit results
-#'   p1_raw, p2_raw: the index of points for the line using the raw y values
+#'      \itemize{
+#'        \item y_exp_fit, y_lm_fit: the y value from the fitting results (exponential or linear)
+#'        \item dist2l_exp, dist2l_raw: the calculated distance-to-line value
+#'        based on the y from exponential fit or original y
+#'        \item curvature: the calculated curvature value using smooth.spline fit results
+#'        \item p1_raw, p2_raw: the index of points for the line using the original y values
+#'      }
 #'   }
 #'   \item{outcome}{
-#'   thresDist_raw: the identified threshold based on distance approach using the raw y values
-#'   thresDist_exp: the identified threshold based on distance approach using the y values from the fitted exponential curve
-#'   thresComment: the flag to suggest whether to use the thresDist (OK, cautionary, check)
-#'   p1_raw, p2_raw: the index of points for the line using the raw y values
-#'   cor_exp_fit, cor_lm_fit: the Pearson's correlation between the fitted y values (exponential or linear) and the raw y values
+#'     \itemize{
+#'        \item thresDist_raw: the identified threshold based on distance approach using the original y values
+#'        \item thresDist_exp: the identified threshold based on distance approach using the y values from the exponential fitting results
+#'        \item thresComment: the flag to suggest whether to use the thresDist (OK, cautionary, check)
+#'        \item p1_raw, p2_raw: the index of points for the line using the original y values
+#'        \item cor_exp_fit, cor_lm_fit: the Pearson's correlation between the y values from fitting (exponential or linear) and the original y values
+#'     }
 #'   }
 #' }
 #'
@@ -38,12 +43,15 @@
 #'
 #' @examples
 #' data("zfishdev_act")
-#' acts <- zfishdev_act %>% mutate(POD = ifelse(is.na(POD), conc_highest, POD))
-#' outthres <- identify_basenoise_threshold(acts)
+#' outthres <- get_baseline_threshold(zfishdev_act)
 #'
-identify_basenoise_threshold <- function(
+get_baseline_threshold <- function(
   df, endpoint = "endpoint", chemical = "chemical",
   threshold = "threshold", direction = "direction", potency = "POD", plot = TRUE, n_endpoint_page = 4) {
+
+  if (!inherits(df, "rcurvep_out")) {
+    warning("df is not a class of rcurvep_out")
+  }
 
   endpoint <- rlang::sym(endpoint)
   direction <- rlang::sym(direction)
@@ -75,17 +83,22 @@ identify_basenoise_threshold <- function(
     dplyr::select(-knee_out) %>%
     tidyr::unnest()
 
+  result <- list(stats = select_thres_stats, outcome = select_thres_outcome)
+  class(result) <- c("rcurvep_thres_stats", class(result))
+
   #generate diagonistic plot
    if (plot == TRUE)
    {
-     pl <- generate_diagnostic_plot(
-       select_thres_stats,
+     pl <- plot.rcurvep_thres_stats(
+       result,
        endpoint = endpoint, direction = direction,  threshold = threshold, n_endpoint_page = n_endpoint_page
        )
      print(pl)
    }
 
-  return(list(stats = select_thres_stats, outcome = select_thres_outcome))
+  print.rcurvep_thres_stats(result)
+
+  return(result)
 }
 
 cal_pooled_variances_per_endpoint_direction <- function(df, endpoint, chemical, threshold, direction, potency) {
@@ -96,7 +109,14 @@ cal_pooled_variances_per_endpoint_direction <- function(df, endpoint, chemical, 
   threshold <- rlang::sym(threshold)
   potency <- rlang::sym(potency)
 
-  if (sum(is.na(df[[as.character(potency)]])) > 0) stop("NA is not allowed in the potency column")
+  if (sum(is.na(df[[as.character(potency)]])) > 0) {
+    if ( "conc_highest" %in% colnames(df)  ) {
+      df <- df %>% dplyr::mutate(!!potency := ifelse(is.na(!!potency), conc_highest, !!potency))
+      warning("Potency of inactive compounds is set to the highest tested concentration")
+    } else {
+      stop("NA is not allowed in the potency column")
+    }
+  }
 
   #calculate the pooled variance for each endpoint at a threshold
   result <- df %>%
@@ -112,33 +132,19 @@ cal_pooled_variances_per_endpoint_direction <- function(df, endpoint, chemical, 
 }
 
 
-#' Calculate the knee point on the exponential curve using various approaches
+#' Calculate the knee point on the exponential-like curve using various approaches
 #'
+#' Two approaches are available: original value-based and exponential fit value-based.
+#' Currently original value-based approach appears to be more consistent.
 #'
+#' @param df a tbl
+#' @param xvar A chr column name in the `df` to be the x-axis in the exponential-like curve
+#' @param yvar A chr column name in the `df` to be the y-axis in the exponential-like curve
+#' @param p1_raw default = NULL, or an int to manually set the first threshold index for the original value-based approach
+#' @param p2_raw default = NULL, or an int to manually set the last threshold index for the original value-based approach
 #'
-#' @param df a tibble
-#' @param xvar a character column name in the `df` to be the x-axis in the exponential curve
-#' @param yvar a character column name in the `df` to be the y-axis in the exponential curve
-#' @param p1_raw default = NULL, or a number to manually set the first threshold index for the distance approach using the raw y values
-#' @param p2_raw default = NULL, or a number to manually set last threshold index for the distance approach the raw y values
+#' @return same as \code{\link{get_baseline_threshold}}
 #'
-#' @return a list with two tibbles
-#'
-#' \describe{
-#'   \item{stats}{
-#'   y_exp_fit, y_lm_fit: the fitted y values (exponential or linear)
-#'   dist2l_exp, dist2l_raw: the calculated distance-to-line value based on fitted y values (exponential) or raw y values
-#'   curvature: the calculated curvature value using smooth.spline fit results
-#'   p1_raw, p2_raw: the index of points for the line using the raw y values
-#'   }
-#'   \item{outcome}{
-#'   thresDist_raw: the identified threshold based on distance approach using the raw y values
-#'   thresDist_exp: the identified threshold based on distance approach using the y values from the fitted exponential curve
-#'   thresComment: the flag to suggest whether to use the thresDist (OK, cautionary, check)
-#'   p1_raw, p2_raw: the index of points for the line using the raw y values
-#'   cor_exp_fit, cor_lm_fit: the Pearson's correlation between the fitted y values (exponential or linear) and the raw y values
-#'   }
-#' }
 #'
 #' @importFrom magrittr "%>%"
 #' @importFrom rlang .data
@@ -147,14 +153,13 @@ cal_pooled_variances_per_endpoint_direction <- function(df, endpoint, chemical, 
 #'
 #' @examples
 #' data("zfishdev_act")
-#' acts <- zfishdev_act %>% mutate(POD = ifelse(is.na(POD), conc_highest, POD))
-#' outthres <- identify_basenoise_threshold(acts)[["stats"]]
+#' outthres <- get_baseline_threshold(zfishdev_act)[["stats"]]
 #'
 #' outthres2 <- outthres %>%
-#' nest(-endpoint, -direction) %>%
-#' mutate(
-#' knee_out = purrr::map(data, function(x) cal_knee_point(x, "threshold", "pooled_variance"))
-#' )
+#'   nest(-endpoint, -direction) %>%
+#'   mutate(
+#'    knee_out = purrr::map(data, function(x) cal_knee_point(x, "threshold", "pooled_variance"))
+#'   )
 #'
 
 cal_knee_point <- function(df, xvar, yvar, p1_raw = NULL, p2_raw = NULL) {
@@ -208,17 +213,24 @@ cal_knee_point <- function(df, xvar, yvar, p1_raw = NULL, p2_raw = NULL) {
   return(list(stats = result1, outcome = result2))
 }
 
+#' @export
+print.rcurvep_thres_stats <- function(thres_out) {
+  outcome <- thres_out$outcome
+  purrr::map(1:nrow(outcome), function(x) {
+    dd <- outcome[x, ]
+    ifelse(dd$direction == 1, "increasing", "decreasing")
+    cat("Threshold is:", dd$thresDist_raw, "(", dd$thresComment, ")",
+        "for the endpoint:", dd$endpoint, "at:",
+        ifelse(dd$direction == 1, "increasing", "decreasing"), "direction\n")
+  })
+  invisible(thres_out)
+}
 
 
-
-
-#' Generate diagnostic plots for inspecting the quality of the identified baseline noise threshold
+#' Plots for inspecting the quality of the derived baseline noise thresholds
 #'
-#' @param df a tibble from the identify_basenoise_threshold() or a tibble with two required columns: pooled_variance and dist2l
-#' @param endpoint a string that represents the column name of endpoint in `df`
-#' @param threshold a string that represents the column name of threshold in `df`
-#' @param direction a string that represents the column name of direction in `df`
-#' @param n_endpoint_page number of endpoints to be plotted per page
+#' @param x the output from `get_baseline_threshold()` or a tbl similar to the stats output from `get_baseline_threshold()`
+#' @param ... \code{\link{get_baseline_threshold}} for available parameters
 #'
 #' @return a ggplot object
 #'
@@ -226,12 +238,17 @@ cal_knee_point <- function(df, xvar, yvar, p1_raw = NULL, p2_raw = NULL) {
 #'
 #' @examples
 #' data("zfishdev_act")
-#' acts <- zfishdev_act %>% mutate(POD = ifelse(is.na(POD), conc_highest, POD))
-#' outthres <- identify_basenoise_threshold(acts, plot = FALSE)
-#' generate_diagnostic_plot(outthres[['stats']])
+#' outthres <- get_baseline_threshold(zfishdev_act, plot = FALSE)
+#' plot(outthres)
 #'
-generate_diagnostic_plot <- function(
-  df, endpoint = "endpoint", direction = "direction", threshold = "threshold", n_endpoint_page = 4 ) {
+plot.rcurvep_thres_stats <- function(x, ...) {
+
+  df <- .check_plot_firstin(x)
+  dots_out <- .check_plot_paras(...)
+  endpoint <- dots_out$endpoint
+  direction <- dots_out$direction
+  threshold <- dots_out$threshold
+  n_endpoint_page <- dots_out$n_endpoint_page
 
   endpoint <- rlang::sym(endpoint)
   direction <- rlang::sym(direction)
