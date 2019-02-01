@@ -1,13 +1,11 @@
 Package: Rcurvep
 Type: Package
 Title: Concentration Response Modeling Using Curvep  
-Version: 0.5.2
-Authors@R: as.person(c(
-    "Jui-Hua Hsieh <juihua.hsieh@gmail.com> [aut, cre]", 
-    "Alexander Sedykh <sunirks@gmail.com > [aut]"
-  ))
-Maintainer: The package maintainer <juihua.hsieh@gmail.com>
-Description: The packages provides an R interface for processing concentration response data using Curvep, a response noise filtering algorithm and functions for deriving a optimal response noise threshold in an experiment.
+Version: 0.6.0
+Authors@R: c(
+  person("Jui-Hua", "Hsieh", email = "juihua.hsieh@gmail.com", role = c("aut", "cre")),
+  person("Alexander", "Sedykh", email = "sunirks@gmail.com", role = c("aut")))
+Description: The package provides an R interface for processing concentration response data using Curvep, a response noise filtering algorithm and functions for deriving an optimal response noise threshold in an experiment.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -16,6 +14,8 @@ Imports: dplyr (>= 0.7),
     boot,
     tidyr,
     purrr,
+    rlang,
+    stringr,
     ggplot2
 Suggests: testthat,
     knitr,

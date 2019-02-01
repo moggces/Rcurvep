@@ -60,40 +60,45 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 }
 
 
-#' A wrap function to run Curvep based on types of dataset
+#' Run curvep in batch mode based on the type of dataset
 #'
 #' Given a type of dataset and parameters,
 #' the function generates input for `curvep()`,
 #' performs calculations, and generates output.
 #'
+#' \code{\link{zfishdev}} for dichotomous binary incidence data and \code{\link{zfishbeh}} for continuous data
+#'
 #' @param dats datasets such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}
-#' @param directionality an int value (1, 0, -1) to represent the presumed direction of responses for processing; 1 = up, -1 = down, 0 = both
-#' @param n_sample NULL (using orignal data) or an int to indicate the number of curves to generate
-#' @param threshold a numeric value for the presumed noise threshold or a numeric vector for threshold finding or a named (-1, 1) list with numeric vectors
-#' @param other_paras a list of other Curvep parameters to pass on
-#' @param vehicle_data NULL or a numeric vector of responses in vehicle control wells
-#' @param simplify_output (default = FALSE, warning! large output), if set TRUE (extract_curvep_data(out, "act") is performed)
-#' @return
+#' @param directionality an int (1, 0, -1) to represent the presumed direction of responses for processing; 1 = up, -1 = down, 0 = both
+#' @param n_sample NULL (using original data) or an int to indicate the number of curves to simulate
+#' @param threshold a dbl for the presumed noise threshold or a dbl vector for threshold finding or a named (-1, 1) list with dbl vectors
+#' @param other_paras a list of other curvep parameters to pass on
+#' @param vehicle_data NULL or a dbl vector of responses in vehicle control wells
+#' @param simplify_output default = FALSE, if set TRUE (withdraw(out, "act") is performed)
+#' @return if simplify_output = FALSE, an object of class 'rcurvep_out_nested' (also a tbl)
+#' if simplify_output = TRUE, an object of class 'rcurvep_out' (also a tbl)
+#'
 #' \itemize{
-#'   \item input: a tibble, including the information of concs, resps, and parameters
+#'   \item input: a tbl, including the information of concs, resps, and parameters
 #'   \item output: a list, all results from `curvep()`
-#'   \item activity: a tibble, extracted activity information from output
+#'   \item activity: a tbl, activity information from output
 #'   \item endpoint: input endpoint information
 #'   \item chemical: input chemical information
 #'   \item direction: direction used in the calculation
 #'   \item threshold: threshold used in the calculation
-#'   \item repeat_id: repeat id, NA for the calculation using orignal responses instead of simulated samples
+#'   \item repeat_id: repeat id, NA for the calculation using original responses instead of the simulated responses
 #' }
-#' @seealso \code{\link{curvep}} for available Curvep parameters
+#' @seealso \code{\link{curvep}} for available curvep parameters
+#' @seealso \code{\link{withdraw.rcurvep_out_nested}} if simplify_output = TRUE
 #' @export
 #' @importFrom magrittr "%>%"
 #' @importFrom rlang .data
 #' @examples
 #'
-#' # a percentage type dataset
+#' # a binary incidence dataset
 #' data(zfishdev)
 #' x <- zfishdev %>% split(.$endpoint)
-#' outd <- run_curvep_job(x[[1]],
+#' outd <- run_curvep_batch(x[[1]],
 #'                       directionality = 1,
 #'                       n_sample = 1,
 #'                       threshold = 15,
@@ -101,7 +106,7 @@ select_type_simulation <- function(dats, directionality, n_sample, vehicle_data)
 #' # more examples are availabie
 #' vignette("Rcurvep-intro")
 #'
-run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, threshold, other_paras = list(), vehicle_data = NULL, simplify_output = FALSE)
+run_curvep_batch <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, threshold, other_paras = list(), vehicle_data = NULL, simplify_output = FALSE)
 {
   #arguments check
   dats <- .check_dats(dats)
@@ -184,7 +189,7 @@ run_curvep_job <- function(dats, directionality = c(1, 0, -1), n_sample = NULL, 
   #simplify the output (especially for BMR finding)
   if (simplify_output) {
     class(dats_out) <- c("rcurvep_out_nested", class(dats_out))
-    dats_out <- extract_curvep_data(dats_out, "act")
+    dats_out <- withdraw.rcurvep_out_nested(dats_out, "act")
   } else {
     class(dats_out) <- c("rcurvep_out_nested", class(dats_out))
   }

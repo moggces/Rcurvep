@@ -9,38 +9,44 @@ recreate_curvep_input <- function(input, threshold, direction, paras) {
 
 }
 
+#' @export
+#' @rdname reparam.rcurvep_out_nested
+reparam <- function(dats_out, directionality = NULL, threshold = NULL, other_paras = list(), simplify_output = FALSE) {
+  UseMethod("reparam")
+}
 
 
-#' Re-paramaterization based on output data frame from run_curvep_job()
+
+#' Re-paramaterization curvep based on output data from `run_curvep_batch()`
 #'
-#' Given the complex output structure from run_curvep_job(simplify_output = FALSE),
+#' Given the output from `run_curvep_batch(simplify_output = FALSE)`,
 #' the function re-parameterize input for `curvep()`,
 #' performs calculations, and generates output.
 #'
-#' @param dats_out complex output structure from run_curvep_job(simplify_output = FALSE)
+#' @param dats_out the output from run_curvep_batch(simplify_output = FALSE)
 #' @param directionality NULL for not changing the directionality, only 1 or -1 is allowed
-#' @param threshold NULL for not changing the threshold, only one positive numeric threshold is allowed
-#' @param other_paras a list of other Curvep parameters to pass on
-#' @param simplify_output (default = FALSE) warning! large output, set TRUE (extract_curvep_data(out, "act") is performed) for threshold finding calculations
+#' @param threshold NULL for not changing the threshold, only one positive dbl threshold is allowed
+#' @param other_paras a list of other curvep parameters to pass on
+#' @param simplify_output default = FALSE, if set TRUE (withdraw(out, "act") is performed)
 #'
-#' @return see \code{\link{run_curvep_job}}
+#' @return see \code{\link{run_curvep_batch}}
 #' @export
 #' @importFrom magrittr "%>%"
 #' @importFrom rlang .data
 #'
 #' @examples
 #' data(zfishdev)
-#' outd <- run_curvep_job(zfishdev,
+#' outd <- run_curvep_batch(zfishdev,
 #'                       directionality = 1,
 #'                       n_sample = 1,
 #'                       threshold = 15,
 #'                       other_paras = list(CARR = 20, TrustHi = TRUE))
-#' outd2 <- reparam_curvep_job(outd, threshold = 25)
+#' outd2 <- reparam(outd, threshold = 25)
 #' # more examples are availabie
 #' vignette("Rcurvep-intro")
 #'
 #'
-reparam_curvep_job <- function(dats_out, directionality = NULL, threshold = NULL, other_paras = list(), simplify_output = FALSE) {
+reparam.rcurvep_out_nested <- function(dats_out, directionality = NULL, threshold = NULL, other_paras = list(), simplify_output = FALSE) {
 
   #arguments check
   dats_out <- .check_dats_reparam(dats_out)
@@ -84,8 +90,12 @@ reparam_curvep_job <- function(dats_out, directionality = NULL, threshold = NULL
 
   #simplify the output (especially for BMR finding)
   if (simplify_output) {
-    dats_out <- extract_curvep_data(dats_out, "act")
+    class(dats_out) <- c("rcurvep_out_nested", class(dats_out))
+    dats_out <- withdraw.rcurvep_out_nested(dats_out, "act")
+  } else {
+    class(dats_out) <- c("rcurvep_out_nested", class(dats_out))
   }
+
 
   return(dats_out)
 }

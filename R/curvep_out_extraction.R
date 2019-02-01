@@ -100,13 +100,19 @@ calculate_median_resps <- function(in_concs, in_resps, out_resps) {
   return(result)
 }
 
-#' Unnest Curvep input, output, or activity lists.
+#' @export
+#' @rdname withdraw.rcurvep_out_nested
+withdraw <- function(c_out, type, modifier = NULL) {
+  UseMethod("withdraw")
+}
+
+#' Withdraw curvep input, output, or activity data
 #'
-#' The function unnest the input, output, or activity lists after `run_curvep_job()`.
+#' The function unnests the input, output, or activity lists after `run_curvep_batch()`.
 #'
-#' @param c_out A tibble after `run_curvep_job()`.
+#' @param c_out a tbl after `run_curvep_batch()`.
 #'
-#' @param type A string to indicate which data to extract. Currently seven types are implemented:
+#' @param type a chr to indicate which data to withdraw
 #' \itemize{
 #'   \item act: all the activity related metrics such as potency and efficacy
 #'   \item concs_in: a vector of input concentrations
@@ -117,50 +123,43 @@ calculate_median_resps <- function(in_concs, in_resps, out_resps) {
 #'   \item summary: 1) the hit confidence, 2) the median (med),
 #'   95\% confidence interval (ciu, cil) of POD, EC50, Emax, and wAUC, 3) median of resps (input/output)
 #' }
-#' @param modifier A string to match the Curvep Comments column to batch modifiy the activity,
+#' @param modifier a chr to match the curvep Comments column to batch-modify the activity,
 #' including hit, potency related values, and adjusted responses (active -> inactive)
 #'
-#' @return Depending the specified type, a tibble with various columns is returned.
+#' @return Depending the specified type, a tbl with respective columns is returned.
 #'
 #' @export
 #' @importFrom magrittr "%>%"
 #' @examples
 #' data(zfishdev)
 #' x <- zfishdev %>% split(.$endpoint)
-#' outd <- run_curvep_job(x[[1]],
+#' outd <- run_curvep_batch(x[[1]],
 #'                       directionality = 1,
 #'                       n_sample = 1,
 #'                       threshold = 15,
 #'                       other_paras = list(CARR = 20, TrustHi = TRUE))
 #' # activities
-#' extract_curvep_data(outd, "act")
+#' withdraw(outd, "act")
 #'
 #' # parameters
-#' extract_curvep_data(outd, "paras")
+#' withdraw(outd, "paras")
 #'
 #' # summary
-#' extract_curvep_data(outd, "summary")
+#' withdraw(outd, "summary")
 #'
 #' # make comments that contain "INVERSE" string as inactive
-#'
-#' extract_curvep_data(outd, "act", "INVERSE")
-#'
-#' @seealso \code{\link{curvep}} for available Curvep parameters
+#' withdraw(outd, "act", "INVERSE")
 #'
 #'
+#'
+withdraw.rcurvep_out_nested <- function(c_out, type, modifier = NULL){
 
-extract_curvep_data <- function(c_out, type, modifier = NULL){
-
-  # test the class
-  if (!is(c_out, "rcurvep_out_nested")) {
-    warning("input is not the nested data frame from the run_curvep_job()")
-  }
 
   base_ids <- c("threshold", "endpoint", "chemical", "direction")
 
   if (type == "act")
   {
-    hl <- extract_curvep_data(c_out, "concs_hl")
+    hl <- withdraw.rcurvep_out_nested(c_out, "concs_hl")
     result <- c_out %>%
       dplyr::select(dplyr::one_of(base_ids, "repeat_id", "activity")) %>%
       tidyr::unnest() %>%
@@ -222,57 +221,53 @@ extract_curvep_data <- function(c_out, type, modifier = NULL){
 
   } else if (type == "summary")
   {
-    act <- extract_curvep_data(c_out, "act")
-    in_concs <- extract_curvep_data(c_out, "concs_in")
-    in_resps <- extract_curvep_data(c_out, "resps_in")
-    out_resps  <- extract_curvep_data(c_out, "resps_out")
+    act <- withdraw.rcurvep_out_nested(c_out, "act")
+    in_concs <- withdraw.rcurvep_out_nested(c_out, "concs_in")
+    in_resps <- withdraw.rcurvep_out_nested(c_out, "resps_in")
+    out_resps  <- withdraw.rcurvep_out_nested(c_out, "resps_out")
     sum_input <- list(act, in_concs, in_resps, out_resps) %>%
       purrr::reduce(dplyr::inner_join, by = c(base_ids, "repeat_id"))
 
-    result <- summarize_curvep_output(sum_input, col_names = c("POD", "EC50", "Emax", "wAUC", "wAUC_prev"), modifier = modifier, conf_level = 0.95)
+    result <- summary.rcurvep_out(sum_input, col_names = c("POD", "EC50", "Emax", "wAUC", "wAUC_prev"), modifier = modifier, conf_level = 0.95)
   }
 
   # append the class information
   if (type != "summary") {
     class(result) <- c("rcurvep_out", class(result))
   }
+
   return(result)
 }
 
-#' Summarize the activity output after Curvep based on bootstrap samples.
+#' Summarize the activity output after curvep based on simulated samples.
 #'
-#' The summarized values include hit_confidence, confidence interval for the activity values,
-#' and median responses per concentration.
+#' The summarized values include hit_confidence, confidence interval of the activity values,
+#' and the median response per concentration.
 #'
-#' @param a_out a tibble from the extract_curvep_data(type != "summary") or run_curvep_job(simplify_output = TRUE)
-#' @param col_names default values include POD, EC50, Emax, wAUC, wAUC_prev
-#' @param modifier A string to match the Curvep Comments column to batch modifiy the activity,
+#' @param a_out a tbl from the `withdraw()`(type != "summary") or `run_curvep_batch(simplify_output = TRUE)`
+#' @param col_names default activity values include POD, EC50, Emax, wAUC, wAUC_prev
+#' @param modifier a chr to match the curvep comments column to batch-modify the activity,
 #' including hit, potency related values, and adjusted responses (active -> inactive)
 #' @param conf_level default value = 0.95 (95\%)
 #'
-#' @return a tibble with summary data: 1) the hit confidence, 2) the median (med),
-#'   95\% confidence interval (ciu, cil) of activity values, 3) median of responses of concentrations (input/output)
-#' 3) is only calculated when input tables have resps, concs, and resps_in columns
+#' @return a tbl with summary data: 1) the hit confidence, 2) the median (med),
+#'   95\% confidence interval (ciu, cil) of activity values, 3) the median response per concentration (input/output)
+#' 3) is only calculated when the input tbl have resps, concs, and resps_in columns
 #' @export
 #'
 #' @examples
 #' data(zfishdev)
 #' x <- zfishdev %>% split(.$endpoint)
-#' acts <- run_curvep_job(x[[1]],
+#' acts <- run_curvep_batch(x[[1]],
 #'                       directionality = 1,
 #'                       n_sample = 10,
 #'                       threshold = 15,
 #'                       other_paras = list(CARR = 20, TrustHi = TRUE), simplify_output = TRUE)
 #' # activities
-#' acts_sum <- summarize_curvep_output(acts, conf_level = 0.9)
+#' acts_sum <- summary(acts, conf_level = 0.9)
 #'
-summarize_curvep_output <- function(a_out, col_names = c("POD", "EC50", "Emax", "wAUC", "wAUC_prev"), modifier = NULL, conf_level = 0.95) {
+summary.rcurvep_out <- function(a_out, col_names = c("POD", "EC50", "Emax", "wAUC", "wAUC_prev"), modifier = NULL, conf_level = 0.95) {
 
-
-  # test the class
-  if (!is(a_out, "rcurvep_out")) {
-    warning("input is not the activity file from extract_curvep_data() ")
-  }
 
   base_ids <- c("threshold", "endpoint", "chemical", "direction")
 

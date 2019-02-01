@@ -2,7 +2,7 @@
 #'
 #' Data are processed from Biobide development plate incidence data
 #'
-#' @format a tibble with variables
+#' @format a tbl with columns:
 #' \itemize{
 #' \item endpoint: toxicity endpoints
 #' \item chemical: chemical information
@@ -19,7 +19,7 @@
 #'
 #' Data are processed from Biobide behavior plate data
 #'
-#' @format a tibble with variables
+#' @format a tbl with columns:
 #' \itemize{
 #' \item endpoint: toxicity endpoints
 #' \item chemical: chemical information
@@ -34,7 +34,7 @@
 
 #' Zebrafish development endpoint activity results
 #'
-#' zfishdev_complete data are processed through `run_curvep_job()` and `extract_curvep_data()`
+#' zfishdev_act data are processed through `run_curvep_batch()` and `withdraw()`
 #'
 
 "zfishdev_act"

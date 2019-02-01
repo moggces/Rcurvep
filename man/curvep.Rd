@@ -51,7 +51,7 @@ a list with corrected concentration-response measurements and several calculated
 }
 }
 \description{
-A function to process a given pair of concentration response data, the background function for `run_curvep_job()`.
+A function to process a given pair of concentration response data, the background function for `run_curvep_batch()`.
 }
 \section{primary parameters}{
 
@@ -65,5 +65,5 @@ A function to process a given pair of concentration response data, the backgroun
 curvep(Conc = c(-8, -7, -6, -5, -4) , Resp = c(0, -3, -5, -15, -30))
 }
 \seealso{
-\code{\link{run_curvep_job}}
+\code{\link{run_curvep_batch}}
 }

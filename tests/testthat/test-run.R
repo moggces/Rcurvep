@@ -5,7 +5,7 @@ test_that("percent data with n_sample = NULL", {
   data("zfishdev")
   x <- zfishdev %>%
     split(.$endpoint)
-  outd <- run_curvep_job(x[[1]],
+  outd <- run_curvep_batch(x[[1]],
                          directionality = 1,
                          n_sample = NULL,
                          threshold = 15,
@@ -18,7 +18,7 @@ test_that("resp data with n_sample = NULL", {
   data("zfishbeh")
   x <- zfishbeh %>%
     split(.$endpoint)
-  outd <- run_curvep_job(x[[1]],
+  outd <- run_curvep_batch(x[[1]],
                          directionality = 1,
                          n_sample = NULL,
                          threshold = 15,
@@ -31,7 +31,7 @@ test_that("resp data original with multiple thresholds", {
   data("zfishbeh")
   x <- zfishbeh %>%
     split(.$endpoint)
-  outd <- run_curvep_job(x[[1]],
+  outd <- run_curvep_batch(x[[1]],
                          directionality = 0,
                          n_sample = NULL,
                          threshold = list("1" = c(15,20), "-1" = c(30)),
@@ -47,7 +47,7 @@ test_that("percent boot dataset job run", {
   data("zfishdev")
   x <- zfishdev %>%
     split(.$endpoint)
-  outd <- run_curvep_job(x[[1]],
+  outd <- run_curvep_batch(x[[1]],
                          directionality = 1,
                          n_sample = 2,
                          threshold = seq(5, 10, by = 5),
@@ -63,7 +63,7 @@ test_that("resp boot dataset job run", {
   data("zfishbeh")
   x <- zfishbeh %>%
     split(.$endpoint)
-  outd <- run_curvep_job(x[[1]],
+  outd <- run_curvep_batch(x[[1]],
                          directionality = 1,
                          n_sample = 2,
                          threshold = seq(5, 10, by = 5),
@@ -79,7 +79,7 @@ test_that("resp boot error dataset job run", {
   data("zfishbeh")
   x <- zfishbeh %>%
     split(.$endpoint)
-  outd <- run_curvep_job(x[[1]],
+  outd <- run_curvep_batch(x[[1]],
                          directionality = 1,
                          n_sample = 2,
                          threshold = seq(5, 10, by = 5),

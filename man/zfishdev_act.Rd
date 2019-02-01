@@ -4,11 +4,11 @@
 \name{zfishdev_act}
 \alias{zfishdev_act}
 \title{Zebrafish development endpoint activity results}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1216000 rows and 20 columns.}
+\format{An object of class \code{rcurvep_out} (inherits from \code{tbl_df}, \code{tbl}, \code{data.frame}) with 121600 rows and 20 columns.}
 \usage{
 zfishdev_act
 }
 \description{
-zfishdev_complete data are processed through `run_curvep_job()` and `extract_curvep_data()`
+zfishdev_act data are processed through `run_curvep_batch()` and `withdraw()`
 }
 \keyword{datasets}
