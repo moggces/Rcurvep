@@ -1,0 +1,57 @@
+---
+title: "rename the column"
+output: html_notebook
+---
+
+```{r, warning=FALSE, message=FALSE}
+library(here)
+library(tidyverse)
+```
+
+## generate zfishdev
+
+
+```{r}
+zfishdev <- readRDS(here("data-raw", "zfishdev.rds"))
+
+zfishdev <- zfishdev %>%
+  filter(stringr::str_detect(well__substance, 'Caffeine|Saccharin|Dieldrin')) %>%
+  mutate(directionality = as.integer(directionality), n_in = as.integer(n_in), N = as.integer(N)) %>%
+  rename(endpoint = id, chemical = well__substance) %>%
+  rename(conc = concs) %>%
+  select(-directionality)
+
+usethis::use_data(zfishdev, overwrite =  TRUE)
+```
+
+## generate zfishbeh
+
+```{r}
+## the zfish behavior data
+zfishbeh <- readRDS(here("data-raw", "zfishbeh.rds"))
+
+zfishbeh <-  zfishbeh %>%
+  filter(stringr::str_detect(well__substance, 'Caffeine|Saccharin|Dieldrin')) %>%
+  mutate(directionality = as.integer(directionality)) %>%
+  rename(endpoint = id, chemical = well__substance) %>%
+  rename(conc = concs, resp = resps) %>%
+  select(-directionality)
+
+
+usethis::use_data(zfishbeh, overwrite =  TRUE)
+```
+
+## generate zfishdev_all
+
+```{r}
+zfishdev <- readRDS(here("data-raw", "zfishdev.rds"))
+zfishdev_all <- zfishdev %>%
+  mutate(directionality = as.integer(directionality), n_in = as.integer(n_in), N = as.integer(N)) %>%
+  rename(endpoint = id, chemical = well__substance) %>%
+  select(-directionality) %>%
+  filter(stringr::str_detect(endpoint, "96")) %>%
+  rename(conc = concs)
+usethis::use_data(zfishdev_all, overwrite =  TRUE)
+```
+
+
