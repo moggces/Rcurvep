@@ -8,7 +8,7 @@ test_that("check parameter names", {
   config <- .check_config_name(config = defaults, RNGE = 1000000)
   expect_equal(defaults$MXDV, config$MXDV)
 
-  # add through commane
+  # add through command
   config <- .check_config_name(config = defaults, MXDV = 10)
   expect_equal(config$MXDV, 10)
 
@@ -26,6 +26,17 @@ test_that("check parameter names", {
   config <- .check_config_name(config = defaults, RNGE = 100, RNGE = 100000)
   expect_equal(config$RNGE, 100)
 
+})
+
+test_that("check mask value", {
+
+  dats <- zfishbeh %>%
+    dplyr::group_by(endpoint, chemical, conc) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup() %>%
+    split(.$endpoint)
+
+  expect_error(.check_mask_input(c(1, 6), dats[[1]]))
 })
 
 
@@ -54,8 +65,14 @@ test_that("check input basic dataset", {
   expect_equal(.check_dat_base(dats[[1]]), dats[[1]])
 
   # many endpoints
-  expect_warning(.check_dat_base(bind_rows(dats[1:2])))
+  expect_warning(.check_dat_base(dplyr::bind_rows(dats[1:2])))
 
+})
+
+test_that("input two types of dataset", {
+  expect_type(.check_dat(tibble::tibble(endpoint = 1, chemical = 1, resp = 1, conc = 1, mask = 1)), "list")
+  expect_error(.check_dat(tibble::tibble(endpoint = 1, chemical = 1, resp = 1, mask = 1)))
+  expect_type(.check_dat(tibble::tibble(endpoint = 1, chemical = 1, n_in = 1, N = 1, conc = 1, mask = 1)), "list")
 })
 
 # test_that("threshold is not numeric", {

@@ -1,7 +1,3 @@
-call_curvep <- function(concs, resps, masks = NULL, paras = curvep_defaults()) {
-  result <- do.call(curvep, c(list(concs), list(resps), list(masks), paras))
-  return(result)
-}
 
 
 create_curvep_input <- function(d, threshold, paras) {

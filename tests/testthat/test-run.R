@@ -1,5 +1,6 @@
-context("running job")
+context("basic curvep running")
 
+# make some datasets
 data("zfishbeh")
 dats <- zfishbeh %>%
   dplyr::group_by(endpoint, chemical, conc) %>%
@@ -20,8 +21,33 @@ test_that("run one resp per conc many endpoints", {
 })
 
 test_that("with parameter change", {
-
+  outp <- run_rcurvep(dats[[1]], TRSH = 30)
+  expect_equal(outp$config$TRSH, 30)
 })
+
+test_that("with mask", {
+  outp <- run_rcurvep(dats[[1]], mask = c(1, 2))
+  expect_equal(sum(tail(outp$result[1,]$input[[1]]$mask, n = 2)), 2)
+})
+
+test_that("reparam by using input column from output", {
+  outp <- run_rcurvep(dats[[1]])
+  inp <- outp$result %>%
+    dplyr::select(endpoint, chemical, input) %>%
+    tidyr::unnest()
+  outp2 <- run_rcurvep(inp, TRSH = 30)
+  expect_equal(outp2$config$TRSH, 30)
+})
+
+test_that("reparam by using input column from output and new mask", {
+  outp <- run_rcurvep(dats[[1]])
+  inp <- outp$result %>%
+    dplyr::select(endpoint, chemical, input) %>%
+    tidyr::unnest()
+  outp2 <- run_rcurvep(inp, mask = c(1, 2))
+  expect_equal(sum(tail(outp2$result[1,]$input[[1]]$mask, n = 2)), 2)
+})
+
 
 # test_that("percent data with n_sample = NULL", {
 #   data("zfishdev")
