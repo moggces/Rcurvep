@@ -33,7 +33,7 @@ boot_percent_resps <- function(d1, d2, direction = 1,  times = 100) {
   bd <- boot::boot(vec, samplemean, R = times)
   if (direction == -1)
   {
-    return((bd$t) - 100)
+    return((bd$t) - 100) # does not look right...
   } else
   {
     return((bd$t))

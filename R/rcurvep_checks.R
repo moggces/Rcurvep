@@ -1,8 +1,18 @@
 .check_dat_base  <- function(dat)
 {
-  cols <- colnames(dat)
+  cols_ori <- colnames(dat)
   cols_stand <- c("endpoint", "chemical", "conc", "resp")
 
+  # remove extra columns
+  cols_inter <- intersect(cols_ori, c(cols_stand, 'mask'))
+  dat <- dat[, cols_inter]
+  cols_removed <- setdiff(cols_ori, cols_inter)
+  if (length(cols_removed) != 0) {
+    rlang::warn(stringr::str_glue("{cols_removed} are removed in the input for run_rcurvep()"))
+  }
+  cols <- colnames(dat)
+
+  # check columns
   if (!(all(rlang::has_name(dat, c(cols_stand, "mask"))) && length(cols) == 5))
   {
     if (!(all(rlang::has_name(dat, c(cols_stand))) && length(cols) == 4)) {
@@ -108,4 +118,36 @@
     }
   }
   return(dat)
+}
+
+.check_directionality <- function(directionality)
+{
+  if (length(directionality) != 1 | sum(directionality %in% c(1, -1)) != 1)
+  {
+    rlang::abort("only 1, -1 is allowed")
+  } else
+  {
+    return(directionality)
+  }
+}
+
+.check_n_samples <- function(n_samples)
+{
+  if (!is.null(n_samples))
+  {
+    if (rlang::is_integer(as.integer(n_samples)) == FALSE || n_samples < 0)
+    {
+      rlang::abort("n_samples is not a valid number or is not NULL")
+    }
+  }
+  return(n_samples)
+}
+
+.check_vdata <- function(vdata, dataset_type) {
+  if (!all(!is.na(as.numeric(vdata)))) {
+    rlang::abort("vdata is not NULL or all numeric")
+  } else if (!is.null(vdata) && dataset_type == "dichotomous") {
+    rlang::abort("currently numeric vdata is not supported for dichotomous dataset")
+  }
+  return(vdata)
 }

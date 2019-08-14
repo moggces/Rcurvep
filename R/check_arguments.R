@@ -1,32 +1,6 @@
 
 
-.check_directionality <- function(directionality)
-{
-  if (length(directionality) != 1 | sum(directionality %in% c(1, -1)) != 1)
-  {
-    rlang::abort("only 1, -1 is allowed")
-  } else
-  {
-    return(directionality)
-  }
-}
 
-
-
-
-
-.check_n_sample <- function(n_sample)
-{
-  if (!is.null(n_sample))
-  {
-    if (rlang::is_integer(rlang::as_integer(n_sample)) == FALSE)
-    {
-      rlang::abort("n_sample is not a valid number or is not NULL")
-    }
-  }
-  return(n_sample)
-
-}
 
 
 
