@@ -31,10 +31,16 @@ create_dataset <- function(d, n_samples = NULL, vdata = NULL) {
   n_samples <- .check_n_samples(n_samples)
   vdata <- .check_vdata(vdata, dat_type)
 
+  result <- create_resps(d, dataset_type = dat_type, n_samples = n_samples, vdata = vdata)
+
+  return(result)
+}
+
+create_resps <- function(d, dataset_type, n_samples, vdata) {
   if (is.null(n_samples)) {
-    result <- summarize_resps(d, dataset_type = dat_type)
+    result <- summarize_resps(d, dataset_type = dataset_type)
   } else {
-    result <- simulate_resps(d, dataset_type = dat_type, n_samples = n_samples, vdata = vdata)
+    result <- simulate_resps(d, dataset_type = dataset_type, n_samples = n_samples, vdata = vdata)
   }
   return(result)
 }
@@ -216,7 +222,9 @@ simulate_resps <- function(d, dataset_type, n_samples, vdata = NULL) {
     if (is.null(vdata)) {
       result <- d %>%
         dplyr::mutate(
-          resp = purrr::map(data, ~ sample(unlist(.x$resp), size = n_samples, replace = TRUE))
+          resp = purrr::map(
+            data, function(x, n_samples) sample(unlist(x$resp), size = n_samples, replace = TRUE), n_samples = n_samples
+            )
         )
     } else {
 
@@ -224,15 +232,17 @@ simulate_resps <- function(d, dataset_type, n_samples, vdata = NULL) {
       errors <- create_n_errors(vdata, n = n_samples)
       result <- d %>%
         dplyr::mutate(
-          resp = purrr::map(data, ~ rep(unlist(.x$resp), n_samples)),
-          resp = purrr::map(.data$resp, ~ .x + errors)
+          resp = purrr::map(data, function(x, n_samples) rep(unlist(x$resp), n_samples), n_samples = n_samples),
+          resp = purrr::map(.data$resp, function(x, errors) x + errors, errors = errors)
         )
     }
   } else if (dataset_type == "dichotomous") {
 
     result <- d %>%
       dplyr::mutate(
-        resp = purrr::map(data, ~ cal_percent_resps(.x$n_in, .x$N, times = n_samples))
+        resp = purrr::map(
+          data, function(x, n_samples) cal_percent_resps(x$n_in, x$N, times = n_samples), n_samples = n_samples
+          )
       )
   }
 

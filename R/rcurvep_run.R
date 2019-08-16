@@ -51,7 +51,7 @@ curvep_defaults <- function() {
 
 
 
-#' Run rcurvep for a dataset
+#' Run rcurvep on a dataset
 #'
 #'
 #' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh})
@@ -83,11 +83,7 @@ run_rcurvep <- function(d, mask = NULL, config = curvep_defaults(), ...) {
   config <- .check_config_value(config)
 
   # generate mask column
-  if (!rlang::has_name(d, "mask") | !is.null(mask))
-  {
-    d$mask <- NULL
-    d <- create_mask(d, mask)
-  }
+  d <- create_mask(d, mask)
 
   # prepare the list of data
   d <- d %>%
@@ -97,10 +93,10 @@ run_rcurvep <- function(d, mask = NULL, config = curvep_defaults(), ...) {
   # generate output and activity column
   result <- d %>%
     dplyr::mutate(
-      output = purrr::map(.data$input, ~ call_curvep(.x$conc, .x$resp, .x$mask, config)),
+      output = purrr::map(.data$input, function(x, config) call_curvep(x$conc, x$resp, x$mask, config), config = config),
       out_resp = purrr::map(.data$output, extract_curvep_outresp),
       in_summary = purrr::map(.data$input, extract_input_summary),
-      fingerprint = purrr::map(.data$output, extract_curvep_fingerprint),
+      fingerprint = purrr::map(.data$output, extract_curvep_fingerprint, config = config),
       activity = purrr::map(.data$output, extract_curvep_activity, config = config)
     ) %>%
     dplyr::select(-.data$output)
@@ -119,20 +115,24 @@ run_rcurvep <- function(d, mask = NULL, config = curvep_defaults(), ...) {
 #' @importFrom rlang .data
 #'
 #'
-create_mask <- function(d, mask = NULL) {
+create_mask <- function(d, mask) {
 
+  result <- d
   # if NULL use all 0 to avoid
   if (is.null(mask)) {
-    result <- d %>%
-      dplyr::mutate(
-        mask = 0
-      )
+    if (!rlang::has_name(d, "mask")) {
+      result <- d %>%
+        dplyr::mutate(
+          mask = 0
+        )
+    }
   } else {
+    if (rlang::has_name(d, "mask")) d$mask <- NULL
     result <- d %>%
       dplyr::arrange(.data$endpoint, .data$chemical, dplyr::desc(.data$conc)) %>%
       tidyr::nest(-.data$endpoint, -.data$chemical, .key = "data") %>%
       dplyr::mutate(
-        mask = purrr::map(data, ~ replace(rep(0, nrow(.x)), mask, 1))
+        mask = purrr::map(data, function(x, mask) replace(rep(0, nrow(x)), mask, 1), mask = mask)
       ) %>%
       tidyr::unnest()
   }
@@ -161,13 +161,17 @@ call_curvep <- function(concs, resps, masks = NULL, paras = curvep_defaults()) {
 #' extract_curvep_fingerprint
 #'
 #' @param x the list from curvep output
+#' @param config
 #' @keywords internal
 #' @return a tibble with three columns: xx, ECxx, Cxx
 
-extract_curvep_fingerprint <- function(x) {
+extract_curvep_fingerprint <- function(x, config) {
   outp <- x
   vals <- outp[names(outp) %in% c('xx', 'ECxx', 'Cxx')]
   result <- vals %>% tibble::as_tibble()
+
+  # make the dummy value as NA
+  result[result == config$DUMV] <- NA
   return(result)
 }
 
@@ -202,8 +206,8 @@ extract_input_summary <- function(x) {
     highest_conc = tail(x$conc, 1),
     max_resp = max(x$resp),
     min_resp = min(x$resp),
-    n_conc <- length(x$conc),
-    mean_conc_spacing <- mean(diff(x$conc))
+    n_conc = length(x$conc),
+    mean_conc_spacing = mean(diff(x$conc))
 
   )
   return(result)

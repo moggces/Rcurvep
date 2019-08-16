@@ -26,11 +26,6 @@
     rlang::abort("one concentration can have only one response")
   }
 
-  endpoints <- unique(dat$endpoint)
-  if (length(endpoints) > 1) {
-    rlang::warn("same curvep parameters are applied to many endpoints")
-  }
-
   return(dat)
 }
 
@@ -73,6 +68,14 @@
     rlang::abort("nonexistent curvep parameters are added")
   }
 
+  return(config)
+}
+
+.check_config_name2 <- function(config = curvep_defaults(),  ...) {
+  if (length(list(...)) == 0) {
+    rlang::abort("Input parameters are needed, for example, TRSH = 5")
+  }
+  config <- .check_config_name(config = curvep_defaults(),  ...)
   return(config)
 }
 
@@ -150,4 +153,12 @@
     rlang::abort("currently numeric vdata is not supported for dichotomous dataset")
   }
   return(vdata)
+}
+
+.check_keep_data <- function(keep_data) {
+  keep_data <- unique(keep_data)
+  if (length(keep_data) > 3 || !all(keep_data %in% c("act_set", "resp_set", "fingerprint"))) {
+    rlang::abort("Only a combination of act_set, resp_set, fingerprint is allowed")
+  }
+  return(keep_data)
 }

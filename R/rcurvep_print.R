@@ -3,9 +3,15 @@ print.curvep_config <- function(config, ...) {
 
   message("\n")
   message("curvep configuration parameters\n")
-  result <- purrr::map2(names(config), config, ~ stringr::str_glue(
-    "    {.x}:    {.y}"
-  ))
+
+  result <- purrr::map2(names(config), config, function(x, y) {
+    new_y <- y
+    if (length(y) != 1) new_y <- stringr::str_c(y, collapse = " ")
+    new_x <- format(stringr::str_c(x, ":"), width = 10, justify = "right")
+    stringr::str_glue(
+      "    {new_x}    [{new_y}]"
+    )
+  })
   result <- stringr::str_c(result, collapse = "\n")
   message(result)
   message("\n")

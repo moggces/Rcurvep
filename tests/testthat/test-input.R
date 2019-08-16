@@ -72,8 +72,6 @@ test_that("check input basic dataset", {
   d <- dats[[1]] %>% dplyr::mutate(sample_id = 0)
   expect_equal(.check_dat_base(d), dats[[1]])
 
-  # many endpoints
-  expect_warning(.check_dat_base(dplyr::bind_rows(dats[1:2])))
 
 })
 
@@ -87,6 +85,11 @@ test_that("vehicle control data",  {
   expect_type(.check_vdata(rnorm(10), "continuous"), "double")
   expect_error(.check_vdata(c(1, 10, 100, 50, NA), "continuous"))
   expect_error(.check_vdata(rnorm(10), "dichotomous"))
+})
+
+test_that("keep data argument", {
+  expect_error(.check_keep_data(c("act_set", "xx")))
+  expect_length(.check_keep_data(c("act_set", "act_set", "fingerprint")), 2)
 })
 
 # test_that("threshold is not numeric", {
