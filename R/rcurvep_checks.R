@@ -155,10 +155,20 @@
   return(vdata)
 }
 
-.check_keep_data <- function(keep_data) {
-  keep_data <- unique(keep_data)
-  if (length(keep_data) > 3 || !all(keep_data %in% c("act_set", "resp_set", "fingerprint"))) {
-    rlang::abort("Only a combination of act_set, resp_set, fingerprint is allowed")
+.check_keep_sets <- function(keep_sets) {
+  keep_sets <- unique(keep_sets)
+  if (length(keep_sets) > 3 || !all(keep_sets %in% c("act_set", "resp_set", "fp_set"))) {
+    rlang::abort("Only a combination of act_set, resp_set, fp_set is allowed")
   }
-  return(keep_data)
+  return(keep_sets)
+}
+
+.check_result_sets <- function(lsets) {
+  if (!rlang::is_list(lsets) || length(lsets) > 3 || !all(names(lsets) %in% c("act_set", "resp_set", "fp_set"))) {
+    rlang::abort("Only a list with names of act_set, resp_set, fp_set is allowed")
+  }
+  if (!"act_set" %in% names(lsets)) {
+    rlang::abort("At least act_set tibble is needed")
+  }
+  return(lsets)
 }

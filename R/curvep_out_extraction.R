@@ -76,13 +76,13 @@ add_confidence_interval <- function(m, col_names = c("POD", "EC50", "Emax", "wAU
   return(result)
 }
 
-add_hit_confidence <- function(m) {
-  result <- m %>%
-    dplyr::summarize(
-      hit_confidence = sum(hit)/n()
-    ) %>% dplyr::ungroup()
-  return(result)
-}
+# add_hit_confidence <- function(m) {
+#   result <- m %>%
+#     dplyr::summarize(
+#       hit_confidence = sum(hit)/n()
+#     ) %>% dplyr::ungroup()
+#   return(result)
+# }
 
 calculate_median_resps <- function(in_concs, in_resps, out_resps) {
 

@@ -87,9 +87,16 @@ test_that("vehicle control data",  {
   expect_error(.check_vdata(rnorm(10), "dichotomous"))
 })
 
-test_that("keep data argument", {
-  expect_error(.check_keep_data(c("act_set", "xx")))
-  expect_length(.check_keep_data(c("act_set", "act_set", "fingerprint")), 2)
+test_that("keep_sets argument", {
+  expect_error(.check_keep_sets(c("act_set", "xx")))
+  expect_length(.check_keep_sets(c("act_set", "act_set", "fp_set")), 2)
+})
+
+test_that("check_result_sets", {
+  expect_error(.check_result_sets(c("act_set")))
+  outp <- run_rcurvep(create_dataset(zfishbeh)) %>% merge_rcurvep_output()
+  expect_length(.check_result_sets(outp$result), 3)
+  expect_error(.check_result_sets(outp$result['fp_set']))
 })
 
 # test_that("threshold is not numeric", {
