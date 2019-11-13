@@ -4,7 +4,7 @@
 \name{zfishdev_act}
 \alias{zfishdev_act}
 \title{Zebrafish development endpoint activity results}
-\format{An object of class \code{rcurvep_out} (inherits from \code{tbl_df}, \code{tbl}, \code{data.frame}) with 121600 rows and 20 columns.}
+\format{An object of class \code{list} of length 2.}
 \usage{
 zfishdev_act
 }
