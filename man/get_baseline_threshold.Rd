@@ -4,9 +4,10 @@
 \alias{get_baseline_threshold}
 \title{Get baseline noise threshold through activity data calculated from simulated curves}
 \usage{
-get_baseline_threshold(df, endpoint = "endpoint", chemical = "chemical",
-  threshold = "threshold", direction = "direction", potency = "POD",
-  plot = TRUE, n_endpoint_page = 4)
+get_baseline_threshold(df, endpoint = "endpoint",
+  chemical = "chemical", threshold = "threshold",
+  direction = "direction", potency = "POD", plot = TRUE,
+  n_endpoint_page = 4)
 }
 \arguments{
 \item{df}{a tbl}
