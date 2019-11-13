@@ -1,15 +1,14 @@
 
 #' Run rcurvep on a base/simulated dataset with a combination of parameters
 #'
-#' A wrapper function combining \code{\link{create_dataset}}, \code{\link{run_rcurvep}},
-#' \code{\link{merge_rcurvep_output}}
+#' A wrapper function combining \code{\link{create_dataset}}, \code{\link{run_rcurvep}}
 #'
 #' @param d a dataset such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}
 #' @param n_samples NULL (default) or an int to indicate the number of resp per conc to simulate
 #' @param vdata NULL (default) or a dbl vector of responses in vehicle control wells; experimental feature
 #' @param mask 0 (default) for not using mask
 #' use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.
-#' @param keep_sets one or multiple of these: act_set, resp_set, fp_set
+#' @param keep_sets act_set + (resp_set or fp_set) or all three
 #'  \itemize{
 #'   \item act_set: activity data
 #'   \item resp_set: response data
@@ -24,8 +23,7 @@
 #'
 #' data(zfishbeh)
 #'
-#' # n_samples = 2, threshold = 5, 10, and mask highested test conc
-#' out <- combi_run_rcurvep(zfishbeh, n_samples = 2, TRSH = c(5, 10), mask = 1)
+#' out <- combi_run_rcurvep(zfishbeh, n_samples = 2, TRSH = c(5, 10), mask = 1, keep_sets = "act_set")
 #'
 #'
 #'
@@ -50,13 +48,18 @@ combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = 0,
   para_in <- create_para_input(paras, n_samples = n_samples, d = d1)
 
   # run rcurvp using parameters from input
-  result <- combi_run_curvep_in(d = d1, mask = mask, n_samples = n_samples, paras = para_in)
+  result <- combi_run_curvep_in(
+    d = d1, mask = mask, n_samples = n_samples,
+    keep_sets = keep_sets, paras = para_in)
 
-  # unnest the output (with merge_rcurvep_output())
+  # unnest the output
   flat_result <- purrr::map(keep_sets, flat_result_tbl, d = result) %>%
     rlang::set_names(keep_sets)
 
-  return(list(result = flat_result, config = new_config))
+  out_result <- list(result = flat_result, config = new_config)
+  class(out_result) <- c("rcurvep", class(out_result))
+
+  return(out_result)
 
 }
 
@@ -81,11 +84,11 @@ combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = 0,
 #' out <- run_rcurvep(d)
 #' res <- merge_rcurvep_output(out)
 #'
-merge_rcurvep_output <- function(rcurvep_obj, keep_sets = c("act_set", "resp_set", "fp_set")) {
+merge_rcurvep_output <- function(d, keep_sets) {
 
-  rcurvep_obj <- .check_class(rcurvep_obj, "rcurvep", "not a rcurvep object")
+  # need to check d
+  #rcurvep_obj <- .check_class(rcurvep_obj, "rcurvep", "not a rcurvep object")
   keep_sets <- .check_keep_sets(keep_sets)
-
 
   tbl_names <- list(
     act_set = c("in_summary", "activity"),
@@ -95,12 +98,14 @@ merge_rcurvep_output <- function(rcurvep_obj, keep_sets = c("act_set", "resp_set
 
   result <- purrr::map(
     keep_sets, function(x, tbl_names, obj)
-      obj[['result']][c("endpoint", "chemical", tbl_names[[x]])] %>% tidyr::unnest(),
+      #obj[['result']][c("endpoint", "chemical", tbl_names[[x]])] %>% tidyr::unnest(),
+      obj[c("endpoint", "chemical", tbl_names[[x]])] %>% tidyr::unnest(),
     tbl_names = tbl_names,
-    obj = rcurvep_obj
+    obj = d
   ) %>% rlang::set_names(keep_sets)
 
-  return(list(result = result, config = rcurvep_obj$config))
+  #return(list(result = result, config = d$config))
+  return(result)
 }
 
 #' create parameter input
@@ -138,16 +143,16 @@ create_para_input <- function(paras, n_samples, d) {
 #' @return an rcurvep object
 #' @keywords internal
 #'
-pmap_run_rcurvep <- function(d, mask, n_samples, ...) {
+pmap_run_rcurvep <- function(d, mask, n_samples, keep_sets, ...) {
 
   args <- list(...)
 
   if (is.null(n_samples)) {
-    result <- do.call(run_rcurvep, c(list(d = d, mask = mask), args))
+    result <- do.call(run_rcurvep, c(list(d = d, mask = mask, keep_sets = keep_sets), args))
   } else {
     args_f <- args
     args_f[c('data', 'sample_id')] <- NULL
-    result <- do.call(run_rcurvep, c(list(d = args$data, mask = mask), args_f))
+    result <- do.call(run_rcurvep, c(list(d = args$data, mask = mask, keep_sets = keep_sets), args_f))
   }
   return(result)
 }
@@ -162,11 +167,11 @@ pmap_run_rcurvep <- function(d, mask, n_samples, ...) {
 #' @return a tibble (paras) with a new rcurvep_obj column
 #' @keywords internal
 #'
-combi_run_curvep_in <- function(d, mask, n_samples, paras) {
+combi_run_curvep_in <- function(d, mask, n_samples, keep_sets, paras) {
   result <- paras %>%
     dplyr::mutate(
       rcurvep_obj = purrr::pmap(
-        ., ~ pmap_run_rcurvep(d = d, mask = mask, n_samples = n_samples, ...)
+        ., ~ pmap_run_rcurvep(d = d, mask = mask, n_samples = n_samples, keep_sets = keep_sets, ...)
       )
     )
   suppressWarnings(result <- result %>% dplyr::select(-tidyselect::one_of("data")))
@@ -185,7 +190,8 @@ combi_run_curvep_in <- function(d, mask, n_samples, paras) {
 flat_result_tbl <- function(d, keep_set) {
   result <- d %>%
     dplyr::mutate(
-      temp = purrr::map(.data$rcurvep_obj, ~ merge_rcurvep_output(.x, keep_set)$result[[1]])
+      #temp = purrr::map(.data$rcurvep_obj, ~ merge_rcurvep_output(.x, keep_set)$result[[1]])
+      temp = purrr::map(.data$rcurvep_obj, ~ .x[['result']][[keep_set]])
     ) %>%
     dplyr::select(-.data$rcurvep_obj) %>%
     tidyr::unnest()

@@ -2,14 +2,9 @@ context("dataset simulation or summary")
 
 # create initial dataset
 data("zfishbeh")
-dats1 <- zfishbeh %>%
-  dplyr::group_by(endpoint, chemical, conc) %>%
-  dplyr::ungroup()
-
 data("zfishdev")
-dats2 <- zfishdev %>%
-  dplyr::group_by(endpoint, chemical, conc) %>%
-  dplyr::ungroup()
+dats1 <- zfishbeh
+dats2 <- zfishdev
 
 test_that("summary, continuous",{
   d <- create_dataset(dats1)

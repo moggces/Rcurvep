@@ -1,3 +1,5 @@
+
+#' @export
 print.curvep_config <- function(config, ...) {
   config <- .check_class(config, "curvep_config", "not a curvep_config object")
 
@@ -17,18 +19,20 @@ print.curvep_config <- function(config, ...) {
   message("\n")
 }
 
+#' @export
 print.rcurvep <- function(x, ...) {
   x <- .check_class(x, "rcurvep", "not a rcurvep object")
 
-  n_end <- length(unique(x$result$endpoint))
-  n_chem <- length(unique(x$result$chemical))
+  n_end <- length(unique(x$result[[1]]$endpoint))
+  n_chem <- length(unique(x$result[[1]]$chemical))
   comp_names <- stringr::str_c(names(x), collapse = ", ")
-  res_col_names <- stringr::str_c(colnames(x$result), collapse = ", ")
+  result_set_names <- stringr::str_c(names(x$result), collapse = ", ")
+
 
   data_info <- stringr::str_glue(
-    "rcurvep output for a dataset with {n_end} endpoint(s) and {n_chem} chemical(s)
-    object components: {comp_names}
-    result has columns: {res_col_names}
+    "{n_end} endpoint(s) and {n_chem} chemical(s)
+    Components in the list: {comp_names}
+    Components in the result: {result_set_names}
     "
   )
 
