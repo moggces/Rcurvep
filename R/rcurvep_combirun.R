@@ -1,12 +1,20 @@
 
-#' Run rcurvep on a dataset with a combination of parameters
+#' Run rcurvep on a base/simulated dataset with a combination of parameters
 #'
-#' @param d datasets such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}
+#' A wrapper function combining \code{\link{create_dataset}}, \code{\link{run_rcurvep}},
+#' \code{\link{merge_rcurvep_output}}
+#'
+#' @param d a dataset such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}
 #' @param n_samples NULL (default) or an int to indicate the number of resp per conc to simulate
-#' @param vdata NULL (default) or a dbl vector of responses in vehicle control wells
-#' @param mask NULL to not use mask to mask resps (default = NULL);
+#' @param vdata NULL (default) or a dbl vector of responses in vehicle control wells; experimental feature
+#' @param mask 0 (default) for not using mask
 #' use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.
-#' @param keep_data allowed one or multiple values: act_set, resp_set, fp_set
+#' @param keep_sets one or multiple of these: act_set, resp_set, fp_set
+#'  \itemize{
+#'   \item act_set: activity data
+#'   \item resp_set: response data
+#'   \item fp_set: fingerprint data
+#' }
 #' @param ... a list of settings; are used to overwrite the default values in curvep_defaults()
 #'
 #' @return a list with two components: result (a named list, based on keep_data), config
@@ -14,8 +22,14 @@
 #'
 #' @examples
 #'
+#' data(zfishbeh)
 #'
-combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = NULL,
+#' # n_samples = 2, threshold = 5, 10, and mask highested test conc
+#' out <- combi_run_rcurvep(zfishbeh, n_samples = 2, TRSH = c(5, 10), mask = 1)
+#'
+#'
+#'
+combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = 0,
                               keep_sets = c("act_set", "resp_set", "fp_set"), ...) {
 
   paras <- list(...)
@@ -31,24 +45,16 @@ combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = NULL,
   new_config <- .check_config_name2(config = curvep_defaults(), ...)
   keep_sets <- .check_keep_sets(keep_sets)
 
-
   # create inputs
   d1 <- create_dataset(d, n_samples = n_samples, vdata = vdata)
   para_in <- create_para_input(paras, n_samples = n_samples, d = d1)
 
   # run rcurvp using parameters from input
-  result <- para_in %>%
-    dplyr::mutate(
-      rcurvep_obj = purrr::pmap(
-        ., ~ pmap_run_rcurvep(d = d1, mask = mask, n_samples = n_samples, ...)
-        )
-    )
-  suppressWarnings(result <- result %>% dplyr::select(-tidyselect::one_of("data")))
+  result <- combi_run_curvep_in(d = d1, mask = mask, n_samples = n_samples, paras = para_in)
 
-  # unnest the output
-  flat_result <- purrr::map(
-    keep_sets, function(x, result) flat_result_tbl(result, x), result = result
-    ) %>% rlang::set_names(keep_sets)
+  # unnest the output (with merge_rcurvep_output())
+  flat_result <- purrr::map(keep_sets, flat_result_tbl, d = result) %>%
+    rlang::set_names(keep_sets)
 
   return(list(result = flat_result, config = new_config))
 
@@ -58,15 +64,28 @@ combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = NULL,
 #' Merge columns from the result field of an rcurvep object
 #'
 #' @param rcurvep_obj an object with class:rcurvep
-#' @param keep_sets allowed one or multiple values: act_set, resp_set, fp_set
+#' @param keep_sets one or multiple of these: act_set, resp_set, fp_set
+#'  \itemize{
+#'   \item act_set: activity data
+#'   \item resp_set: response data
+#'   \item fp_set: fingerprint data
+#' }
+#' @return a list with two components: result (a named list, act_set, resp_set, fp_set), config
 #'
-#' @return a list with two components: result (a named list, based on keep_sets), config
 #' @export
+#'
+#' @examples
+#'
+#' data(zfishdev)
+#' d <- create_dataset(zfishdev)
+#' out <- run_rcurvep(d)
+#' res <- merge_rcurvep_output(out)
 #'
 merge_rcurvep_output <- function(rcurvep_obj, keep_sets = c("act_set", "resp_set", "fp_set")) {
 
   rcurvep_obj <- .check_class(rcurvep_obj, "rcurvep", "not a rcurvep object")
   keep_sets <- .check_keep_sets(keep_sets)
+
 
   tbl_names <- list(
     act_set = c("in_summary", "activity"),
@@ -87,10 +106,11 @@ merge_rcurvep_output <- function(rcurvep_obj, keep_sets = c("act_set", "resp_set
 #' create parameter input
 #'
 #' @param paras curvep parameters
-#' @param n_samples
-#' @param d
+#' @param n_samples NULL or an int to indicate the number of resp per conc to simulate
+#' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh}})
 #'
-#' @return a tibble with all combinations of parameters
+#' @return a tibble with all combinations of parameters in a data column + sample_id (for a simulated dataset)
+#' or a tibble with all combinations of parameters
 #' @keywords internal
 
 create_para_input <- function(paras, n_samples, d) {
@@ -110,10 +130,10 @@ create_para_input <- function(paras, n_samples, d) {
 
 #' Run rcurvep using the parameters supplied by purrr::pmap
 #'
-#' @param d
-#' @param mask
-#' @param n_samples
-#' @param ... curvep parameters, (and sample_id, data column)
+#' @param d a dataset after \code{\link{create_datasets}}
+#' @param mask 0 (default) for not using mask
+#' @param n_samples  NULL (default) or an int to indicate the number of resp per conc to simulate
+#' @param ... curvep parameters, (and sample_id, data column), created by \code{\link{create_para_input}
 #'
 #' @return an rcurvep object
 #' @keywords internal
@@ -132,10 +152,31 @@ pmap_run_rcurvep <- function(d, mask, n_samples, ...) {
   return(result)
 }
 
+#' Run curvep using created curvep parameters on
+#'
+#' @param d a dataset after \code{\link{create_datasets}}
+#' @param mask 0 (default) for not using mask
+#' @param n_samples NULL (default) or an int to indicate the number of resp per conc to simulate
+#' @param paras \code{\link{create_para_input}
+#'
+#' @return a tibble (paras) with a new rcurvep_obj column
+#' @keywords internal
+#'
+combi_run_curvep_in <- function(d, mask, n_samples, paras) {
+  result <- paras %>%
+    dplyr::mutate(
+      rcurvep_obj = purrr::pmap(
+        ., ~ pmap_run_rcurvep(d = d, mask = mask, n_samples = n_samples, ...)
+      )
+    )
+  suppressWarnings(result <- result %>% dplyr::select(-tidyselect::one_of("data")))
+  return(result)
+}
+
 
 #' Map through the rcurvep objects in the tibble and unnest
 #'
-#' @param d
+#' @param d a tibble (paras) with a new rcurvep_obj column \code{\link{combi_run_curvep_in}}
 #' @param keep_set only one is allowed
 #'
 #' @return a tibble

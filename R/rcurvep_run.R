@@ -51,27 +51,37 @@ curvep_defaults <- function() {
 
 
 
-#' Run rcurvep on a dataset
+#' Run rcurvep on a base dataset
 #'
+#' For a base dataset, only one response is allowed for endpoint-chemical-conc pair.
+#' see \code{\link{combi_run_rcurvep} for simulated datasets
 #'
-#' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh})
-#' @param mask NULL to not use mask to mask resps (default = NULL);
+#' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh}})
+#' @param mask (default = 0, not using mask); if mask column exists, the setting will be ignored
 #' use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.
 #' @param config default values are by curvep_defaults()
 #' @param ... a list of settings; can be used to overwrite the default values in curvep_defaults()
 #'
 #' @return a rcurvep object; it has two components: result, config.
 #' Result has columns: endpoint, chemical, input, out_resp, in_summary, fingerprint, activity
+#' @export
 #'
 #' @examples
 #'
+#' data(zfishbeh)
+#' d <- create_dataset(zfishbeh)
+#'
+#' # default
+#' out <- run_rcurvep(d)
+#'
+#'  # change THR
+#' out <- run_rcurvep(d, TRSH = 30)
+#'
+#' # mask response at highest and second highest concentration
+#' out <- run_rcurvep(d, mask = c(1, 2))
 #'
 #'
-#' @importFrom rlang .data
-#' @export
-#'
-#'
-run_rcurvep <- function(d, mask = NULL, config = curvep_defaults(), ...) {
+run_rcurvep <- function(d, mask = 0, config = curvep_defaults(), ...) {
 
   # not allow NA in the dataset
   d <- na.omit(d)
@@ -82,24 +92,14 @@ run_rcurvep <- function(d, mask = NULL, config = curvep_defaults(), ...) {
   config <- .check_config_name(config = config, ...)
   config <- .check_config_value(config)
 
-  # generate mask column
-  d <- create_mask(d, mask)
+  # generate mask column if there is no mask column otherwise pass through the data
+  d <- create_resp_mask(d, mask)
 
-  # prepare the list of data
-  d <- d %>%
-    dplyr::arrange(.data$endpoint, .data$chemical, .data$conc) %>%
-    tidyr::nest(-.data$endpoint, -.data$chemical, .key = "input")
+  # calculate curvep
+  out <- cal_curvep_dataset(d, config = config)
 
-  # generate output and activity column
-  result <- d %>%
-    dplyr::mutate(
-      output = purrr::map(.data$input, function(x, config) call_curvep(x$conc, x$resp, x$mask, config), config = config),
-      out_resp = purrr::map(.data$output, extract_curvep_outresp),
-      in_summary = purrr::map(.data$input, extract_input_summary),
-      fingerprint = purrr::map(.data$output, extract_curvep_fingerprint, config = config),
-      activity = purrr::map(.data$output, extract_curvep_activity, config = config)
-    ) %>%
-    dplyr::select(-.data$output)
+  # clean up the output
+  result <- clean_curvep_output(out, config = config)
 
   out_result <- list(result = result, config = config)
   class(out_result) <- 'rcurvep'
@@ -108,26 +108,26 @@ run_rcurvep <- function(d, mask = NULL, config = curvep_defaults(), ...) {
 }
 
 
-#' Creat mask
+#' Creat response mask
 #'
-#' @return a tibble/data.frame with added mask column
+#' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh})
+#'
+#' @param mask 0 for no mask; NULL no change of the data
+#' use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.
+#'
+#' @return a tibble with added mask column
 #' @keywords internal
-#' @importFrom rlang .data
-#'
-#'
-create_mask <- function(d, mask) {
 
-  result <- d
-  # if NULL use all 0 to avoid
-  if (is.null(mask)) {
-    if (!rlang::has_name(d, "mask")) {
-      result <- d %>%
-        dplyr::mutate(
-          mask = 0
-        )
-    }
+create_resp_mask <- function(d, mask) {
+
+
+  if (any(is.null(mask))) { # mask column exists
+    result <- d
+  } else if (any(mask == 0)) {   # no mask
+    result <- d %>% dplyr::mutate(mask = 0)
   } else {
-    if (rlang::has_name(d, "mask")) d$mask <- NULL
+
+    # generate mask
     result <- d %>%
       dplyr::arrange(.data$endpoint, .data$chemical, dplyr::desc(.data$conc)) %>%
       tidyr::nest(-.data$endpoint, -.data$chemical, .key = "data") %>%
@@ -139,13 +139,57 @@ create_mask <- function(d, mask) {
   return(result)
 }
 
+#' Prepare the nested structure of for curvep and calculate (call_curvep)
+#'
+#' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask
+#' @param config curvep_defaults()
+#' @return a tibble with a new column output
+#' @keywords internal
+
+cal_curvep_dataset <- function(d, config) {
+  # prepare the list of data
+  d <- d %>%
+    dplyr::arrange(.data$endpoint, .data$chemical, .data$conc) %>%
+    tidyr::nest(-.data$endpoint, -.data$chemical, .key = "input")
+
+  # use the input and config to call_curvep
+  result <- d %>%
+    dplyr::mutate(
+      output = purrr::map(
+        .data$input,
+        function(x, config) call_curvep(x$conc, x$resp, x$mask, config), config = config)
+    )
+
+  return(result)
+}
+
+#' Clean Curvep output to extract the useful information
+#'
+#' @param d a tibble from cal_curvep_dataset()
+#' @param config curvep_defaults()
+#'
+#' @return a tibble with new columns, out_resp, in_summary, fingerprint, activity
+#' @keywords internal
+
+clean_curvep_output <- function(d, config) {
+  result <- d %>%
+    dplyr::mutate(
+      out_resp = purrr::map(.data$output, extract_curvep_outresp),
+      in_summary = purrr::map(.data$input, extract_input_summary),
+      fingerprint = purrr::map(.data$output, extract_curvep_fingerprint, config = config),
+      activity = purrr::map(.data$output, extract_curvep_activity, config = config)
+    ) %>%
+    dplyr::select(-.data$output)
+  return(result)
+}
+
 
 #' Call curvep
 #'
 #' @param concs a vector of concs (from lowest to highest concentration)
 #' @param resps a vector of resps (from lowest to highest concentration)
 #' @param masks a vector of masks
-#' @param paras
+#' @param paras curvep_defaults() or a modified list
 #' @keywords internal
 #' @return (see \code{\link{curvep}) but remove "Settings"
 
@@ -158,10 +202,10 @@ call_curvep <- function(concs, resps, masks = NULL, paras = curvep_defaults()) {
 }
 
 
-#' extract_curvep_fingerprint
+#' Extract Curvep finterprint
 #'
 #' @param x the list from curvep output
-#' @param config
+#' @param config to get the DUMV parameter
 #' @keywords internal
 #' @return a tibble with three columns: xx, ECxx, Cxx
 
@@ -175,7 +219,7 @@ extract_curvep_fingerprint <- function(x, config) {
   return(result)
 }
 
-#' extract_curvep_outresp
+#' Extract Curvep response output
 #'
 #' @param x the list from curvep output
 #' @keywords internal
@@ -193,7 +237,7 @@ extract_curvep_outresp <- function(x) {
   return(result)
 }
 
-#' extract_input_summary
+#' Extract input (conc, resp) summary data
 #'
 #' @param x the tibble of the input
 #' @keywords internal
@@ -213,10 +257,10 @@ extract_input_summary <- function(x) {
   return(result)
 }
 
-#' extract_curvep_activity
+#' Extract Curvep activity
 #'
 #' @param x the list from curvep output
-#' @param config
+#' @param config for the DUMV parameter
 #' @keywords internal
 #' @return a tibble with activity
 #'
