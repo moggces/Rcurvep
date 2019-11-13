@@ -55,10 +55,11 @@
 * change: identify_basenoise_threshold() -> get_baseline_threshold()
 * change: generate_diagnostic_plot() -> plot.rcurvep_thres_stats() -> plot()
 
+# Rcurvep 1.0.0
+* new: a rewrite of the project
 
 
 # Todo
-* implement Curvep MASK parameter
 * implement stratified bootstrap
 * figure out toJSON/fromJSON conversion
 

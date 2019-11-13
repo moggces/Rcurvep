@@ -1,7 +1,7 @@
 Package: Rcurvep
 Type: Package
 Title: Concentration Response Modeling Using Curvep  
-Version: 0.6.0
+Version: 1.0.0
 Authors@R: c(
   person("Jui-Hua", "Hsieh", email = "juihua.hsieh@gmail.com", role = c("aut", "cre")),
   person("Alexander", "Sedykh", email = "sunirks@gmail.com", role = c("aut")))
@@ -21,4 +21,4 @@ Suggests: testthat,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
