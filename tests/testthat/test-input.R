@@ -28,15 +28,21 @@ test_that("check parameter names", {
 
 })
 
-test_that("check mask value", {
+dats <- zfishbeh %>%
+  dplyr::group_by(endpoint, chemical, conc) %>%
+  dplyr::slice(1) %>%
+  dplyr::ungroup() %>%
+  split(.$endpoint)
 
-  dats <- zfishbeh %>%
-    dplyr::group_by(endpoint, chemical, conc) %>%
-    dplyr::slice(1) %>%
-    dplyr::ungroup() %>%
-    split(.$endpoint)
+test_that("check mask value out of range", {
 
   expect_error(.check_mask_input(c(1, 6), dats[[1]]))
+})
+
+test_that("mask column available", {
+  dats1 <- dats[[1]]
+  dats1$mask <- 0
+  expect_warning(.check_mask_input(c(1, 6), dats1))
 })
 
 
@@ -94,55 +100,8 @@ test_that("keep_sets argument", {
 
 test_that("check_result_sets", {
   expect_error(.check_result_sets(c("act_set")))
-  outp <- run_rcurvep(create_dataset(zfishbeh)) %>% merge_rcurvep_output()
+  outp <- run_rcurvep(create_dataset(zfishbeh))
   expect_length(.check_result_sets(outp$result), 3)
   expect_error(.check_result_sets(outp$result['fp_set']))
 })
-
-# test_that("threshold is not numeric", {
-#   data("zfishbeh")
-#   x <- zfishbeh %>%
-#     dplyr::group_by(endpoint, chemical, concs) %>%
-#     dplyr::slice(1) %>%
-#     split(.$endpoint)
-#   expect_error(
-#     run_curvep_job(x[[1]],
-#                          directionality = 0,
-#                          n_sample = NULL,
-#                          threshold = "15",
-#                          other_paras = list())
-#   )
-# })
-#
-#
-# test_that("threshold is not numeric in a list", {
-#   data("zfishbeh")
-#   x <- zfishbeh %>%
-#     dplyr::group_by(endpoint, chemical, concs) %>%
-#     dplyr::slice(1) %>%
-#     split(.$endpoint)
-#   expect_error(
-#     run_curvep_job(x[[1]],
-#                    directionality = 0,
-#                    n_sample = NULL,
-#                    threshold = list("-1" = c(5), "1" = c("a", "b")),
-#                    other_paras = list())
-#   )
-# })
-#
-#
-# test_that("threshold and direction do not match", {
-#   data("zfishbeh")
-#   x <- zfishbeh %>%
-#     dplyr::group_by(endpoint, chemical, concs) %>%
-#     dplyr::slice(1) %>%
-#     split(.$endpoint)
-#   expect_error(
-#     run_curvep_job(x[[1]],
-#                    directionality = 0,
-#                    n_sample = NULL,
-#                    threshold = list("-1" = c(5), "a" = c(5, 10)),
-#                    other_paras = list())
-#   )
-# })
 

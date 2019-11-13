@@ -54,4 +54,46 @@ zfishdev_all <- zfishdev %>%
 usethis::use_data(zfishdev_all, overwrite =  TRUE)
 ```
 
+## regenerate simulated data for zfishdev_all
+
+```{r}
+data(zfishdev_all)
+set.seed(300)
+system.time(zfishdev_act <- combi_run_rcurvep(
+  zfishdev_all, n_samples = 100, keep_sets = c("act_set"),TRSH = seq(5, 95, by = 5),
+  RNGE = 1000000, CARR = 20
+))
+usethis::use_data(zfishdev_act, overwrite =  TRUE)
+out_dev_sum <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE)
+```
+
+## test set.seed and will the input be the same
+
+```{r}
+set.seed(300)
+data(zfishbeh)
+d1 <- create_dataset(zfishbeh, n_samples = 3)
+```
+
+```{r}
+set.seed(300)
+data(zfishbeh)
+d2 <- create_dataset(zfishbeh, n_samples = 3)
+
+identical(d1, d2)
+```
+
+```{r}
+set.seed(300)
+data(zfishdev)
+d1 <- create_dataset(zfishdev, n_samples = 3)
+```
+
+```{r}
+set.seed(300)
+data(zfishdev)
+d2 <- create_dataset(zfishdev, n_samples = 3)
+
+identical(d1, d2)
+```
 
