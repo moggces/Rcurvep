@@ -97,10 +97,10 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 
 #' Curvep function
 #'
-#' A function to process a given pair of concentration response data, the background function for `run_curvep_batch()`.
-#' @seealso  \code{\link{run_curvep_batch}}
+#' A function to process a given pair of concentration response data.
+#' @seealso  \code{\link{run_rcurvep}} \code{\link{combi_run_rcurvep}}
 #'
-#' @section primary parameters:
+#' primary parameters:
 #'
 #' @param Conc array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped
 #' @param Resp array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls
@@ -109,13 +109,15 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #' @param RNGE target range of responses (default = -100)
 #' @param MXDV  maximum allowed deviation from monotonicity (default = 5)
 #'
-#' @section secondary parameters:
+#' secondary parameters:
 #'
 #' @param CARR carryover detection threshold (default = 0, analysis skipped if set to 0)
 #' @param BSFT for baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0)
 #' @param USHP for u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0)
 #' @param TrustHi for equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE)
 #' @param StrictImp prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE)
+#' @param DUMV a dummy value, default = -999
+#' @param TLOG a scaling factor for calculating the wAUC, default = -24
 #'
 #' @return a list with corrected concentration-response measurements and several calculated curve metrics
 #' \itemize{

@@ -3,3 +3,4 @@ packrat/lib*/
 inst/doc
 packrat/src/
 .Rhistory
+_config.yml

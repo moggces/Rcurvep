@@ -27,6 +27,10 @@ Currently simulated data can be generated from one of the three types of dataset
   \item continous data with low number of replicates by linear-fit of experimental data with vehicle control responses as random noise (e.g., in vitro data)
 }
 
+create_dataset run_rcurvep summarize_rcurvep_output
+combi_run_rcurvep summarize_rcurvep_output
+estimate_dataset_bmr
+
 To learn more about Rcurvep, start with the vignettes:
 `browseVignettes(package = "Rcurvep")`
 }
