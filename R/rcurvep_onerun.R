@@ -1,8 +1,7 @@
 
 #' @title Default configuration for curvep
 #'
-#' @description
-#' curvep parameters
+#' @description curvep parameters
 #'
 #' @return a list of parameters with class as curvep_config
 #'

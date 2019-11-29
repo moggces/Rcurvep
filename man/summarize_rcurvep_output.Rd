@@ -12,7 +12,7 @@ summarize_rcurvep_output(d, act_modifier = NULL, ci_level = 0.95,
 
 \item{act_modifier}{a character string, default = NULL, to make the curve with this string in the Comments column as inactive. The most common case to unhit is the "INVERSE" curves.}
 
-\item{ci_level}{default = 0.95 (95% confidence interval)}
+\item{ci_level}{default = 0.95 (95 percent of confidence interval)}
 
 \item{clean_only}{default = FALSE, only the 1st, 2nd, 3rd task will be performed}
 }

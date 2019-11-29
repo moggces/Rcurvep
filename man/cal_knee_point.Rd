@@ -16,6 +16,8 @@ cal_knee_point(d, xaxis, yaxis, p1 = NULL, p2 = NULL, plot = TRUE)
 \item{p1}{default = NULL, or an int to manually set the first index of line}
 
 \item{p2}{default = NULL, or an int to manually set the last index of line}
+
+\item{plot}{default = TRUE, plot the diagnostic plot}
 }
 \value{
 a list with two components: stats and outcome

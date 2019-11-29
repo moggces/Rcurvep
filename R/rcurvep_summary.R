@@ -7,7 +7,7 @@
 #'
 #' @param d the list from the \code{\link{combi_run_rcurvep}} or \code{\link{run_rcurvep}}
 #' @param act_modifier a character string, default = NULL, to make the curve with this string in the Comments column as inactive. The most common case to unhit is the "INVERSE" curves.
-#' @param ci_level default = 0.95 (95% confidence interval)
+#' @param ci_level default = 0.95 (95 percent of confidence interval)
 #' @param clean_only default = FALSE, only the 1st, 2nd, 3rd task will be performed
 #'
 #' @return the original list (with modified components) + act_summary

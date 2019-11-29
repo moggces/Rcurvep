@@ -9,6 +9,6 @@
 zfishdev_act
 }
 \description{
-zfishdev_act data are processed through `run_curvep_batch()` and `withdraw()`
+Zebrafish development endpoint activity results
 }
 \keyword{datasets}

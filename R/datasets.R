@@ -34,7 +34,14 @@
 
 #' Zebrafish development endpoint activity results
 #'
-#' zfishdev_act data are processed through `run_curvep_batch()` and `withdraw()`
 #'
 
 "zfishdev_act"
+
+
+#' Zebrafish development data for all chemicals
+#'
+#'
+
+"zfishdev_all"
+#'

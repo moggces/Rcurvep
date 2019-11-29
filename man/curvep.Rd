@@ -19,7 +19,9 @@ curvep(Conc, Resp, Mask = NULL, TRSH = 15, RNGE = -100, MXDV = 5,
 
 \item{RNGE}{target range of responses (default = -100)}
 
-\item{MXDV}{maximum allowed deviation from monotonicity (default = 5)}
+\item{MXDV}{maximum allowed deviation from monotonicity (default = 5)
+
+secondary parameters:}
 
 \item{CARR}{carryover detection threshold (default = 0, analysis skipped if set to 0)}
 
@@ -30,6 +32,10 @@ curvep(Conc, Resp, Mask = NULL, TRSH = 15, RNGE = -100, MXDV = 5,
 \item{TrustHi}{for equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE)}
 
 \item{StrictImp}{prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE)}
+
+\item{DUMV}{a dummy value, default = -999}
+
+\item{TLOG}{a scaling factor for calculating the wAUC, default = -24}
 }
 \value{
 a list with corrected concentration-response measurements and several calculated curve metrics
@@ -53,17 +59,11 @@ a list with corrected concentration-response measurements and several calculated
 \description{
 A function to process a given pair of concentration response data.
 }
-\section{primary parameters}{
-
-}
-
-\section{secondary parameters}{
-
-}
-
 \examples{
 curvep(Conc = c(-8, -7, -6, -5, -4) , Resp = c(0, -3, -5, -15, -30))
 }
 \seealso{
 \code{\link{run_rcurvep}} \code{\link{combi_run_rcurvep}}
+
+primary parameters:
 }

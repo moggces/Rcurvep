@@ -1,7 +1,7 @@
 #' Plot BMR diagnostic curves
 #'
 #' @param x the rcurvep_bmr object (see\code{\link{estimate_dataset_bmr}})
-#' @param n_in_page number of endpoints in a page
+#' @param ... n_in_page, number of endpoints in a page
 #'
 #' @return a ggplot object
 #' @export
@@ -15,7 +15,11 @@
 #' bmr_out <- estimate_dataset_bmr(sumd, plot = FALSE)
 #' plot(bmr_out)
 #'
-plot.rcurvep_bmr <- function(x, n_in_page = 6) {
+plot.rcurvep_bmr <- function(x, ...) {
+
+  args <- list(...)
+  args <- modifyList(list(n_in_page = 6), args)
+  n_in_page <- args$n_in_page
 
   d <- .check_class(x, "rcurvep_bmr", "not a rcurvep_bmr object")
 

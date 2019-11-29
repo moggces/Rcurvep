@@ -133,6 +133,7 @@ unnest_knee_data <- function(kneed, type = c("stats", "outcome")) {
 #' @param yaxis a chr column name in the `d` to be the y-axis in the exponential-like curve
 #' @param p1 default = NULL, or an int to manually set the first index of line
 #' @param p2 default = NULL, or an int to manually set the last index of line
+#' @param plot default = TRUE, plot the diagnostic plot
 #'
 #' @return a list with two components: stats and outcome
 #' @export
