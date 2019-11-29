@@ -6,9 +6,7 @@
 #' 4. summarize the results based on the ci_level
 #'
 #' @param d the list from the \code{\link{combi_run_rcurvep}} or \code{\link{run_rcurvep}}
-#' @param act_modifier a character string, default = NULL,
-#' to make the curve with this string in the Comments column as inactive.
-#' The most common case to unhit is the "INVERSE" curves.
+#' @param act_modifier a character string, default = NULL, to make the curve with this string in the Comments column as inactive. The most common case to unhit is the "INVERSE" curves.
 #' @param ci_level default = 0.95 (95% confidence interval)
 #' @param clean_only default = FALSE, only the 1st, 2nd, 3rd task will be performed
 #'
@@ -29,6 +27,7 @@
 #' # simulated dataset
 #' out <- combi_run_rcurvep(zfishbeh, n_samples = 3, TRSH = c(5, 10))
 #' out_res <- summarize_rcurvep_output(out)
+#'
 #'
 summarize_rcurvep_output <- function(d, act_modifier = NULL, ci_level = 0.95, clean_only = FALSE) {
 

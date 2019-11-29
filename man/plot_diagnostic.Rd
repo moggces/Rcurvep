@@ -7,6 +7,8 @@
 plot_diagnostic(plotd, lined, endpoints)
 }
 \arguments{
+\item{plotd}{plotd}
+
 \item{lined}{from get_p1_p2_linecoeff()}
 
 \item{endpoints}{the facet_endpoint names in a page}

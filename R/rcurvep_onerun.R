@@ -1,8 +1,10 @@
-#' Default configuration for curvep
+
+#' @title Default configuration for curvep
 #'
-#' curvep_defaults() return a list of parameters with class as "curvep_config"
+#' @description
+#' curvep parameters
 #'
-#' @return a list of parameters with class as "curvep_config"
+#' @return a list of parameters with class as curvep_config
 #'
 #' \itemize{
 #'   \item TRSH base(zero-)line threshold
@@ -16,7 +18,7 @@
 #'   \item DUMV dummy value for inactive (not suggested to modify)
 #'   \item TLOG denominator for calculation wAUC (not suggested to modify)
 #' }
-#'
+#' @export
 #' @examples
 #'
 #' # display all default settings
@@ -27,7 +29,6 @@
 #' custom_settings$TRSH <- 30
 #' custom_settings
 #'
-#' @export
 #'
 #'
 curvep_defaults <- function() {
@@ -118,7 +119,7 @@ run_rcurvep <- function(d, mask = 0, config = curvep_defaults(),  keep_sets = c(
 
 #' Creat response mask
 #'
-#' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh})
+#' @param d a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh}})
 #'
 #' @param mask 0 for no mask; NULL no change of the data
 #' use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.
@@ -199,7 +200,7 @@ clean_curvep_output <- function(d, config) {
 #' @param masks a vector of masks
 #' @param paras curvep_defaults() or a modified list
 #' @keywords internal
-#' @return (see \code{\link{curvep}) but remove "Settings"
+#' @return (see \code{\link{curvep}}) but remove "Settings"
 
 call_curvep <- function(concs, resps, masks = NULL, paras = curvep_defaults()) {
   result <- do.call(curvep, c(list(concs), list(resps), list(masks), paras))

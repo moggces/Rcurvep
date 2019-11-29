@@ -75,14 +75,7 @@ combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = 0,
 #' }
 #' @return a list with two components: result (a named list, act_set, resp_set, fp_set), config
 #'
-#' @export
-#'
-#' @examples
-#'
-#' data(zfishdev)
-#' d <- create_dataset(zfishdev)
-#' out <- run_rcurvep(d)
-#' res <- merge_rcurvep_output(out)
+#' @keywords internal
 #'
 merge_rcurvep_output <- function(d, keep_sets) {
 
@@ -135,10 +128,10 @@ create_para_input <- function(paras, n_samples, d) {
 
 #' Run rcurvep using the parameters supplied by purrr::pmap
 #'
-#' @param d a dataset after \code{\link{create_datasets}}
+#' @param d a dataset after \code{\link{create_dataset}}
 #' @param mask 0 (default) for not using mask
 #' @param n_samples  NULL (default) or an int to indicate the number of resp per conc to simulate
-#' @param ... curvep parameters, (and sample_id, data column), created by \code{\link{create_para_input}
+#' @param ... curvep parameters, (and sample_id, data column), created by \code{\link{create_para_input}}
 #'
 #' @return an rcurvep object
 #' @keywords internal
@@ -159,10 +152,10 @@ pmap_run_rcurvep <- function(d, mask, n_samples, keep_sets, ...) {
 
 #' Run curvep using created curvep parameters on
 #'
-#' @param d a dataset after \code{\link{create_datasets}}
+#' @param d a dataset
 #' @param mask 0 (default) for not using mask
 #' @param n_samples NULL (default) or an int to indicate the number of resp per conc to simulate
-#' @param paras \code{\link{create_para_input}
+#' @param paras \code{\link{create_para_input}}
 #'
 #' @return a tibble (paras) with a new rcurvep_obj column
 #' @keywords internal

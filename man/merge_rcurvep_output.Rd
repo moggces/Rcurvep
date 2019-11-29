@@ -22,11 +22,4 @@ a list with two components: result (a named list, act_set, resp_set, fp_set), co
 \description{
 Merge columns from the result field of an rcurvep object
 }
-\examples{
-
-data(zfishdev)
-d <- create_dataset(zfishdev)
-out <- run_rcurvep(d)
-res <- merge_rcurvep_output(out)
-
-}
+\keyword{internal}

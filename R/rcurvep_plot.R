@@ -1,6 +1,6 @@
 #' Plot BMR diagnostic curves
 #'
-#' @param d the rcurvep_bmr object (see\code{\link{estimate_dataset_bmr}})
+#' @param x the rcurvep_bmr object (see\code{\link{estimate_dataset_bmr}})
 #' @param n_in_page number of endpoints in a page
 #'
 #' @return a ggplot object
@@ -15,9 +15,9 @@
 #' bmr_out <- estimate_dataset_bmr(sumd, plot = FALSE)
 #' plot(bmr_out)
 #'
-plot.rcurvep_bmr <- function(d, n_in_page = 6) {
+plot.rcurvep_bmr <- function(x, n_in_page = 6) {
 
-  d <- .check_class(d, "rcurvep_bmr", "not a rcurvep_bmr object")
+  d <- .check_class(x, "rcurvep_bmr", "not a rcurvep_bmr object")
 
   # get the stats component
   statsd <- d$stats
@@ -172,7 +172,7 @@ get_p1_p2_linecoeff <- function(dd, xvar, yvar, p1, p2) {
 
 #' Plot the diagnostic plot
 #'
-#' @param plotd
+#' @param plotd plotd
 #' @param lined from get_p1_p2_linecoeff()
 #' @param endpoints the facet_endpoint names in a page
 #'

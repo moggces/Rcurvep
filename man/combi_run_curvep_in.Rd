@@ -7,11 +7,13 @@
 combi_run_curvep_in(d, mask, n_samples, keep_sets, paras)
 }
 \arguments{
-\item{d}{a dataset after \code{\link{create_datasets}}}
+\item{d}{a dataset}
 
 \item{mask}{0 (default) for not using mask}
 
 \item{n_samples}{NULL (default) or an int to indicate the number of resp per conc to simulate}
+
+\item{paras}{\code{\link{create_para_input}}}
 }
 \value{
 a tibble (paras) with a new rcurvep_obj column

@@ -4,10 +4,10 @@
 \alias{plot.rcurvep_bmr}
 \title{Plot BMR diagnostic curves}
 \usage{
-\method{plot}{rcurvep_bmr}(d, n_in_page = 6)
+\method{plot}{rcurvep_bmr}(x, n_in_page = 6)
 }
 \arguments{
-\item{d}{the rcurvep_bmr object (see\code{\link{estimate_dataset_bmr}})}
+\item{x}{the rcurvep_bmr object (see\code{\link{estimate_dataset_bmr}})}
 
 \item{n_in_page}{number of endpoints in a page}
 }

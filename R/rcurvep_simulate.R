@@ -31,7 +31,7 @@
 #' d <- create_dataset(zfishbeh, n_samples = 3)
 #'
 #' ## add samples and vdata
-#' d <- create_dataset(dats1, n_samples = 3, vdata = rnorm(100))
+#' d <- create_dataset(zfishbeh, n_samples = 3, vdata = rnorm(100))
 #'
 #' # dichotomous
 #' data(zfishdev)

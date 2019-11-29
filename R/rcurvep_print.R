@@ -1,7 +1,7 @@
 
 #' @export
-print.curvep_config <- function(config, ...) {
-  config <- .check_class(config, "curvep_config", "not a curvep_config object")
+print.curvep_config <- function(x, ...) {
+  config <- .check_class(x, "curvep_config", "not a curvep_config object")
 
   message("\n")
   message("curvep configuration parameters\n")

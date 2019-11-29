@@ -7,7 +7,7 @@
 curvep_defaults()
 }
 \value{
-a list of parameters with class as "curvep_config"
+a list of parameters with class as curvep_config
 
 \itemize{
   \item TRSH base(zero-)line threshold
@@ -23,7 +23,7 @@ a list of parameters with class as "curvep_config"
 }
 }
 \description{
-curvep_defaults() return a list of parameters with class as "curvep_config"
+curvep parameters
 }
 \examples{
 
@@ -34,5 +34,7 @@ curvep_defaults()
 custom_settings <- curvep_defaults()
 custom_settings$TRSH <- 30
 custom_settings
+
+
 
 }

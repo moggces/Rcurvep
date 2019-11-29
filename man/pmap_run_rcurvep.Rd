@@ -7,11 +7,13 @@
 pmap_run_rcurvep(d, mask, n_samples, keep_sets, ...)
 }
 \arguments{
-\item{d}{a dataset after \code{\link{create_datasets}}}
+\item{d}{a dataset after \code{\link{create_dataset}}}
 
 \item{mask}{0 (default) for not using mask}
 
 \item{n_samples}{NULL (default) or an int to indicate the number of resp per conc to simulate}
+
+\item{...}{curvep parameters, (and sample_id, data column), created by \code{\link{create_para_input}}}
 }
 \value{
 an rcurvep object

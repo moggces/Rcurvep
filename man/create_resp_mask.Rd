@@ -7,6 +7,8 @@
 create_resp_mask(d, mask)
 }
 \arguments{
+\item{d}{a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh}})}
+
 \item{mask}{0 for no mask; NULL no change of the data
 use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.}
 }

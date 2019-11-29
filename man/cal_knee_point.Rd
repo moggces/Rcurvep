@@ -25,7 +25,7 @@ Two approaches are available: original value-based and exponential fit value-bas
 }
 \examples{
 
-inp <- tibble(
+inp <- data.frame(
 x = seq(5, 95, by = 5),
 y = c(0.0537, 0.0281, 0.0119, 0.0109, 0.0062, 0.0043, 0.0043, 0.0042, 0.0041, 0.0043, 0.0044, 0.0044, 0.0046, 0.0051, 0.0055, 0.0057, 0.0072, 0.0068, 0.0035)
 )

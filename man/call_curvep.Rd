@@ -15,6 +15,9 @@ call_curvep(concs, resps, masks = NULL, paras = curvep_defaults())
 
 \item{paras}{curvep_defaults() or a modified list}
 }
+\value{
+(see \code{\link{curvep}}) but remove "Settings"
+}
 \description{
 Call curvep
 }

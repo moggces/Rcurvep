@@ -97,8 +97,8 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 
 #' Curvep function
 #'
-#' A function to process a given pair of concentration response data, the background function for `run_curvep_batch()`.
-#' @seealso  \code{\link{run_curvep_batch}}
+#' A function to process a given pair of concentration response data.
+#' @seealso  \code{\link{run_rcurvep}} \code{\link{combi_run_rcurvep}}
 #'
 #' @section primary parameters:
 #'
