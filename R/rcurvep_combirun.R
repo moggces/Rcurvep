@@ -79,10 +79,6 @@ combi_run_rcurvep <- function(d, n_samples = NULL, vdata = NULL, mask = 0,
 #'
 merge_rcurvep_output <- function(d, keep_sets) {
 
-  # need to check d
-  #rcurvep_obj <- .check_class(rcurvep_obj, "rcurvep", "not a rcurvep object")
-  keep_sets <- .check_keep_sets(keep_sets)
-
   tbl_names <- list(
     act_set = c("in_summary", "activity"),
     resp_set = c("input", "out_resp"),
@@ -91,13 +87,11 @@ merge_rcurvep_output <- function(d, keep_sets) {
 
   result <- purrr::map(
     keep_sets, function(x, tbl_names, obj)
-      #obj[['result']][c("endpoint", "chemical", tbl_names[[x]])] %>% tidyr::unnest(),
       obj[c("endpoint", "chemical", tbl_names[[x]])] %>% tidyr::unnest(),
     tbl_names = tbl_names,
     obj = d
   ) %>% rlang::set_names(keep_sets)
 
-  #return(list(result = result, config = d$config))
   return(result)
 }
 
@@ -183,7 +177,6 @@ combi_run_curvep_in <- function(d, mask, n_samples, keep_sets, paras) {
 flat_result_tbl <- function(d, keep_set) {
   result <- d %>%
     dplyr::mutate(
-      #temp = purrr::map(.data$rcurvep_obj, ~ merge_rcurvep_output(.x, keep_set)$result[[1]])
       temp = purrr::map(.data$rcurvep_obj, ~ .x[['result']][[keep_set]])
     ) %>%
     dplyr::select(-.data$rcurvep_obj) %>%

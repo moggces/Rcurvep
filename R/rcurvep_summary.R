@@ -47,10 +47,6 @@ summarize_rcurvep_output <- function(d, act_modifier = NULL, ci_level = 0.95, cl
   # use the Comments column to unhit
   lsets_n <- apply_comment_to_unhit(lsets_n, act_modifier = act_modifier)
 
-  # make the activity column = NA as the highest conc
-  lsets_n <- make_act_na_highconc(lsets_n)
-
-
   # unnest the clean sets
   lsets_clean <- purrr::map(
     names(lsets), unnest_joined_sets, nested = lsets_n, base_cols = base_cols) %>%
@@ -66,6 +62,8 @@ summarize_rcurvep_output <- function(d, act_modifier = NULL, ci_level = 0.95, cl
   # summarize the act_set
   # three components: result, act_summary, config
   if(!clean_only) {
+    # make the activity column = NA as the highest conc
+    lsets_n <- make_act_na_highconc(lsets_n)
     lsets_n <- summarize_actsets(lsets_n, ci_level = ci_level)
     result[['act_summary']] <- unnest_joined_sets(lsets_n, base_cols, "act_summary")
 
@@ -311,16 +309,17 @@ apply_comment_to_unhit_nonactset <- function(nonact_set, act_set) {
 
 make_act_na_highconc_in <- function(act_set) {
 
+  potency_cols <- c("wConc", "EC50", "C50", "POD", "ECxx")
+  highest_conc <- act_set$highest_conc
   result <- act_set %>%
-    dplyr::mutate(
-      wConc = replace(.data$wConc, is.na(.data$wConc), .data$highest_conc[is.na(.data$wConc)]),
-      EC50 = replace(.data$EC50, is.na(.data$EC50), .data$highest_conc[is.na(.data$EC50)]),
-      C50 = replace(.data$C50, is.na(.data$C50), .data$highest_conc[is.na(.data$C50)]),
-      POD = replace(.data$POD, is.na(.data$POD), .data$highest_conc[is.na(.data$POD)])
+    dplyr::mutate_at(
+      dplyr::vars(tidyselect::one_of(potency_cols)),
+      ~ replace(.x, is.na(.x), highest_conc[is.na(.x)])
     )
 
   return(result)
 }
+
 
 
 

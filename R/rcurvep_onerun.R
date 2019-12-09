@@ -258,8 +258,8 @@ extract_input_summary <- function(x) {
     highest_conc = tail(x$conc, 1),
     max_resp = max(x$resp),
     min_resp = min(x$resp),
-    n_conc = length(x$conc),
-    mean_conc_spacing = mean(diff(x$conc))
+    n_conc = length(unique(x$conc)),
+    mean_conc_spacing = mean(diff(unique(x$conc)))
 
   )
   return(result)
