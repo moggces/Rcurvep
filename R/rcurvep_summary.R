@@ -311,11 +311,11 @@ make_act_na_highconc_in <- function(act_set) {
 
   potency_cols <- c("wConc", "EC50", "C50", "POD", "ECxx")
   highest_conc <- act_set$highest_conc
-  result <- act_set %>%
+  suppressWarnings(result <- act_set %>%
     dplyr::mutate_at(
       dplyr::vars(tidyselect::one_of(potency_cols)),
       ~ replace(.x, is.na(.x), highest_conc[is.na(.x)])
-    )
+    ))
 
   return(result)
 }
@@ -395,16 +395,16 @@ summarize_actset_by_type <- function(act_set_grouped, type, ci_level) {
 
   if (type == "med_only") {
     med_cols <- c('max_resp', 'min_resp', 'nCorrected')
-    result <- act_set_grouped %>%
+    suppressWarnings(result <- act_set_grouped %>%
       dplyr::summarise_at(
         dplyr::vars(tidyselect::one_of(med_cols)),
         list(med = median)
-      )
+      ))
   } else if (type == "med_conf") {
     upper_bound <- 1 - (1 - ci_level)/2
     lower_bound <- (1 - ci_level)/2
-    ci_cols <- c('Emax', 'slope', 'AUC', 'wAUC', 'wAUC_prev')
-    result <- act_set_grouped %>%
+    ci_cols <- c('Emax', 'slope', 'AUC', 'wAUC', 'wAUC_prev','EC50','POD')
+    suppressWarnings(result <- act_set_grouped %>%
       dplyr::summarise_at(
         dplyr::vars(tidyselect::one_of(ci_cols)),
         list(
@@ -412,7 +412,7 @@ summarize_actset_by_type <- function(act_set_grouped, type, ci_level) {
           ciu = ~ quantile(., probs = upper_bound),
           cil = ~ quantile(., probs = lower_bound)
         )
-      )
+      ))
   } else if (type == "hit_conf") {
     result <- act_set_grouped %>%
       dplyr::summarize(

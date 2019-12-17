@@ -1,28 +1,28 @@
 
-fit_modls <- function(Conc, Resp, Mask = NULL, types = c("hill", "cnst"), ...) {
+fit_modls <- function(Conc, Resp, Mask = NULL, modls = c("hill", "cnst"), ...) {
   args <- list(...)
   result <- purrr::map(
-    types, ~ do.call(
-      fit_modl_in, c(list(Conc = Conc, Resp = Resp, Mask = Mask, type = .x), args)
+    modls, ~ do.call(
+      fit_modl_in, c(list(Conc = Conc, Resp = Resp, Mask = Mask, modl = .x), args)
     )
-  )
+  ) %>% rlang::set_names(modls)
   result <- sort_modl_aic(result)
   return(result)
 }
 
-fit_modl_in <- function(Conc, Resp, Mask, type, ...) {
+fit_modl_in <- function(Conc, Resp, Mask, modl, ...) {
   l <- list(...)
-  func_name <- stringr::str_c("fit_", type, "_modl")
-  pref <- stringr::str_glue("^{type}_")
+  func_name <- stringr::str_c("fit_", modl, "_modl")
+  pref <- stringr::str_glue("^{modl}_")
   l_p <- l[stringr::str_detect(names(l), pref)]
   l_p <- l_p %>% rlang::set_names(stringr::str_remove(names(l_p), pref))
 
   result <- NULL
-  if (type == "cnst") {
+  if (modl == "cnst") {
     result <- do.call(
       get(eval(func_name)), c(list(Resp = Resp), l_p)
     )
-  } else if (type == "hill") {
+  } else if (modl == "hill") {
     result <- do.call(
       get(eval(func_name)), c(list(Conc = Conc, Resp = Resp, Mask = Mask), l_p)
     )

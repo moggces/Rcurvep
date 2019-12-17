@@ -1,12 +1,19 @@
-run_fit <- function(d, types = c("hill", "cnst"), keep_sets = c('fit_set', 'resp_set'), ...) {
+# need to report unknown parameters
+# ... needs hill_pdir
+run_fit <- function(d, modls = c("hill", "cnst"), keep_sets = c('fit_set', 'resp_set'), n_samples = NULL, ...) {
 
   args <- list(...)
 
   nestd <- nest_fit_dataset(d, nest_cols = c("endpoint", "chemical"))
-  fitd <- cal_fit_dataset(nestd = nestd, types = types, args = args)
-  fitd_clean <- suppressMessages(
-    purrr::reduce(purrr::map(keep_sets, clean_fit_output, nestd = fitd), dplyr::left_join)
-  )
+  fitd <- cal_fit_dataset(nestd = nestd, modls = modls, args = args, fit_type = "ori")
+
+  if(!is.null(n_samples)) {
+    simud <- create_hillsimu_dataset(fitd = fitd, n_samples = n_samples, pdir = args$hill_pdir)
+    nestd <- nest_fit_dataset(simud, nest_cols = c("endpoint", "chemical", "sample_id"))
+    fitd <- cal_fit_dataset(nestd = nestd, modls = modls, args = args, fit_type = "hill_simu")
+  }
+
+  fitd_clean <- clean_fit_output(fitd = fitd, keep_sets = keep_sets)
   sets <- merge_fit_output(fitd_clean, keep_sets = keep_sets)
 
   result <- list(result = sets, result_nested = fitd)
@@ -37,8 +44,7 @@ merge_fit_output <- function(fitd, keep_sets) {
 summarize_fit_output <- function(d, thr_resp = 20, perc_resp = 10, ci_level = 0.95, extract_only = FALSE) {
 
   fitd <- d$result_nested
-  fitd_clean <- clean_fit_output(
-    nestd = fitd, keep_set = "act_set", thr_resp = thr_resp, perc_resp = perc_resp)
+  fitd_clean <- clean_fit_output(fitd, keep_sets = "act_set", thr_resp = thr_resp, perc_resp = perc_resp)
   act_set <- merge_fit_output(fitd_clean, keep_sets = c("act_set"))
   d[['result']] <- c(d$result, act_set)
 
@@ -47,23 +53,69 @@ summarize_fit_output <- function(d, thr_resp = 20, perc_resp = 10, ci_level = 0.
     base_cols <- get_base_cols(lsets)
     lsets_n <- get_nested_joined_sets(lsets, base_cols)
     lsets_n <- make_act_na_highconc(lsets_n)
+    lsets_n <- make_act_na_0(lsets_n)
     lsets_n <- summarize_actsets(lsets_n, ci_level = ci_level)
+    d[['act_summary']] <- unnest_joined_sets(lsets_n, base_cols, "act_summary")
   }
 
   return(d)
 }
 
-cal_fit_dataset <- function(nestd, types, args) {
+make_act_na_0 <- function(nestd) {
   result <- nestd %>%
     dplyr::mutate(
-      output = purrr::map(
-        .data$input, ~ do.call(fit_modls,c(list(Conc = .x$conc, Resp = .x$resp, Mask = NULL, types = types), args))
-      )
+      act_set = purrr::map(.data$act_set, make_act_na_0_in)
     )
   return(result)
 }
 
-clean_fit_output <- function(nestd, keep_set, thr_resp = NULL, perc_resp = NULL) {
+make_act_na_0_in <- function(act_set) {
+
+  potency_cols <- c("slope", "Emax")
+  suppressWarnings(result <- act_set %>%
+                     dplyr::mutate_at(
+                       dplyr::vars(tidyselect::one_of(potency_cols)),
+                       ~ replace(.x, is.na(.x), 0)
+                     ))
+
+  return(result)
+}
+
+cal_fit_dataset <- function(nestd, modls, args, fit_type = c("ori", "hill_simu")) {
+  if (fit_type == "ori") {
+    result <- nestd %>%
+      dplyr::mutate(
+        output = purrr::map(
+          .data$input, ~ do.call(fit_modls,c(list(Conc = .x$conc, Resp = .x$resp, Mask = NULL, modls = modls), args))
+        )
+      )
+  } else if (fit_type == "hill_simu") {
+
+    args[['hill_pdir']] <- NULL
+
+    result <- nestd %>%
+      dplyr::mutate(
+        output = purrr::map(
+          .data$input, ~ do.call(fit_modls,c(list(Conc = .x$conc, Resp = .x$resp, hill_pdir = unique(.x$direction), Mask = NULL, modls = modls), args))
+        )
+      )
+  }
+
+  return(result)
+}
+
+clean_fit_output <- function(fitd, keep_sets, thr_resp = NULL, perc_resp = NULL) {
+  result <- suppressMessages(
+    purrr::reduce(
+      purrr::map(
+        keep_sets, clean_fit_output_in,
+        nestd = fitd, thr_resp = thr_resp, perc_resp = perc_resp),
+      dplyr::left_join)
+  )
+  return(result)
+}
+
+clean_fit_output_in <- function(nestd, keep_set, thr_resp = NULL, perc_resp = NULL) {
 
   if (keep_set == "fit_set") {
     result <- nestd %>%
@@ -87,12 +139,6 @@ clean_fit_output <- function(nestd, keep_set, thr_resp = NULL, perc_resp = NULL)
   result <- result %>% dplyr::select(-.data$input, -.data$output)
 
   return(result)
-}
-
-run_hillfit <- function(d, pdir = c(1, -1),  n_samples = NULL, ...) {
-
-
-
 }
 
 nest_fit_dataset <- function(d, nest_cols) {
@@ -135,13 +181,13 @@ cal_hillfit_dataset_in <- function(nestd, pdir, ...) {
 
 }
 
-create_simu_dataset <- function(fitd, pdir, n_samples) {
+create_hillsimu_dataset <- function(fitd, n_samples, pdir) {
   result <- fitd %>%
     dplyr::mutate(
       simud = purrr::map2(
         .data$input, .data$output,
-        ~ bind_rows(
-          replicate(n_samples, create_simulated_data(.x, .y), simplify = FALSE),
+        ~ dplyr::bind_rows(
+          replicate(n_samples, create_hillsimu_resp(.x, .y), simplify = FALSE),
           .id = "sample_id"))
     )
 
@@ -174,17 +220,20 @@ cal_hillfit_dataset <- function(d, pdir,  n_samples, ...) {
 
 select_direction <- function(out, pdir) {
 
-  tp <- out[[1]]$tp
+  tp <- out[['hill']]$tp
 
-  if (length(pdir) == 1) {
-    return(pdir)
-  } else {
-    result <- 1
-    if(!is.na(tp)) {
-      if (tp < 0) result <- -1
+  if (!is.null(pdir)) {
+    if (length(pdir) == 1) {
+      return(pdir)
     }
-    return(result)
   }
+
+  result <- 1
+  if(!is.na(tp)) {
+    if (tp < 0) result <- -1
+  }
+  return(result)
+
 }
 
 tibble_fit_para <- function(modl) {
@@ -216,9 +265,9 @@ extract_fit_resp <- function(inp, out) {
 }
 
 
-create_simulated_data <- function(inp, out) {
+create_hillsimu_resp <- function(inp, out) {
   result <- inp
-  yhat <- tcplHillVal(inp$conc, out[[1]]$tp, out[[1]]$ga, out[[1]]$gw)
+  yhat <- tcplHillVal(inp$conc, out[['hill']]$tp, out[['hill']]$ga, out[['hill']]$gw)
   resid <- inp$resp - yhat
   sampleresids <- sample(resid,length(resid),replace = TRUE)
   this_y <- yhat + sampleresids
@@ -228,26 +277,8 @@ create_simulated_data <- function(inp, out) {
 
 
 
-clean_hillfit_output <- function(nestd) {
-  result <- nestd %>%
-    dplyr::mutate(
-      #in_summary = purrr::map(.data$input, extract_input_summary),
-      #out_resp = purrr::
-
-    )
 
 
-  return(result)
-}
-
-# summarize_hillfit_output <- function(d, bmr, clean_only) {
-#   result <- clean_hillfit_output(d = d, bmr = bmr)
-#   result <- result %>%
-#     dplyr::select(-.data$input, -.data$output) %>%
-#     tidyr::unnest()
-#
-#
-# }
 
 extract_fit_activity <- function(inp, out, thr_resp, perc_resp) {
 
