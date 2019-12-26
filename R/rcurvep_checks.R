@@ -228,3 +228,35 @@
   }
   return(obj)
 }
+
+#_hillbase
+.check_concresp <- function(conc, resp, mask) {
+  outd <- mask_resp_conc(conc, resp, mask)
+  new_conc <- outd$Conc
+  new_resp <- outd$Resp
+  if (length(new_conc) != length(new_resp)) {
+    rlang::abort("the length of Conc and Resp is not the same")
+  } else if (length(new_conc) < 4) {
+    rlang::abort("at least four resps are needed")
+  }
+  return(outd)
+}
+
+#_hillbase
+.check_hill_args <- function(ori, new) {
+  if (!all(names(new) %in% names(ori))) {
+    rlang::warn("The supplied arguments are not registered. No changes will be applied.")
+  }
+  config <- modifyList(ori, new)
+  return(config)
+}
+
+#_hillbase
+.check_modls_args <- function(args, modls) {
+
+  syn <- paste0("(", stringr::str_c(modls, collapse = "|"), ")")
+  if (!all(stringr::str_detect(names(args), syn))) {
+    rlang::warn("Some supplied arguments do not have model type as the prefix. No changes will be applied.")
+  }
+  return(args)
+}

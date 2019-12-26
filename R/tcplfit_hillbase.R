@@ -1,17 +1,88 @@
 
+#' Fit concentration-response data using types of models.
+#'
+#' A convenient function to fit data using available models
+#' and to sort the outcomes by AIC values.
+#'
+#' @section Available model outputs
+#'
+#' \subsection{hill}{
+#'   Fit output from Hill equation
+#'   \describe{
+#'     \item{modl}{model type, i.e., hill}
+#'     \item{fit}{fitable?, 1 or 0}
+#'     \item{aic}{AIC value}
+#'     \item{tp}{model top, <0 means the fit for decreasing direction is preferred}
+#'     \item{ga}{ac50}
+#'     \item{gw}{Hill coefficient}
+#'     \item{er}{scale term}
+#'   }
+#' }
+#'
+#' \subsection{cnst}{
+#'   Fit output from constant model
+#'   \describe{
+#'     \item{modl}{model type, i.e., cnst}
+#'     \item{fit}{fitable?, 1 or 0}
+#'     \item{aic}{AIC value}
+#'     \item{er}{scale term}
+#'   }
+#' }
+#'
+#' @param Conc A vector of log10 concentrations.
+#' @param Resp A vector of numeric responses.
+#' @param Mask Default = NULL or a vector of 1 or 0.
+#'   1 is for masking the respective response.
+#' @param modls The model types for the fitting. Multiple values are allowed.
+#'   Currently Hill model (hill) and constant model (cnst) are implemented.
+#'   Default = c("hill", "cnst").
+#' @param ... The named input configurations for replacing the default configurations.
+#'   The input configuration needs to add model type as the prefix.
+#'   For example, hill_pdir = -1 will set the Hill fit only to the decreasing direction.
+#'
+#' @return A list of components named by the models.
+#'   The models are sorted by their AIC values. Thus, the first component has the best fit.
+#' @export
+#' @seealso [tcpl::tcplObjHill()], [tcpl::tcplObjCnst()], and [get_hill_fit_config()]
+#'
+#' @examples
+#'
 fit_modls <- function(Conc, Resp, Mask = NULL, modls = c("hill", "cnst"), ...) {
+
+  # check the input
   args <- list(...)
+  args <- .check_modls_args(args, modls)
+  outd <- .check_concresp(Conc, Resp, Mask)
+
+
+  new_conc <- outd$Conc
+  new_resp <- outd$Resp
+
   result <- purrr::map(
     modls, ~ do.call(
-      fit_modl_in, c(list(Conc = Conc, Resp = Resp, Mask = Mask, modl = .x), args)
+      fit_modl_in,
+      c(list(Conc = new_conc, Resp = new_resp, modl = .x), args)
     )
   ) %>% rlang::set_names(modls)
+
+  # sort the output
   result <- sort_modl_aic(result)
   return(result)
 }
 
-fit_modl_in <- function(Conc, Resp, Mask, modl, ...) {
+#' Fit concentration-response data using one type of models.
+#'
+#' @inheritDotParams fit_modls -modls -Mask
+#' @param modl The model type.
+#'
+#' @return The respective model output (in a list).
+#' @keywords internal
+
+fit_modl_in <- function(Conc, Resp, modl, ...) {
+
   l <- list(...)
+
+  # handle model specific configurations
   func_name <- stringr::str_c("fit_", modl, "_modl")
   pref <- stringr::str_glue("^{modl}_")
   l_p <- l[stringr::str_detect(names(l), pref)]
@@ -24,7 +95,7 @@ fit_modl_in <- function(Conc, Resp, Mask, modl, ...) {
     )
   } else if (modl == "hill") {
     result <- do.call(
-      get(eval(func_name)), c(list(Conc = Conc, Resp = Resp, Mask = Mask), l_p)
+      get(eval(func_name)), c(list(Conc = Conc, Resp = Resp), l_p)
     )
   }
 
@@ -32,32 +103,66 @@ fit_modl_in <- function(Conc, Resp, Mask, modl, ...) {
 }
 
 
-#' Fit Hill model
+#' Fit the concentration-response data using the Hill equation.
 #'
-#' @param Conc
-#' @param Resp
-#' @param Mask
-#' @param pdir preferred direction, 1 (increasing) or -1 (decreasing), or both then AIC is used to select one
-#' @param ... can be used to replace the initial config of Hill fit (e.g., f )
+#' @inheritDotParams fit_modls Conc:Resp
+#' @param pdir The preferred direction,
+#'   1 is for the increasing direction and -1 is for the decreasing direction.
+#'   Default is both values (1, -1) and AIC will be used to select one best fit.
+#' @param ... The named input configurations for Hill equation.
+#'   This can be used to replace the initial configurations of Hill equation.
 #'
-#' @return a (selected) Hill model fit, a list including modl, fit, ga, gw, tp
-#' tp < 0 means that decreasing
-#' @export
+#' @seealso [get_hill_fit_config()]
+#'
+#' @return A list of output parameters from Hill model fit.
+#'   If the data is not fittable, the default values for aic, tp, ga, er is NA_real_.
+#'   If both directions are used, only the direction with the best fit (by AIC) will be reported.
+#'
+#' \describe{
+#'   \item{modl}{model type, i.e., hill}
+#'   \item{fit}{fitable?, 1 or 0}
+#'   \item{aic}{AIC value}
+#'   \item{tp}{model top, <0 means the fit for decreasing direction is preferred}
+#'   \item{ga}{ac50}
+#'   \item{gw}{Hill coefficient}
+#'   \item{er}{scale term}
+#' }
+#'
+#' @keywords internal
+#'
+#'
 
-fit_hill_modl <- function(Conc, Resp, Mask = NULL, pdir = c(1, -1), ...) {
+fit_hill_modl <- function(Conc, Resp, pdir = c(1, -1), ...) {
 
-  # need to test the input ....
+  args <- list(...)
+  if (!all(unique(pdir) %in% c(1, -1))) {rlang::abort("pdir has to be 1 and/or -1")}
+
   if (length(pdir) > 1) {
     result <- purrr::map(
-      pdir, ~ fit_hill_modl_in(Conc = Conc, Resp = Resp, Mask = Mask, pdir = .x, ...))
+      pdir, ~ do.call(
+        fit_hill_modl_in,
+        c(list(Conc = Conc, Resp = Resp, pdir = .x), args)
+        )
+    )
   } else {
     result <- list(
-      fit_hill_modl_in(Conc = Conc, Resp = Resp, Mask = Mask, pdir = pdir, ...))
+      do.call(
+        fit_hill_modl_in,
+        c(list(Conc = Conc, Resp = Resp, pdir = pdir), args)
+      )
+    )
   }
   result <- select_modl_aic(result)
   return(result)
 }
 
+#' Select one out of models based on AIC values.
+#'
+#' @param lmodls A list of models.
+#'
+#' @return One model output.
+#' @keywords internal
+#'
 select_modl_aic <- function(lmodls) {
 
   if(length(lmodls) > 1) {
@@ -69,6 +174,16 @@ select_modl_aic <- function(lmodls) {
   return(result)
 }
 
+#' Sort a list of models based on AIC values.
+#'
+#' The model with the lowest AIC value will become the first component of the list.
+#'
+#'
+#' @param lmodls A list of models.
+#'
+#' @return A sorted list of models.
+#' @keywords internal
+#'
 sort_modl_aic <- function(lmodls) {
 
     aics <- purrr::map_dbl(lmodls, ~ .x[['aic']])
@@ -77,21 +192,17 @@ sort_modl_aic <- function(lmodls) {
   return(result)
 }
 
-#' Fit Hill
+#' Fit the concentration-response data using the Hill equation for one direction.
 #'
-#' adjust the direction
+#' @inheritDotParams fit_hill_modl -pdir
+#' @param pdir The preferred direction, only one value is allowed.
+#'   1 is for the increasing direction and -1 is for the decreasing direction.
 #'
-#' @param Conc
-#' @param Resp
-#' @param Mask
-#' @param pdir allow only one
-#' @param ...
-#'
-#' @return
+#' @inherit fit_hill_modl return
 #' @keywords internal
 #'
 #'
-fit_hill_modl_in <- function(Conc, Resp, Mask = NULL, pdir = c(1, -1), ...) {
+fit_hill_modl_in <- function(Conc, Resp, pdir = c(1, -1), ...) {
 
   args <- list(...)
 
@@ -103,19 +214,15 @@ fit_hill_modl_in <- function(Conc, Resp, Mask = NULL, pdir = c(1, -1), ...) {
   hill_gw <- NA_real_
   hill_er <- NA_real_
 
-
-  # need to check Resp and Mask has the same length
-  cleand <- mask_resp_conc(Conc = Conc, Resp = Resp, Mask = Mask)
-  conc <- cleand$Conc
-  resp <- cleand$Resp
+  conc <- Conc
+  resp <- Resp
 
   # adjust the direction
   if (pdir == -1) resp <- resp*-1
 
   # replace the default config if needed
   config <- get_hill_fit_config(conc, resp)
-  config <- modifyList(config, args)
-
+  config <- .check_hill_args(config, args)
 
   # Input for optimization
   h <- config$theta
@@ -167,15 +274,23 @@ fit_hill_modl_in <- function(Conc, Resp, Mask = NULL, pdir = c(1, -1), ...) {
 
 
 
-#' Get the default config for the hill fit
+#' Get the default configurations for the Hill fit.
 #'
-#' @param Conc a vector of log10 conc
-#' @param Resp a vector of responses
-#' @param optimf default is tcplObjHill but can change to ObjHillnorm
+#' @param Conc A vector of log10 concentrations.
+#' @param Resp A vector of numeric responses.
+#' @param optimf The default optimized function is \code{tcplObjHill}
+#'   but can be changed to \code{ObjHillnorm}.
 #'
-#' @return a list of theta (inital values), f (optimf), ui (bound matrix), ci (bounds)
+#' @return A list of input configurations.
 #'
+#' \describe{
+#'   \item{theta}{initial values of parameters for Hill equation: tp, ga, gw, er}
+#'   \item{f}{the object function}
+#'   \item{ui}{the bound matrix}
+#'   \item{ci}{the bound constraints}
+#' }
 #' @export
+#' @seealso [tcpl::tcplObjHill()]
 #'
 get_hill_fit_config <- function(Conc, Resp, optimf = "tcplObjHill" ) {
 
@@ -193,7 +308,7 @@ get_hill_fit_config <- function(Conc, Resp, optimf = "tcplObjHill" ) {
 
   # contraint the estimate (need to compare with constraint matrix)
   hbnds <- c(0, -1.2*resp_max, # tp bounds
-             logc_min +log10(LBratio), -(logc_max + 0.5), # ga bounds
+             logc_min + log10(LBratio), -(logc_max + 0.5), # ga bounds
              0.3, -8) # gw bounds
 
   # starting parameters
@@ -235,11 +350,11 @@ get_hill_fit_config <- function(Conc, Resp, optimf = "tcplObjHill" ) {
 
 
 
-#' Guess the initial scaling factor
+#' Guess the initial scaling factor.
 #'
-#' @param Resp a vector of resps
+#' @param Resp A vector of resps.
 #'
-#' @return a initial scaling factor
+#' @return An initial scaling factor.
 #' @keywords internal
 
 get_est_error <- function(Resp) {
@@ -250,13 +365,13 @@ get_est_error <- function(Resp) {
 
 
 
-#' Adjust the conc and resp using the mask
+#' Adjust the conc and resp using the mask.
 #'
-#' @param Conc a vector of log conc
-#' @param Resp a vector of resp
-#' @param Mask a vector of 1/0 for masking
+#' @param Conc A vector of log10 concentrations.
+#' @param Resp A vector of responses.
+#' @param Mask A vector of 1/0 for masking.
 #'
-#' @return  a list of updated Conc and Resp
+#' @return  A list of updated Conc and Resp.
 #' @keywords internal
 #'
 mask_resp_conc <- function(Conc, Resp, Mask) {
@@ -264,24 +379,29 @@ mask_resp_conc <- function(Conc, Resp, Mask) {
   if (!is.null(Mask)) {
     Resp <- replace(Resp, as.logical(Mask), NA)
     ind <- which(!is.na(Resp))
-    Resp <- Resp[ind]
-    Conc <- Conc[ind]
+    Resp <- na.omit(Resp[ind])
+    Conc <- na.omit(Conc[ind])
   }
 
   return(list(Conc = Conc, Resp = Resp))
 }
 
 
-
-
-#' Fit a constant model using object function tcplObjCnst
+#' Fit responses using a constant model.
 #'
-#' @param Resp a vector of responses
-#' @param optimf object function, tcplObjCnst
+#' @param Resp A vector of numeric responses.
+#' @param optimf The object function, \code{tcplObjCnst}.
 #'
-#' @return a list of parameters, modl, fit (1,0), aic, er
-#' @keywords internal
+#' @return A list of output parameters from constant model fit.
 #'
+#' \describe{
+#'   \item{modl}{model type, i.e., cnst}
+#'   \item{fit}{fitable?, 1 or 0}
+#'   \item{aic}{AIC value}
+#'   \item{er}{scale term}
+#' }
+#'
+#' @seealso [tcpl::tcplObjCnst()]
 #'
 fit_cnst_modl <- function(Resp, optimf = "tcplObjCnst") {
 
