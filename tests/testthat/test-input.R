@@ -94,8 +94,8 @@ test_that("vehicle control data",  {
 })
 
 test_that("keep_sets argument", {
-  expect_error(.check_keep_sets(c("act_set", "xx")))
-  expect_length(.check_keep_sets(c("act_set", "act_set", "fp_set")), 2)
+  expect_error(.check_keep_sets(c("act_set", "xx"), c("act_set", "resp_set", "fp_set"), "act_set"))
+  expect_length(.check_keep_sets(c("act_set", "act_set", "fp_set"),  c("act_set", "resp_set", "fp_set"), "act_set"), 2)
 })
 
 test_that("check_result_sets", {

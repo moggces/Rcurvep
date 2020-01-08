@@ -3,12 +3,17 @@
 \docType{data}
 \name{zfishdev_act}
 \alias{zfishdev_act}
-\title{Zebrafish development endpoint activity results}
-\format{An object of class \code{list} of length 2.}
+\title{Activity output based on simulated datasets using zfishdev_all dataset}
+\format{A list of two named components: result and config.
+The result component is a list with one component: act_set.}
 \usage{
 zfishdev_act
 }
 \description{
-Zebrafish development endpoint activity results
+The data is an rcurvep object from the \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}}.
+See \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}} for the code to reproduce this dataset.
+}
+\seealso{
+\code{\link[=estimate_dataset_bmr]{estimate_dataset_bmr()}}
 }
 \keyword{datasets}

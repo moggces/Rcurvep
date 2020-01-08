@@ -1,39 +1,3 @@
-#CurveP for R - 2017
-#
-#ToDo / History
-#  30.04.2018 modified wAUC calculations for better scaling against diverse test ranges
-#
-#  10.18.2017 modified wAUC calculation to any scale of log-doses (could span negative and positive values both)
-#             this now requires TLOG constant to represent the log10(dose) at infinite dilution or at the limit-of-detection
-#             TLOG's default is -12 for assumed log10(M) scale) but could go as low as -24 (Avogadro number based)
-#             NB: e.g., if user wishes to use milliMolar dose units as input throughout, the n TLOG should be likewise adjutsed by adding 6,
-#             Additional output added (run settings)
-#
-#  10.16.2017 handling of non-numeric imput added (quits with message)
-#
-#  09.20.2017 curvecase of just above baseline: Conc <- c(-5.52 -5.00 -4.52 -4.00 -3.52), Resp <- c(0,5,0,0,5), if TRSH=MXDV=5, it will
-#              result in no correction but significant response (because MXDV is not exceeded, and threshold is also satisfied)
-#              Hence, TRSH should be always > MXDV. For TRSH <= MXDV, there may be non-monotonic points saved near threshold due to MXDV rescue.
-#
-#  07.24.2017 minor bug for slope estimation fixed
-#             EC50 added to output as explicit metric
-#
-#  07.10.2017 minor bug fixed in Impute() which caused POD invalidation in some cases of carryover/inverse curves
-#             15 additional cases of curves checked
-#
-#  07.05.2017 bugs fixed in get_monotonics() and in BLIP handling
-#
-#  07.03.2017 U-shape work check on 28099 case
-#  06.16.2017 small cosmetic change in get_monotonics()
-#
-#  05.26.2017 testing on "tox21-er-luc-bg1-4e2-agonist-p2_luc.Rdata" curves
-#
-#  removed DUMV comparison for Conc, since no reading from file, instead the user must provide clean input
-#
-#
-#
-#
-
 Impute <- function(lgC, V, L, JUNK = -999, strict = TRUE)
 {
   #returns estimated log conc., at which response level L is reached.
@@ -95,50 +59,55 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
   return (inters)
 }
 
-#' Curvep function
+#' The Curvep function to process one set of concentration-response data
 #'
-#' A function to process a given pair of concentration response data.
-#' @seealso  \code{\link{run_rcurvep}} \code{\link{combi_run_rcurvep}}
+#' The relationship between concentration and response has to be 1 to 1.
+#'   The function is the backbone of [run_rcurvep()] and [combi_run_rcurvep()].
 #'
-#' primary parameters:
+#' @param Conc Array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped.
+#' @param Resp Array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls.
+#' @param Mask array of 1/0 flags indicating invalidated measurements (default = NULL).
+#' @param TRSH Base(zero-)line threshold (default = 15).
+#' @param RNGE Target range of responses (default = -100).
+#' @param MXDV Maximum allowed deviation from monotonicity (default = 5).
 #'
-#' @param Conc array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped
-#' @param Resp array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls
-#' @param Mask array of 1/0 flags indicating invalidated measurements (default = NULL)
-#' @param TRSH base(zero-)line threshold (default = 15)
-#' @param RNGE target range of responses (default = -100)
-#' @param MXDV  maximum allowed deviation from monotonicity (default = 5)
+#' @param CARR Carryover detection threshold (default = 0, analysis skipped if set to 0)
+#' @param BSFT For baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0).
+#' @param USHP For u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0).
+#' @param TrustHi For equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE).
+#' @param StrictImp It prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE).
+#' @param DUMV A dummy value, default = -999.
+#' @param TLOG A scaling factor for calculating the wAUC, default = -24.
 #'
-#' secondary parameters:
-#'
-#' @param CARR carryover detection threshold (default = 0, analysis skipped if set to 0)
-#' @param BSFT for baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0)
-#' @param USHP for u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0)
-#' @param TrustHi for equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE)
-#' @param StrictImp prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE)
-#' @param DUMV a dummy value, default = -999
-#' @param TLOG a scaling factor for calculating the wAUC, default = -24
-#'
-#' @return a list with corrected concentration-response measurements and several calculated curve metrics
+#' @return A list with corrected concentration-response measurements and several calculated curve metrics.
 #' \itemize{
-#'   \item resp corrected responses
-#'   \item corr flags for corrections
-#'   \item ECxx effective concentration values at various thresholds
-#'   \item Cxx concentrations for various absolute response levels
-#'   \item Emax maximum effective concentration, slope of the mid-curve (b/w EC25 and EC75)
-#'   \item wConc, response-weighted concentration
-#'   \item wResp concentration-weighed response
-#'   \item POD point-of-departure (first concentration with response >TRSH)
-#'   \item AUC area-under-curve (in units of log-concentration X response)
-#'   \item wAUC AUC weighted by concentration range and POD / TLOG (-12)
-#'   \item wAUC_pre AUC weighted by concentration range and POD
-#'   \item nCorrected number of points corrected (basically, sum of flags in corr)
-#'   \item Comments warning and notes about the dose-response curve
-#'   \item Settings input parameters for this run
+#'   \item resp: corrected responses
+#'   \item corr: flags for corrections
+#'   \item ECxx: effective concentration values at various thresholds
+#'   \item Cxx: concentrations for various absolute response levels
+#'   \item Emax: maximum effective concentration, slope of the mid-curve (b/w EC25 and EC75)
+#'   \item wConc: response-weighted concentration
+#'   \item wResp: concentration-weighed response
+#'   \item POD: point-of-departure (first concentration with response >TRSH)
+#'   \item AUC: area-under-curve (in units of log-concentration X response)
+#'   \item wAUC: AUC weighted by concentration range and POD / TLOG (-24)
+#'   \item wAUC_pre: AUC weighted by concentration range and POD
+#'   \item nCorrected: number of points corrected (basically, sum of flags in corr)
+#'   \item Comments: warning and notes about the dose-response curve
+#'   \item Settings: input parameters for this run
 #' }
 #' @export
+#' @references{
+#'   \insertRef{PMID:20980217}{Rcurvep}\cr
+#'
+#'   \insertRef{PMID:27518631}{Rcurvep}
+#' }
+#' @seealso  [run_rcurvep()] and [combi_run_rcurvep()]
 #' @examples
+#'
 #' curvep(Conc = c(-8, -7, -6, -5, -4) , Resp = c(0, -3, -5, -15, -30))
+#'
+#'
 
 
 #[[Rccp::export]]
@@ -176,6 +145,42 @@ curvep <- function(Conc, Resp, Mask = NULL,
 #     nCorrected = number of points corrected (basically, sum of flags in corr)
 #     Comments = warning and notes about the dose-response curve
 #     Settings = input parameters for this run
+
+# CurveP for R - 2017
+#
+#ToDo / History
+#  30.04.2018 modified wAUC calculations for better scaling against diverse test ranges
+#
+#  10.18.2017 modified wAUC calculation to any scale of log-doses (could span negative and positive values both)
+#             this now requires TLOG constant to represent the log10(dose) at infinite dilution or at the limit-of-detection
+#             TLOG's default is -12 for assumed log10(M) scale) but could go as low as -24 (Avogadro number based)
+#             NB: e.g., if user wishes to use milliMolar dose units as input throughout, the n TLOG should be likewise adjutsed by adding 6,
+#             Additional output added (run settings)
+#
+#  10.16.2017 handling of non-numeric imput added (quits with message)
+#
+#  09.20.2017 curvecase of just above baseline: Conc <- c(-5.52 -5.00 -4.52 -4.00 -3.52), Resp <- c(0,5,0,0,5), if TRSH=MXDV=5, it will
+#              result in no correction but significant response (because MXDV is not exceeded, and threshold is also satisfied)
+#              Hence, TRSH should be always > MXDV. For TRSH <= MXDV, there may be non-monotonic points saved near threshold due to MXDV rescue.
+#
+#  07.24.2017 minor bug for slope estimation fixed
+#             EC50 added to output as explicit metric
+#
+#  07.10.2017 minor bug fixed in Impute() which caused POD invalidation in some cases of carryover/inverse curves
+#             15 additional cases of curves checked
+#
+#  07.05.2017 bugs fixed in get_monotonics() and in BLIP handling
+#
+#  07.03.2017 U-shape work check on 28099 case
+#  06.16.2017 small cosmetic change in get_monotonics()
+#
+#  05.26.2017 testing on "tox21-er-luc-bg1-4e2-agonist-p2_luc.Rdata" curves
+#
+#  removed DUMV comparison for Conc, since no reading from file, instead the user must provide clean input
+#
+#
+#
+#
 {
   if (!is.numeric(Conc))
   {

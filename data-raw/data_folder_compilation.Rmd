@@ -64,7 +64,7 @@ system.time(zfishdev_act <- combi_run_rcurvep(
   RNGE = 1000000, CARR = 20
 ))
 usethis::use_data(zfishdev_act, overwrite =  TRUE)
-out_dev_sum <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE)
+#out_dev_sum <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE)
 ```
 
 ## test set.seed and will the input be the same

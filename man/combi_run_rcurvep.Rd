@@ -2,42 +2,84 @@
 % Please edit documentation in R/rcurvep_combirun.R
 \name{combi_run_rcurvep}
 \alias{combi_run_rcurvep}
-\title{Run rcurvep on a base/simulated dataset with a combination of parameters}
+\title{Run Curvep on datasets of concentration-response data with a combination of Curvep parameters}
 \usage{
-combi_run_rcurvep(d, n_samples = NULL, vdata = NULL, mask = 0,
-  keep_sets = c("act_set", "resp_set", "fp_set"), ...)
+combi_run_rcurvep(
+  d,
+  n_samples = NULL,
+  vdata = NULL,
+  mask = 0,
+  keep_sets = c("act_set", "resp_set", "fp_set"),
+  ...
+)
 }
 \arguments{
-\item{d}{a dataset such as \code{\link{zfishdev}} and \code{\link{zfishbeh}}}
+\item{d}{Datasets with concentration-response data.
+Examples are \link{zfishbeh} and \link{zfishdev}.}
 
-\item{n_samples}{NULL (default) or an int to indicate the number of resp per conc to simulate}
+\item{n_samples}{NULL (default) for not to simulate responses or an integer number to indicate the number of responses per concentration to simulate.}
 
-\item{vdata}{NULL (default) or a dbl vector of responses in vehicle control wells; experimental feature}
+\item{vdata}{NULL (default) for not to simulate responses or a vector of numeric responses in vehicle control wells to use as error.
+This parameter only works when n_samples is not NULL; an experimental feature.}
 
-\item{mask}{0 (default) for not using mask
-use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.}
+\item{mask}{Default = 0, for no mask (values in the mask column all 0).
+Use a vector of integers to mask the responses:
+1 to mask the response at the highest concentration;
+2 to mask the response at the second highest concentration, and so on.
+If mask column exists, the setting will be ignored.}
 
-\item{keep_sets}{act_set + (resp_set or fp_set) or all three
- \itemize{
-  \item act_set: activity data
-  \item resp_set: response data
-  \item fp_set: fingerprint data
+\item{keep_sets}{The types of output to be reported.
+Allowed values: act_set, resp_set, fp_set. Multiple values are allowed.
+act_set is the must.
+\itemize{
+\item act_set: activity data
+\item resp_set: response data
+\item fp_set: fingerprint data
 }}
 
-\item{...}{a list of settings; are used to overwrite the default values in curvep_defaults()}
+\item{...}{Curvep settings.
+See \code{\link[=curvep_defaults]{curvep_defaults()}} for allowed parameters.
+These can be used to overwrite the default values.}
 }
 \value{
-a list with two components: result (a named list, based on keep_data), config
+An rcurvep object. It has two components: result, config
+The result component is also a list of output sets depending on the parameter, \emph{keep_sets}.
+The config component is a \emph{curvep_config} obejct.\cr
+
+Often used columns in the \emph{act_set}: AUC (area under the curve), wAUC (weighted AUC),
+POD (point-of-departure), EC50 (Half maximal effective concentration),
+nCorrected (number of corrected points).
 }
 \description{
-A wrapper function combining \code{\link{create_dataset}}, \code{\link{run_rcurvep}}
+It simplifies the steps of \code{\link[=run_rcurvep]{run_rcurvep()}} by wrapping the \code{\link[=create_dataset]{create_dataset()}} in the function.
 }
 \examples{
 
 data(zfishbeh)
 
-out <- combi_run_rcurvep(zfishbeh, n_samples = 2, TRSH = c(5, 10), mask = 1, keep_sets = "act_set")
+# 2 simulated sample curves +
+# using two thresholds +
+# mask the response at the higest concentration
+# only to output the act_set
 
+out <- combi_run_rcurvep(
+  zfishbeh,
+  n_samples = 2,
+  TRSH = c(5, 10),
+  mask = 1,
+  keep_sets = "act_set")
 
+# create the zfishdev_act dataset
+\donttest{
+ set.seed(300)
+ data(zfishdev_all)
+ zfishdev_act <- combi_run_rcurvep(
+   zfishdev_all, n_samples = 100, keep_sets = c("act_set"),TRSH = seq(5, 95, by = 5),
+   RNGE = 1000000, CARR = 20
+ )
+}
 
+}
+\seealso{
+\code{\link[=run_rcurvep]{run_rcurvep()}}
 }

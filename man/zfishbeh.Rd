@@ -3,13 +3,13 @@
 \docType{data}
 \name{zfishbeh}
 \alias{zfishbeh}
-\title{Zebrafish behavior endpoint data}
-\format{a tbl with columns:
-\itemize{
-\item endpoint: toxicity endpoints
-\item chemical: chemical information
-\item concs: concentrations in log10(M) format
-\item resps: normalized responses with baseline = 0
+\title{Subsets of concentration response datasets from zebrafish neurotoxicity assays}
+\format{A tibble with 2123 rows and 4 columns:
+\describe{
+\item{endpoint}{endpoin name}
+\item{chemical}{chemical name + CASRN}
+\item{conc}{concentrations in log10(M) format}
+\item{resp}{responses after normalized using the vehicle control on each plate}
 }}
 \source{
 Biobide study S‐BBD‐0017/15
@@ -18,6 +18,7 @@ Biobide study S‐BBD‐0017/15
 zfishbeh
 }
 \description{
-Data are processed from Biobide behavior plate data
+The datasets contain 11 toxicity endpoints and 2 chemicals.
+The responses have been normalized so that the baseline is 0.
 }
 \keyword{datasets}

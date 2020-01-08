@@ -2,28 +2,28 @@
 % Please edit documentation in R/rcurvep_onerun.R
 \name{curvep_defaults}
 \alias{curvep_defaults}
-\title{Default configuration for curvep}
+\title{Default parameters of Curvep}
 \usage{
 curvep_defaults()
 }
 \value{
-a list of parameters with class as curvep_config
+A list of parameters with class as curvep_config.
 
 \itemize{
-  \item TRSH base(zero-)line threshold
-  \item RNGE arget range of responses
-  \item MXDV maximum allowed deviation from monotonicity
-  \item CARR carryover detection threshold (analysis skipped if set to 0)
-  \item BSFT for baseline shift issue, min.#points to detect baseline shift (analysis skipped if set to 0)
-  \item USHP for u-shape curves, min.#points to avoid flattening (analysis skipped if set to 0)
-  \item TrustHi for equal sets of corrections, trusts those retaining measurements at high concentrations
-  \item StrictImp prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc.
-  \item DUMV dummy value for inactive (not suggested to modify)
-  \item TLOG denominator for calculation wAUC (not suggested to modify)
+\item TRSH: (default = 15) base(zero-)line threshold
+\item RNGE: (default = -1000000, decreasing) target range of responses
+\item MXDV: (default = 5) maximum allowed deviation from monotonicity
+\item CARR: (default = 0) carryover detection threshold (analysis skipped if set to 0)
+\item BSFT: (default = 3) for baseline shift issue, min.#points to detect baseline shift (analysis skipped if set to 0)
+\item USHP: (default = 4) for u-shape curves, min.#points to avoid flattening (analysis skipped if set to 0)
+\item TrustHi: (default = TRUE)for equal sets of corrections, trusts those retaining measurements at high concentrations
+\item StrictImp: (default = TRUE) prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc.
+\item DUMV: (default = -999) dummy value for inactive (not suggested to modify)
+\item TLOG: (default = -24) denominator for calculation wAUC (not suggested to modify)
 }
 }
 \description{
-curvep parameters
+Default parameters of Curvep
 }
 \examples{
 
@@ -37,4 +37,7 @@ custom_settings
 
 
 
+}
+\seealso{
+\code{\link[=curvep]{curvep()}}
 }

@@ -1,32 +1,59 @@
-#' Estimate BMR for each dataset
+#' Estimate benchmark response (BMR) for each dataset
 #'
-#' @param d the output from \code{\link{summarize_rcurvep_output}}
-#' @param p1 default = NULL, or an int to manually set the first index of line
-#' @param p2 default = NULL, or an int to manually set the last index of line
-#' @param plot default = TRUE, plot the diagnostic plot
-#' @return a list with two components: stats and outcome
+#' Currently two methods have been implemented to get the "keen-point" from the variance(y) - threshold(x) curve.
+#' One is to use the original y values to draw a straight line between the lowest x value (p1) to highest x value (p2).
+#' The knee-point is the x that has the longest distance to the line.
+#' The other one is to fit the data first then use the fitted responses to do the same analysis.
+#' Currently the first method is preferred.
+#'
+#' @details
+#'
+#' The estimated BMR can be used in the calculation of POD.
+#' For example, if bmr = 25.
+#' For Curvep, `combi_run_rcurvep(zfishbeh, TRSH = 25)`.\cr
+#' For Hill fit, `summarize_fit_output(run_fit(zfishbeh, modls = "hill"), thr_resp = 25, extract_only = TRUE)`.
+#'
+#' @param d The rcurvep object with multiple samples and TRSHs. See [combi_run_rcurvep()] for an example.
+#' @param p1 Default = NULL, or an integer value to manually set the first index of line.
+#' @param p2 Default = NULL, or an integer value to manually set the last index of line.
+#' @param plot Default = TRUE, plot the diagnostic plot.
+#' @return A list with two components: stats and outcome.
+#'
+#' \itemize{
+#'   \item stats: a tibble, including pooled variance (pvar),
+#'   fitted responses (y_exp_fit, y_lm_fit), distance to the line (dist2l)
+#'   \item outcome: a tibble, including estimated BMRs (bmr)
+#' }
+#' Suffix in the *stats* and *outcome* tibble: _ori (original values), _exp(exponential fit).
+#' prefix in the *outcome* tibble: cor_ (correlation between the fitted responses and the orignal responses),
+#' bmr_ (benchmark response), qc (quality control).
+#'
 #' @export
-#'
+#' @seealso [cal_knee_point()], [combi_run_rcurvep()]
 #' @examples
 #'
+#' # no extra cleaning
 #' data(zfishdev_act)
-#'
-#' # use the highest concentration to replace value of the inactive
-#' sumd <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE)
-#'
-#' bmr_out <- estimate_dataset_bmr(sumd, plot = FALSE)
+#' bmr_out <- estimate_dataset_bmr(zfishdev_act, plot = FALSE)
 #' plot(bmr_out)
+#'
+#' # if want to do extra cleaning...
+#' actm <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE, inactivate = "CARRY_OVER")
+#'
+#' bmr_out <- estimate_dataset_bmr(actm, plot = FALSE)
+#'
 #'
 estimate_dataset_bmr <- function(d, p1 = NULL, p2 = NULL, plot = TRUE) {
 
   # check input data
   d <- .check_bmr_input(d)
 
+
   # get the base columns (parameter columns + endpoint + chemical, no sample_id)
   base_cols <- get_base_cols(d$result)
 
   # get the activity data
-  act_set <- d$result$act_set
+  act_set <- make_act_na_highconc_in(d$result$act_set) # make act NA as highest conc
 
   # calculate the pooled variance for each dataset
   pvar_datasets <- cal_dataset_pvar(act_set, base_cols)
@@ -53,11 +80,12 @@ estimate_dataset_bmr <- function(d, p1 = NULL, p2 = NULL, plot = TRUE) {
 
 #' Calculate pooled variance column
 #'
-#' @param act_set summarize_rcurvep_output()$result$act_set
+#' @param act_set The act_set. There
 #' @param base_cols parameter columns + endpoint + chemical, no sample_id
 #'
 #' @return a tibble with parameter columns + endpoint + pvar
 #' @keywords internal
+#' @noRd
 
 cal_dataset_pvar <- function(act_set, base_cols) {
 
@@ -85,24 +113,25 @@ cal_dataset_pvar <- function(act_set, base_cols) {
 
 #' Calculate knee point for each dataset
 #'
-#' @param pvard output cal_dataset_pvar()
-#' @param base_cols parameter columns + endpoint + chemical, no sample_id
-#' @param p1 NULL, or an int to manually set the first index of line
-#' @param p2 NULL, or an int to manually set the last index of line
+#' @param pvard output `cal_dataset_pvar()`.`
+#' @param base_cols parameter columns + endpoint + chemical, no sample_id.
+#' @param p1 NULL, or an int to manually set the first index of line.
+#' @param p2 NULL, or an int to manually set the last index of line.
 #'
 #' @return the pvard + a new column knee_out
 #' @keywords internal
+#' @noRd
 #'
 #'
 cal_dataset_knee <- function(pvard, base_cols, p1, p2) {
   base_cols_f <- base_cols[!base_cols %in% c("chemical", "TRSH")]
-  knees <- pvard %>%
+  suppressWarnings(knees <- pvard %>%
     tidyr::nest(-c(base_cols_f), .key = "input") %>%
     dplyr::mutate(
       knee_out = purrr::map(
         .data$input,
         cal_knee_point, xaxis = "TRSH", yaxis = "pvar", p1 = p1, p2 = p2, plot = FALSE)
-    )
+    ))
   return(knees)
 }
 
@@ -113,37 +142,36 @@ cal_dataset_knee <- function(pvard, base_cols, p1, p2) {
 #'
 #' @return a tibble
 #' @keywords internal
-#'
+#' @noRd
 #'
 unnest_knee_data <- function(kneed, type = c("stats", "outcome")) {
-  result <- kneed %>%
+  suppressWarnings(result <- kneed %>%
     dplyr::mutate(temp = purrr::map(.data$knee_out, ~ .x[[type]])) %>%
     dplyr::select(-.data$knee_out, -.data$input) %>%
-    tidyr::unnest()
+    tidyr::unnest())
   return(result)
 }
 
 
-#' Calculate the knee point on the exponential-like curve using various approaches
+#' Calculate the knee point on the exponential-like curve
 #'
-#' Two approaches are available: original value-based and exponential fit value-based
 #'
-#' @param d a tibble
-#' @param xaxis a chr column name in the `d` to be the x-axis in the exponential-like curve
-#' @param yaxis a chr column name in the `d` to be the y-axis in the exponential-like curve
-#' @param p1 default = NULL, or an int to manually set the first index of line
-#' @param p2 default = NULL, or an int to manually set the last index of line
-#' @param plot default = TRUE, plot the diagnostic plot
+#' @param d A tibble.
+#' @inheritParams estimate_dataset_bmr
+#' @param xaxis The column name in the `d` to be the x-axis in the exponential-like curve
+#' @param yaxis The column name in the `d` to be the y-axis in the exponential-like curve
 #'
-#' @return a list with two components: stats and outcome
+#' @inherit estimate_dataset_bmr description return
 #' @export
-#' @importFrom magrittr %>%
+#' @seealso [estimate_dataset_bmr()]
 #'
 #' @examples
 #'
 #' inp <- data.frame(
 #' x = seq(5, 95, by = 5),
-#' y = c(0.0537, 0.0281, 0.0119, 0.0109, 0.0062, 0.0043, 0.0043, 0.0042, 0.0041, 0.0043, 0.0044, 0.0044, 0.0046, 0.0051, 0.0055, 0.0057, 0.0072, 0.0068, 0.0035)
+#' y = c(0.0537, 0.0281, 0.0119, 0.0109, 0.0062, 0.0043, 0.0043, 0.0042,
+#' 0.0041, 0.0043, 0.0044, 0.0044, 0.0046, 0.0051,
+#' 0.0055, 0.0057, 0.0072, 0.0068, 0.0035)
 #' )
 #'
 #' out <- cal_knee_point(inp,"x", "y", plot = FALSE)
@@ -186,6 +214,7 @@ cal_knee_point <- function(d, xaxis, yaxis, p1 = NULL, p2 = NULL, plot = TRUE) {
 #'
 #' @return a tibble with generate columns
 #' @keywords internal
+#' @noRd
 #'
 
 create_bmr_report <- function(distd, xvar, yvar) {
@@ -217,6 +246,7 @@ create_bmr_report <- function(distd, xvar, yvar) {
 #'
 #' @return a character string either of three values: OK, cautionary, check
 #' @keywords internal
+#' @noRd
 
 qc_data <- function(exp_cor, linear_cor) {
 
@@ -250,6 +280,7 @@ qc_data <- function(exp_cor, linear_cor) {
 #'
 #' @return the original d + y_exp_fit + y_lm_fit columns
 #' @keywords internal
+#' @noRd
 #'
 add_fitted_y <- function(d, xvar, yvar) {
   result <- d %>%
@@ -272,6 +303,7 @@ add_fitted_y <- function(d, xvar, yvar) {
 #'
 #' @return a original fitd + 6 new columns
 #' @keywords internal
+#' @noRd
 #'
 add_dist_2_line <- function(fitd, xvar, yvar, p1, p2) {
 
@@ -301,6 +333,7 @@ add_dist_2_line <- function(fitd, xvar, yvar, p1, p2) {
 #'
 #' @return a tibble with a new column, curva
 #' @keywords internal
+#' @noRd
 #'
 add_curvature <- function(d, xvar, yvar) {
   result <- d %>%
@@ -321,6 +354,7 @@ add_curvature <- function(d, xvar, yvar) {
 #'
 #' @return an nls object
 #' @keywords internal
+#' @noRd
 #'
 cal_exponential_fit <- function(thres, vars) {
 
@@ -339,6 +373,7 @@ cal_exponential_fit <- function(thres, vars) {
 #'
 #' @return an lm object
 #' @keywords internal
+#' @noRd
 #'
 cal_linear_fit <- function(thres, vars) {
 
@@ -359,6 +394,7 @@ cal_linear_fit <- function(thres, vars) {
 #'
 #' @return a vector of curvature at each x point
 #' @keywords internal
+#' @noRd
 
 cal_curvature <- function(thres, vars) {
 
@@ -381,6 +417,7 @@ cal_curvature <- function(thres, vars) {
 #'
 #' @return a vector of curvature at each x point
 #' @keywords internal
+#' @noRd
 
 cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
 
@@ -436,6 +473,7 @@ cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
 #'
 #' @return a single value from the thres
 #' @keywords internal
+#' @noRd
 #'
 get_thres_at_max_dist2l <- function(thres, dist2l) {
   ind_max <- thres[which.max(dist2l)]

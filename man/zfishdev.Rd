@@ -3,14 +3,15 @@
 \docType{data}
 \name{zfishdev}
 \alias{zfishdev}
-\title{Zebrafish development endpoint data}
-\format{a tbl with columns:
-\itemize{
-\item endpoint: toxicity endpoints
-\item chemical: chemical information
-\item concs: concentrations in log10(M) format
-\item n_in: number of incidence
-\item N: number of animals
+\title{Subsets of concentration response datasets from zebrafish developmental toxicity assays}
+\format{A tibble with 96 rows and 5 columns:
+
+\describe{
+\item{endpoint}{endpoin name + at time point measured}
+\item{chemical}{chemical name + CASRN}
+\item{conc}{concentrations in log10(M) format}
+\item{n_in}{number of incidence}
+\item{N}{number of embryos}
 }}
 \source{
 Biobide study S-BBD-00016/15
@@ -19,6 +20,6 @@ Biobide study S-BBD-00016/15
 zfishdev
 }
 \description{
-Data are processed from Biobide development plate incidence data
+The datasets contain 4 toxicity endpoints and 3 chemicals.
 }
 \keyword{datasets}

@@ -2,33 +2,55 @@
 % Please edit documentation in R/rcurvep_onerun.R
 \name{run_rcurvep}
 \alias{run_rcurvep}
-\title{Run rcurvep on a base dataset}
+\title{Run Curvep on datasets of concentration-response data}
 \usage{
-run_rcurvep(d, mask = 0, config = curvep_defaults(),
-  keep_sets = c("act_set", "resp_set", "fp_set"), ...)
+run_rcurvep(
+  d,
+  mask = 0,
+  config = curvep_defaults(),
+  keep_sets = c("act_set", "resp_set", "fp_set"),
+  ...
+)
 }
 \arguments{
-\item{d}{a dataset with columns: endpoint, chemical, conc, and resp, mask (optional) (see \code{\link{zfishbeh}})}
+\item{d}{Datasets with columns: endpoint, chemical, conc, and resp, mask (optional)
+Example datasets as \link{zfishbeh}.
+It is required that the baseline of responses in the resp column to be 0.}
 
-\item{mask}{(default = 0, not using mask); if mask column exists, the setting will be ignored
-use a vector of integers to mask the resps, 1 to mask resp at the highest conc, 2 to mask resp at the second highest conc, and so on.}
+\item{mask}{Default = 0, for no mask (values in the mask column all 0).
+Use a vector of integers to mask the responses:
+1 to mask the response at the highest concentration;
+2 to mask the response at the second highest concentration, and so on.
+If mask column exists, the setting will be ignored.}
 
-\item{config}{default values are by curvep_defaults()}
+\item{config}{Default configurations set by \code{\link[=curvep_defaults]{curvep_defaults()}}.}
 
-\item{keep_sets}{act_set + (resp_set or fp_set) or all three
+\item{keep_sets}{The types of output to be reported.
+Allowed values: act_set, resp_set, fp_set. Multiple values are allowed.
+act_set is the must.
 \itemize{
-  \item act_set: activity data
-  \item resp_set: response data
-  \item fp_set: fingerprint data
+\item act_set: activity data
+\item resp_set: response data
+\item fp_set: fingerprint data
 }}
 
-\item{...}{a list of settings; can be used to overwrite the default values in curvep_defaults()}
+\item{...}{Curvep settings.
+See \code{\link[=curvep_defaults]{curvep_defaults()}} for allowed parameters.
+These can be used to overwrite the default values.}
 }
 \value{
-a rcurvep object; it has two components: result, config
+An rcurvep object. It has two components: result, config
+The result component is also a list of output sets depending on the parameter, \emph{keep_sets}.
+The config component is a \emph{curvep_config} obejct.\cr
+
+Often used columns in the \emph{act_set}: AUC (area under the curve), wAUC (weighted AUC),
+POD (point-of-departure), EC50 (Half maximal effective concentration),
+nCorrected (number of corrected points).
 }
 \description{
-Run rcurvep on a base dataset
+The concentration-response relationship per endpoint and chemical has to be 1-to-1.
+If not, use \code{\link[=create_dataset]{create_dataset()}} for pre-processing or
+use \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}}, which has both pre-processing and more flexible parameter controls.
 }
 \examples{
 
@@ -38,11 +60,14 @@ d <- create_dataset(zfishbeh)
 # default
 out <- run_rcurvep(d)
 
-# change THR
+# change TRSH
 out <- run_rcurvep(d, TRSH = 30)
 
 # mask response at highest and second highest concentration
 out <- run_rcurvep(d, mask = c(1, 2))
 
 
+}
+\seealso{
+\code{\link[=create_dataset]{create_dataset()}}, \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}}, \code{\link[=curvep_defaults]{curvep_defaults()}}.
 }

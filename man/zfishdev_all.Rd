@@ -3,12 +3,18 @@
 \docType{data}
 \name{zfishdev_all}
 \alias{zfishdev_all}
-\title{Zebrafish development data for all chemicals}
-\format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 512 rows and 5 columns.}
+\title{Full sets of concentration response datasets from zebrafish developmental toxicity assays}
+\format{A tibble with 512 rows and 5 columns:}
+\source{
+Biobide study S-BBD-00016/15
+}
 \usage{
 zfishdev_all
 }
 \description{
-Zebrafish development data for all chemicals
+The datasets contain 4 toxicity endpoints and 32 chemicals.
+}
+\seealso{
+\link{zfishdev}
 }
 \keyword{datasets}
