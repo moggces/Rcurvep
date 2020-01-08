@@ -1,5 +1,6 @@
 #_onerun
-.check_dat_base  <- function(dat)
+#_onerun(hill)
+.check_dat_base  <- function(dat, check_one_concresp = TRUE)
 {
   cols_ori <- colnames(dat)
   cols_stand <- c("endpoint", "chemical", "conc", "resp")
@@ -9,7 +10,7 @@
   dat <- dat[, cols_inter]
   cols_removed <- setdiff(cols_ori, cols_inter)
   if (length(cols_removed) != 0) {
-    rlang::warn(stringr::str_glue("{cols_removed} are removed in the input for run_rcurvep()"))
+    rlang::warn(stringr::str_glue("{cols_removed} are removed in the input"))
   }
   cols <- colnames(dat)
 
@@ -17,14 +18,18 @@
   if (!(all(rlang::has_name(dat, c(cols_stand, "mask"))) && length(cols) == 5))
   {
     if (!(all(rlang::has_name(dat, c(cols_stand))) && length(cols) == 4)) {
-      rlang::abort("dataset needs to have endpoint, chemical, conc, resp, mask (optional) columns")
+      rlang::abort(
+        "dataset needs to have endpoint, chemical, conc, resp, mask (optional) columns"
+      )
     }
   }
 
-  dat2 <- dplyr::count(dat, .data$endpoint, .data$chemical, .data$conc)
-  if (sum(dat2$n) != nrow(dat2))
-  {
-    rlang::abort("one endpoint-chemical-concentration pair can have only one response. Use combi_run_rcurvep() instead")
+  if (check_one_concresp) {
+    dat2 <- dplyr::count(dat, .data$endpoint, .data$chemical, .data$conc)
+    if (sum(dat2$n) != nrow(dat2))
+    {
+      rlang::abort("one endpoint-chemical-concentration pair can have only one response. Use combi_run_rcurvep() instead")
+    }
   }
 
   return(dat)
@@ -160,13 +165,31 @@
 }
 
 #_onerun, _combirun
-.check_keep_sets <- function(keep_sets) {
+# .check_keep_sets <- function(keep_sets) {
+#   keep_sets <- unique(keep_sets)
+#   if (length(keep_sets) > 3 || !all(keep_sets %in% c("act_set", "resp_set", "fp_set"))) {
+#     rlang::abort("Only a combination of act_set, resp_set, fp_set is allowed")
+#   }
+#   if (!'act_set' %in% keep_sets) {
+#     rlang::abort("act_set is needed")
+#   }
+#   return(keep_sets)
+# }
+
+#_onerun, _combirun, _onerun(hill)
+.check_keep_sets <- function(keep_sets, allowed_sets, must_set) {
   keep_sets <- unique(keep_sets)
-  if (length(keep_sets) > 3 || !all(keep_sets %in% c("act_set", "resp_set", "fp_set"))) {
-    rlang::abort("Only a combination of act_set, resp_set, fp_set is allowed")
+  if (length(keep_sets) > length(allowed_sets) || !all(keep_sets %in% allowed_sets)) {
+    sets <- stringr::str_c(allowed_sets, collapse = " ")
+    rlang::abort(
+      stringr::str_glue(
+        "Only a combination {sets} is allowed.")
+    )
   }
-  if (!'act_set' %in% keep_sets) {
-    rlang::abort("act_set is needed")
+  if (!must_set %in% keep_sets) {
+    rlang::abort(
+      stringr::str_glue("{must_set} is needed.")
+    )
   }
   return(keep_sets)
 }
@@ -192,10 +215,10 @@
 
 #_bmr
 .check_bmr_input <- function(d) {
-  if (!all(c('result', 'config') %in% names(d))) {
-    rlang::abort("the input is not a names list with result and config components.\nPlease see summarize_rcurvep_output()")
-  } else if (sum(is.na(d$result$act_set$POD)) > 0) {
-    rlang::abort("NA is not allowed in the POD column.\nPlease summarize_rcurvep_output()")
+  d <- .check_class(d, "rcurvep", "not a rcurvep object")
+  if (!rlang::has_name(d$result$act_set, "sample_id")) {
+    rlang::abort("The input act_set needs to have multiple samples (sample_id).
+                 Please set n_samples in combi_run_rcurvep()")
   }
   return(d)
 }
@@ -220,7 +243,7 @@
   return(result)
 }
 
-#_print, _plot
+#_print, _plot, _bmr
 .check_class <- function(obj, class_name, error_message) {
   if ( !class_name %in% class(obj) )
   {
@@ -230,16 +253,29 @@
 }
 
 #_hillbase
-.check_concresp <- function(conc, resp, mask) {
-  outd <- mask_resp_conc(conc, resp, mask)
-  new_conc <- outd$Conc
-  new_resp <- outd$Resp
-  if (length(new_conc) != length(new_resp)) {
-    rlang::abort("the length of Conc and Resp is not the same")
-  } else if (length(new_conc) < 4) {
-    rlang::abort("at least four resps are needed")
+.check_mask_on_concresp <- function(conc, resp, mask) {
+
+  result <- list(Conc = conc, Resp = resp)
+
+  len_inp <- purrr::map_dbl(list(conc, resp), length)
+  if (length(unique(len_inp)) != 1 ) {
+    rlang::abort("the length of Conc Resp is not the same.")
   }
-  return(outd)
+
+  if (!is.null(mask)) {
+    if (length(mask) != length(conc)) {
+      rlang::abort("the length of Conc Resp Mask is not the same.")
+    }
+    result <- mask_resp_conc(conc, resp, mask)
+    conc <- result$Conc
+    resp <- result$Resp
+  }
+
+  if (length(conc) < 4) {
+    rlang::abort("at least four resps are needed.")
+  }
+
+  return(result)
 }
 
 #_hillbase
@@ -260,3 +296,4 @@
   }
   return(args)
 }
+

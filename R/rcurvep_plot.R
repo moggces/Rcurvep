@@ -1,18 +1,15 @@
 #' Plot BMR diagnostic curves
 #'
-#' @param x the rcurvep_bmr object (see\code{\link{estimate_dataset_bmr}})
-#' @param ... n_in_page, number of endpoints in a page
+#' @param x The rcurvep_bmr object from [estimate_dataset_bmr()].
+#' @param ... Allowed values: n_in_page, number of endpoints in a page.
 #'
-#' @return a ggplot object
+#' @return A ggplot object.
 #' @export
 #'
 #' @examples
+#'
 #' data(zfishdev_act)
-#'
-#' # use the highest concentration to replace value of the inactive
-#' sumd <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE)
-#'
-#' bmr_out <- estimate_dataset_bmr(sumd, plot = FALSE)
+#' bmr_out <- estimate_dataset_bmr(zfishdev_act, plot = FALSE)
 #' plot(bmr_out)
 #'
 plot.rcurvep_bmr <- function(x, ...) {
@@ -54,6 +51,7 @@ plot.rcurvep_bmr <- function(x, ...) {
 #'
 #' @return a tibble with type, fit_type, intercept, slope
 #' @keywords internal
+#' @noRd
 #'
 get_dataset_linecoeff <- function(statsd, fit_type = c("ori", "exp")) {
 
@@ -63,13 +61,13 @@ get_dataset_linecoeff <- function(statsd, fit_type = c("ori", "exp")) {
   }
 
   # get intercept and slope
-  result <- statsd %>%
+  suppressWarnings(result <- statsd %>%
     tidyr::nest(-c(!!!nest_cols), .key = "input") %>%
     dplyr::mutate(
       temp = purrr::pmap(., ~ get_p1_p2_linecoeff(..4, "TRSH", "pvar", ..2, ..3))
     ) %>%
     dplyr::select(-.data$input) %>%
-    tidyr::unnest()
+    tidyr::unnest())
 
   # add the type
   result <- result %>%
@@ -91,7 +89,7 @@ get_dataset_linecoeff <- function(statsd, fit_type = c("ori", "exp")) {
 #'
 #' @return a tibble with some columns are united
 #' @keywords internal
-#'
+#' @noRd
 #'
 add_facet_endpoint_col <- function(statsd) {
   id <- which(colnames(statsd) %in% "endpoint")
@@ -108,6 +106,7 @@ add_facet_endpoint_col <- function(statsd) {
 #'
 #' @return a tibble facet_endpoint, TRSH, pvar, dist2l_ori, dist2l_exp, y_exp_fit
 #' @keywords internal
+#' @noRd
 #'
 create_bmrplot_based <- function(statsd) {
 
@@ -136,6 +135,7 @@ create_bmrplot_based <- function(statsd) {
 #'
 #' @return a list, each component has the facet_endpoints in a page
 #' @keywords internal
+#' @noRd
 #'
 get_facet_endpoints_in_page <- function(plotd, n_in_page) {
   new_ends <- unique(plotd[['facet_endpoint']])
@@ -155,6 +155,7 @@ get_facet_endpoints_in_page <- function(plotd, n_in_page) {
 #'
 #' @return a data frame with intercept and slope columns
 #' @keywords internal
+#' @noRd
 #'
 #'
 get_p1_p2_linecoeff <- function(dd, xvar, yvar, p1, p2) {
@@ -182,6 +183,7 @@ get_p1_p2_linecoeff <- function(dd, xvar, yvar, p1, p2) {
 #'
 #' @return a ggplot object
 #' @keywords internal
+#' @noRd
 
 plot_diagnostic <- function(plotd, lined, endpoints) {
   # filter data

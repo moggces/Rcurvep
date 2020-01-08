@@ -1,35 +1,55 @@
-#' Clean and summarize the output of rcurvep
+#' Clean and summarize the output of rcurvep object
 #'
-#' 1. adds an hit column in the act_set
-#' 2. unhit (make result as inactive) if the Comments column contains a certain string
-#' 3. make NA in the potency related columns as highest tested concentration
-#' 4. summarize the results based on the ci_level
+#' @details
+#' The function can perform the following tasks:
+#' \enumerate{
+#'   \item add an column, hit, in the *act_set*
+#'   \item unhit (make result as inactive) if the Comments column contains a certain string
+#'   \item summarize the results
+#'}
+#' The curve is considered as "hit" if its responses are monotonic after processing by Curvep.
+#' However, often, if the curve is "INVERSE" (yet monotonic) is not considered as an active curve.
+#' By using the information in the Comments column, we can "unhit" these cases.
 #'
-#' @param d the list from the \code{\link{combi_run_rcurvep}} or \code{\link{run_rcurvep}}
-#' @param act_modifier a character string, default = NULL, to make the curve with this string in the Comments column as inactive. The most common case to unhit is the "INVERSE" curves.
-#' @param ci_level default = 0.95 (95 percent of confidence interval)
-#' @param clean_only default = FALSE, only the 1st, 2nd, 3rd task will be performed
+#' When (clean_only = FALSE, default), a tibble, act_summary is generated with confidence intervals of the activity metrics.
+#' The quantile approach is used to calculate the confidence interval.
+#' For potency activity metrics, if value is NA, highest tested concentration is used in the summary.
+#' For other activity metrics, if value is NA, 0 is used in the summary.
 #'
-#' @return the original list (with modified components) + act_summary
+#'
+#' @param d The rcurvep object from [combi_run_rcurvep()] and [run_rcurvep()].
+#' @param inactivate A character string, default = NULL,
+#'   to make the curve with this string in the Comments column as inactive.
+#' @param ci_level Default = 0.95 (95 percent of confidence interval).
+#' @param clean_only Default = FALSE, only the 1st, 2nd task will be performed (see Details).
+#'
+#' @return A list of named components: result and config (and act_summary).
+#'   The result and config are the copy of the input d (but with modifications if *inactivate* is not NULL).
+#'   If (clean_only = FALSE), an *act_summary* is added.
+#'
+#'   Suffix meaning in column names in *act_summary*: med (median), cil (lower end confidence interval),
+#'   ciu (higher end confidence interval)
+#'   Often used columns in *act_summary*: n_curves (number of curves used in summary), hit_confidence (fraction of active in n_curves)
+#'
 #' @export
-#'
+#' @seealso [combi_run_rcurvep()], [run_rcurvep()]
 #' @examples
 #'
 #' data(zfishbeh)
 #'
-#' # base dataset
+#' # original datasets
 #' out <- combi_run_rcurvep(zfishbeh, n_samples = NULL, TRSH = c(5, 10))
 #' out_res <- summarize_rcurvep_output(out)
 #'
-#' # base dataset + remove comment has "INVERSE"
-#' out <- summarize_rcurvep_output(out, act_modifier = "INVERSE")
+#' # unhit when comment has "INVERSE"
+#' out <- summarize_rcurvep_output(out, inactivate = "INVERSE")
 #'
-#' # simulated dataset
+#' # simulated datasets
 #' out <- combi_run_rcurvep(zfishbeh, n_samples = 3, TRSH = c(5, 10))
 #' out_res <- summarize_rcurvep_output(out)
 #'
 #'
-summarize_rcurvep_output <- function(d, act_modifier = NULL, ci_level = 0.95, clean_only = FALSE) {
+summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clean_only = FALSE) {
 
   d <- .check_combirun_out(d)
   lsets <- d$result
@@ -45,7 +65,7 @@ summarize_rcurvep_output <- function(d, act_modifier = NULL, ci_level = 0.95, cl
   lsets_n <- add_hit(lsets_n)
 
   # use the Comments column to unhit
-  lsets_n <- apply_comment_to_unhit(lsets_n, act_modifier = act_modifier)
+  lsets_n <- apply_comment_to_unhit(lsets_n, inactivate = inactivate)
 
   # unnest the clean sets
   lsets_clean <- purrr::map(
@@ -75,31 +95,16 @@ summarize_rcurvep_output <- function(d, act_modifier = NULL, ci_level = 0.95, cl
   return(result)
 }
 
-#' Unnest the nested tibble with columns act_set, resp_set, fp_set, or act_summary
-#'
-#' @param nested a nested tibble with columns
-#' @param base_cols a vector of common column names in sets
-#' @param add_col act_set, resp_set, fp_set, or act_summary
-#'
-#' @return a tibble
-#' @keywords internal
-#'
-unnest_joined_sets <- function(nested, base_cols, add_col) {
 
-  result <- nested %>%
-    dplyr::select(base_cols, add_col) %>%
-    tidyr::unnest()
-  return(result)
-}
-
-#' Get common column names between sets
+#' Get common column names between sets.
 #'
-#' Depending on different settings (e.g., TRSH), the common column names change
+#' Depending on different settings (e.g., TRSH), the common column names change.
 #'
-#' @param lsets The result list from the combi_run_rcurvep or run_rcurvep
+#' @param lsets The result list from the [combi_run_rcurvep()] or [run_rcurvep()].
 #'
-#' @return a vector of common column names in sets
+#' @return A vector of common column names in sets.
 #' @keywords internal
+#' @noRd
 
 get_base_cols <- function(lsets) {
 
@@ -114,13 +119,14 @@ get_base_cols <- function(lsets) {
   return(result)
 }
 
-#' Nest the lsets into columns
+#' Nest the lsets into columns.
 #'
-#' @param lsets The result list from the combi_run_rcurvep or run_rcurvep
-#' @param base_cols  a vector of common column names in sets
+#' @param lsets The result list from the [combi_run_rcurvep()] or [run_rcurvep()].
+#' @param base_cols A vector of common column names in sets from [get_base_cols()].
 #'
-#' @return a tibble with the common column from sets + the data of sets nested into columns
+#' @return A tibble with the common column from sets + the data of sets nested into columns.
 #' @keywords internal
+#' @noRd
 
 get_nested_joined_sets <- function(lsets, base_cols) {
 
@@ -128,19 +134,42 @@ get_nested_joined_sets <- function(lsets, base_cols) {
   # nest the data
   lsets_n <- purrr::map2(
     lsets, names(lsets),
-    function(x, y, nest_cols) tidyr::nest(x, -c(!!!nest_cols), .key = !!y), nest_cols = base_cols)
+    function(x, y, nest_cols)
+      suppressWarnings(tidyr::nest(x, -c(!!!nest_cols), .key = !!y)), nest_cols = base_cols)
 
   # join all the sets
   result <- purrr::reduce(lsets_n, dplyr::left_join, by = base_cols)
   return(result)
 }
 
-#' A wrapper function for the add_hit_actset
+
+#' Unnest the nested tibble with columns act_set, resp_set, fp_set, or act_summary.
 #'
-#' @param nestd the nested tibble from the get_nested_joined_sets
 #'
-#' @return the nested tibble but in each table of the act_set, a new column hit is added
+#' @param nested A nested tibble with columns.
+#' @inheritParams get_nested_joined_sets
+#' @param add_col One of the column names: act_set, resp_set, fp_set, or act_summary.
+#'
+#' @return A tibble with unnested data.
 #' @keywords internal
+#' @noRd
+#'
+unnest_joined_sets <- function(nested, base_cols, add_col) {
+
+  suppressWarnings(result <- nested %>%
+    dplyr::select(base_cols, add_col) %>%
+    tidyr::unnest())
+  return(result)
+}
+
+
+#' A wrapper function for the `add_hit_actset()`.
+#'
+#' @param nestd The nested tibble from the [get_nested_joined_sets()].
+#'
+#' @return The nested tibble but in each table of the act_set, a new column, hit is added.
+#' @keywords internal
+#' @noRd
 
 add_hit <- function(nestd) {
 
@@ -151,14 +180,15 @@ add_hit <- function(nestd) {
   return(result)
 }
 
-#' Add hit column for the act_set
+#' Add hit column for the act_set.
 #'
-#' wAUC != 0 as active otherwise inactive
+#' wAUC != 0 as active otherwise inactive.
 #'
-#' @param act_set one act_set
+#' @param act_set One act_set.
 #'
-#' @return a tibble of the act_set with a new column hit; 1 as active
+#' @return A tibble of the act_set with a new column, hit; 1 as active.
 #' @keywords internal
+#' @noRd
 #'
 add_hit_actset <- function(act_set) {
 
@@ -170,38 +200,47 @@ add_hit_actset <- function(act_set) {
   return(result)
 }
 
-#' Use the Comment and hit column to adjust the activity call
+#' Use the Comment and hit column to adjust the activity call.
 #'
-#' @param nestd the nested tibble from the get_nested_joined_sets and the act_set has the hit column
-#' @param act_modifier default = NULL, no modification on the activity
+#' @param nestd The nested tibble from the [get_nested_joined_sets()]
+#'   and the act_set has the hit column.
+#' @inheritParams summarize_rcurvep_output
 #'
-#' @return the same tibble but column values could be modified
+#' @return The tibble but column values could be modified if inactivate is not NULL.
 #' @keywords internal
+#' @noRd
 #'
-apply_comment_to_unhit <- function(nestd, act_modifier) {
+apply_comment_to_unhit <- function(nestd, inactivate) {
 
   result <- nestd
-  if (!is.null(act_modifier)) {
+  if (!is.null(inactivate)) {
     result <- nestd %>%
       dplyr::mutate(
-        act_set = purrr::map(.data$act_set, apply_comment_to_unhit_actset, act_modifier = act_modifier),
-        resp_set = purrr::map2(.data$resp_set, .data$act_set, apply_comment_to_unhit_nonactset),
-        fp_set = purrr::map2(.data$fp_set, .data$act_set, apply_comment_to_unhit_nonactset)
+        act_set = purrr::map(.data$act_set, apply_comment_to_unhit_actset, inactivate = inactivate)
       )
+    if (rlang::has_name(result, "resp_set")) {
+      result <- result %>% dplyr::mutate(
+        resp_set = purrr::map2(.data$resp_set, .data$act_set, apply_comment_to_unhit_nonactset))
+    }
+    if (rlang::has_name(result, "fp_set")) {
+      result <- result %>% dplyr::mutate(
+        fp_set = purrr::map2(.data$fp_set, .data$act_set, apply_comment_to_unhit_nonactset))
+    }
   }
   return(result)
 }
 
 
-#' Use the comment to unhit values
+#' Use the comment to unhit values.
 #'
-#' @param act_set one act_set
-#' @param act_modifier a character string
+#' @param act_set One act_set.
+#' @inheritParams summarize_rcurvep_output
 #'
-#' @return a tibble with all activity related columns modified
+#' @return A tibble with all activity related columns modified.
 #' @keywords internal
+#' @noRd
 #'
-apply_comment_to_unhit_actset <- function(act_set, act_modifier) {
+apply_comment_to_unhit_actset <- function(act_set, inactivate) {
   v_cols <- c('Emax', 'slope', 'wAUC', 'wAUC_prev', 'wResp', 'AUC', 'hit')
   c_cols <- c('wConc', 'EC50', 'C50', 'POD')
 
@@ -209,41 +248,44 @@ apply_comment_to_unhit_actset <- function(act_set, act_modifier) {
     dplyr::mutate_at(
       dplyr::vars(tidyselect::one_of(v_cols)),
       replace_active_value,
-      act_modifier = act_modifier, comment = act_set$Comments, new_value = 0
+      inactivate = inactivate, comment = act_set$Comments, new_value = 0
     ) %>%
     dplyr::mutate_at(
       dplyr::vars(tidyselect::one_of(c_cols)),
       replace_active_value,
-      act_modifier = act_modifier, comment = act_set$Comments, new_value = as.numeric(NA)
+      inactivate = inactivate, comment = act_set$Comments, new_value = as.numeric(NA)
     )
 
   return(result)
 }
 
-#' Replace the original value if there is a string in the comment
+#' Replace the original value if there is a string in the comment.
 #'
-#' @param act_modifier a character string
-#' @param comment the comment string
-#' @param ori_value original values
-#' @param new_value new value
+#' @inheritParams summarize_rcurvep_output
+#' @param comment The comment string from Curvep.
+#' @param ori_value The original values.
+#' @param new_value The new value.
 #'
-#' @return  a vector with some original values being modified
+#' @return A vector with some original values being modified.
 #' @keywords internal
+#' @noRd
+#'
 
-replace_active_value <- function(act_modifier, comment, ori_value, new_value) {
+replace_active_value <- function(inactivate, comment, ori_value, new_value) {
   result <- ori_value
-  result <- replace(result, stringr::str_detect(comment, act_modifier), new_value)
+  result <- replace(result, stringr::str_detect(comment, inactivate), new_value)
   return(result)
 }
 
 
-#' Use the hit column from act_set to adjust the corrected_resp in resp_set or Cxx/ECxx in fp_set
+#' Use the hit column from act_set to adjust the corrected_resp in resp_set or Cxx/ECxx in fp_set.
 #'
-#' @param resp_set either one resp_set or one fp_set
-#' @param act_set one act_set
+#' @param resp_set Either one resp_set or one fp_set.
+#' @param act_set One act_set.
 #'
-#' @return the modified nonactset
+#' @return The modified nonactset.
 #' @keywords internal
+#' @noRd
 #'
 apply_comment_to_unhit_nonactset <- function(nonact_set, act_set) {
   result <- nonact_set
@@ -300,12 +342,13 @@ apply_comment_to_unhit_nonactset <- function(nonact_set, act_set) {
 }
 
 
-#' Replace all NA in the activity related columns as highest tested concentration
+#' Replace all NA in the activity related columns as highest tested concentration.
 #'
-#' @param act_set one act_set
+#' @param act_set One act_set.
 #'
-#' @return an act_set with modified columns (wConc, EC50, C50, POD)
+#' @return An act_set with modified columns (wConc, EC50, C50, POD, ECxx).
 #' @keywords internal
+#' @noRd
 
 make_act_na_highconc_in <- function(act_set) {
 
@@ -323,12 +366,13 @@ make_act_na_highconc_in <- function(act_set) {
 
 
 
-#' Replace all NA in the activity related columns as highest tested concentration (wrapper)
+#' Replace all NA in the activity related columns as highest tested concentration (wrapper).
 #'
-#' @param nestd the nested tibble from the get_nested_joined_sets
+#' @param nestd The nested tibble from the [get_nested_joined_sets()].
 #'
-#' @return the same nested tibble but act_set has been modified
+#' @return The same nested tibble but act_set has been modified.
 #' @keywords internal
+#' @noRd
 
 make_act_na_highconc <- function(nestd) {
   result <- nestd %>%
@@ -340,11 +384,12 @@ make_act_na_highconc <- function(nestd) {
 
 #' Summarize act_sets
 #'
-#' @param nestd the nested tibble from the get_nested_joined_sets
-#' @param ci_level confidence level
+#' @param nestd The nested tibble from the [get_nested_joined_sets()]
+#' @param ci_level The confidence level.
 #'
-#' @return the original tibble with a new column act_summary
+#' @return The original tibble with a new column, act_summary.
 #' @keywords internal
+#' @noRd
 
 summarize_actsets <- function(nestd, ci_level) {
   result <- nestd %>%
@@ -355,13 +400,14 @@ summarize_actsets <- function(nestd, ci_level) {
   return(result)
 }
 
-#' Summarize an active_set
+#' Summarize an active_set.
 #'
 #' @param act_set one active_set
 #' @param ci_level confidence interval
 #'
-#' @return a tibble with summarized columns
+#' @return A tibble with summarized columns.
 #' @keywords internal
+#' @noRd
 #'
 summarize_actset_in <- function(act_set, ci_level) {
 
@@ -389,6 +435,7 @@ summarize_actset_in <- function(act_set, ci_level) {
 #'
 #' @return a tibble with added columns (_med, _ciu, _cil, hit_confidence) depending on the type
 #' @keywords internal
+#' @noRd
 #'
 summarize_actset_by_type <- function(act_set_grouped, type, ci_level) {
 

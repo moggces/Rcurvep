@@ -2,33 +2,58 @@
 % Please edit documentation in R/rcurvep_bmr.R
 \name{estimate_dataset_bmr}
 \alias{estimate_dataset_bmr}
-\title{Estimate BMR for each dataset}
+\title{Estimate benchmark response (BMR) for each dataset}
 \usage{
 estimate_dataset_bmr(d, p1 = NULL, p2 = NULL, plot = TRUE)
 }
 \arguments{
-\item{d}{the output from \code{\link{summarize_rcurvep_output}}}
+\item{d}{The rcurvep object with multiple samples and TRSHs. See \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}} for an example.}
 
-\item{p1}{default = NULL, or an int to manually set the first index of line}
+\item{p1}{Default = NULL, or an integer value to manually set the first index of line.}
 
-\item{p2}{default = NULL, or an int to manually set the last index of line}
+\item{p2}{Default = NULL, or an integer value to manually set the last index of line.}
 
-\item{plot}{default = TRUE, plot the diagnostic plot}
+\item{plot}{Default = TRUE, plot the diagnostic plot.}
 }
 \value{
-a list with two components: stats and outcome
+A list with two components: stats and outcome.
+
+\itemize{
+\item stats: a tibble, including pooled variance (pvar),
+fitted responses (y_exp_fit, y_lm_fit), distance to the line (dist2l)
+\item outcome: a tibble, including estimated BMRs (bmr)
+}
+Suffix in the \emph{stats} and \emph{outcome} tibble: \emph{ori (original values), \emph{exp(exponential fit).
+prefix in the \emph{outcome} tibble: cor} (correlation between the fitted responses and the orignal responses),
+bmr} (benchmark response), qc (quality control).
 }
 \description{
-Estimate BMR for each dataset
+Currently two methods have been implemented to get the "keen-point" from the variance(y) - threshold(x) curve.
+One is to use the original y values to draw a straight line between the lowest x value (p1) to highest x value (p2).
+The knee-point is the x that has the longest distance to the line.
+The other one is to fit the data first then use the fitted responses to do the same analysis.
+Currently the first method is preferred.
+}
+\details{
+The estimated BMR can be used in the calculation of POD.
+For example, if bmr = 25.
+For Curvep, \code{combi_run_rcurvep(zfishbeh, TRSH = 25)}.\cr
+For Hill fit, \code{summarize_fit_output(run_fit(zfishbeh, modls = "hill"), thr_resp = 25, extract_only = TRUE)}.
 }
 \examples{
 
+# no extra cleaning
 data(zfishdev_act)
-
-# use the highest concentration to replace value of the inactive
-sumd <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE)
-
-bmr_out <- estimate_dataset_bmr(sumd, plot = FALSE)
+bmr_out <- estimate_dataset_bmr(zfishdev_act, plot = FALSE)
 plot(bmr_out)
 
+# if want to do extra cleaning...
+actm <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE, inactivate = "CARRY_OVER")
+
+bmr_out <- estimate_dataset_bmr(actm, plot = FALSE)
+
+
+}
+\seealso{
+\code{\link[=cal_knee_point]{cal_knee_point()}}, \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}}
 }

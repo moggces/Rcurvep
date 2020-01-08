@@ -1,0 +1,182 @@
+---
+title: "Practical applications using Rcurvep package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{practical_rcurvep}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+#https://github.com/rstudio/rmarkdown/issues/1268 has to move project rmd_knit_tem
+```
+
+## Install the package
+
+```{r, eval=FALSE}
+# the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("moggces/Rcurvep")
+devtools::install_github("moggces/Rcurvep", build_vignettes = TRUE)
+```
+
+
+## Load the library
+
+
+```{r setup}
+library(Rcurvep)
+```
+
+## Load the sample dataset
+
+*zfishdev* a subset of data from a 32-compound screen using zebrafish developmental assays. 
+Our goal is to decide whether a compound is active in a particular toxicity endpoint. 
+The **active** is determined by if the responses is monotonic (as the increase of concentration). In addition, the maximum response has to be larger than a certain response threshold. 
+
+```{r}
+# More details of the dataset can be found ?zfishdev.
+data(zfishdev) 
+str(zfishdev)
+```
+
+## Rcurvep method
+
+The Rcurvep is a tool to decide whether responses are monotonic (as the increase of concentration) based on a set of pre-defined parameters. The default setting of those parameters can be obtained through `curvep_defaults()`. The **TRSH** is the threshold parameter, below which, all responses are considered as noise. This threshold is particularly important for toxicologists, since the point-of-departure (POD) can be defined as the concentration at which response equivalent to this threshold. The threshold can also be called as benchmarck response (**BMR**).
+
+
+```{r}
+curvep_defaults()
+#For details of parameters, see ?curvep.
+
+```
+
+## Run Rcurvep on datasets using combi_run_rcurvep()
+
+Since *zfishdev* does not contain a column with responses, `create_dataset()` can be used to generate the responses for this particular type of data. However, this function is already incorporated.
+
+```{r}
+identical(
+  combi_run_rcurvep(zfishdev, RNGE = 1000000),
+  combi_run_rcurvep(create_dataset(zfishdev), RNGE = 1000000)
+)
+```
+
+## Run Rcurvep when there is a preferred BMR
+
+If there is a preferred BMR, you can run the dataset using the threshold. The **act_set** in the result contains potency and efficacy information of the concentration-response data (aka curve). 
+
+```{r}
+out <- combi_run_rcurvep(
+  zfishdev,
+  TRSH = 25, # BMR = 25
+  RNGE = 1000000 # increasing direction
+)
+out
+out$config
+```
+
+
+## Summarize activity data from Rcurvep
+
+The results of the summary is saved in the tibble, **act_summary**.
+
+```{r}
+sum_out <- summarize_rcurvep_output(out)
+sum_out
+```
+
+## Add confidence interval for activity data from Rcurvep
+
+The confidence interval is calculated using simulated datasets created by bootstrapping the original responses. By setting the parameter, **n_samples**, number of curves are simulated. The same `summarize_rcurvep_output()` can be used to summarize the results. 
+
+```{r}
+set.seed(300)
+out <- combi_run_rcurvep(
+  zfishdev,
+  n_samples = 10, # often 1000 samples are preferred
+  TRSH = 25,
+  RNGE = 1000000,
+  keep_sets = "act_set"
+)
+sum_out <- summarize_rcurvep_output(out)
+sum_out
+```
+
+
+## Run Rcurvep when an optimal/preferred BMR is unknown
+
+The optimal BMR may be defined as the threshold at which the potency estimation is more accurate. The concept can be translated as the lowest threshold (which gives the highest potency), at which a decrease of variance in potency estimation is stabilized. 
+By using the simulated datasets, the pooled variance across chemicals at a certain threshold can be estimated. 
+
+
+```{r eval = FALSE}
+# The combi_run_rcurvep() can be used for a combination of Curvep parameters. 
+# finishing the code will take some time. 
+
+set.seed(300)
+data(zfishdev_all)
+
+zfishdev_act <- combi_run_rcurvep(
+  
+  zfishdev_all, 
+  n_samples = 100, 
+  keep_sets = c("act_set"),
+  TRSH = seq(5, 95, by = 5), # test all candidates, 5 to 95
+  RNGE = 1000000, 
+  CARR = 20
+)
+
+```
+
+## Estimate the BMR
+
+For the two endpoints, BMR = 25 (in **bmr_ori** column) is suggested for the *percent_affected_96* endpoint with an *OK* comment but for the *percent_mortality_96* endpoint, *check* is noted. 
+
+```{r}
+data(zfishdev_act)
+bmr_out <- estimate_dataset_bmr(zfishdev_act, plot = FALSE)
+bmr_out$outcome
+```
+
+## Display the diagnostic curves for BMR estimation
+
+It turns out for the *percent_mortality_96* endpoint, the shape is not in the right form (as the *percent_affected_96* endpoint). 
+
+```{r, message=FALSE, warning = FALSE, fig.align = "center", fig.width = 6}
+plot(bmr_out)
+```
+
+## Run parametric fitting on datasets
+
+Since *zfishdev* does not contain a column with responses, `create_dataset()` needs to be used to generate the responses for this particular type of data. Unlike `combi_run_rcurvep()`, `create_dataset()` has to be called explicitly. 
+
+```{r}
+fitd <- run_fit(create_dataset(zfishdev), hill_pdir = 1, modls = "hill")
+fitd
+```
+
+## Summarize parametric fitting results using a preferred BMR
+
+The results of the summary is saved in the tibble, **act_summary**.
+
+
+```{r}
+fitd_sum_out <- summarize_fit_output(fitd, thr_resp  = 25)
+fitd_sum_out
+```
+
+
+## Add confidence interval for activity data from parametric fitting (strictly to Hill equation)
+
+
+
+```{r}
+fitd <- run_fit(create_dataset(zfishdev), hill_pdir = 1, n_samples = 10, modls = "hill")
+```
+
+

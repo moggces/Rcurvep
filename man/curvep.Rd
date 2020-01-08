@@ -2,68 +2,87 @@
 % Please edit documentation in R/curvep.R
 \name{curvep}
 \alias{curvep}
-\title{Curvep function}
+\title{The Curvep function to process one set of concentration-response data}
 \usage{
-curvep(Conc, Resp, Mask = NULL, TRSH = 15, RNGE = -100, MXDV = 5,
-  CARR = 0, BSFT = 3, USHP = 4, TrustHi = FALSE,
-  StrictImp = TRUE, DUMV = -999, TLOG = -24)
+curvep(
+  Conc,
+  Resp,
+  Mask = NULL,
+  TRSH = 15,
+  RNGE = -100,
+  MXDV = 5,
+  CARR = 0,
+  BSFT = 3,
+  USHP = 4,
+  TrustHi = FALSE,
+  StrictImp = TRUE,
+  DUMV = -999,
+  TLOG = -24
+)
 }
 \arguments{
-\item{Conc}{array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped}
+\item{Conc}{Array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped.}
 
-\item{Resp}{array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls}
+\item{Resp}{Array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls.}
 
-\item{Mask}{array of 1/0 flags indicating invalidated measurements (default = NULL)}
+\item{Mask}{array of 1/0 flags indicating invalidated measurements (default = NULL).}
 
-\item{TRSH}{base(zero-)line threshold (default = 15)}
+\item{TRSH}{Base(zero-)line threshold (default = 15).}
 
-\item{RNGE}{target range of responses (default = -100)}
+\item{RNGE}{Target range of responses (default = -100).}
 
-\item{MXDV}{maximum allowed deviation from monotonicity (default = 5)
+\item{MXDV}{Maximum allowed deviation from monotonicity (default = 5).}
 
-secondary parameters:}
+\item{CARR}{Carryover detection threshold (default = 0, analysis skipped if set to 0)}
 
-\item{CARR}{carryover detection threshold (default = 0, analysis skipped if set to 0)}
+\item{BSFT}{For baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0).}
 
-\item{BSFT}{for baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0)}
+\item{USHP}{For u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0).}
 
-\item{USHP}{for u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0)}
+\item{TrustHi}{For equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE).}
 
-\item{TrustHi}{for equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE)}
+\item{StrictImp}{It prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE).}
 
-\item{StrictImp}{prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE)}
+\item{DUMV}{A dummy value, default = -999.}
 
-\item{DUMV}{a dummy value, default = -999}
-
-\item{TLOG}{a scaling factor for calculating the wAUC, default = -24}
+\item{TLOG}{A scaling factor for calculating the wAUC, default = -24.}
 }
 \value{
-a list with corrected concentration-response measurements and several calculated curve metrics
+A list with corrected concentration-response measurements and several calculated curve metrics.
 \itemize{
-  \item resp corrected responses
-  \item corr flags for corrections
-  \item ECxx effective concentration values at various thresholds
-  \item Cxx concentrations for various absolute response levels
-  \item Emax maximum effective concentration, slope of the mid-curve (b/w EC25 and EC75)
-  \item wConc, response-weighted concentration
-  \item wResp concentration-weighed response
-  \item POD point-of-departure (first concentration with response >TRSH)
-  \item AUC area-under-curve (in units of log-concentration X response)
-  \item wAUC AUC weighted by concentration range and POD / TLOG (-12)
-  \item wAUC_pre AUC weighted by concentration range and POD
-  \item nCorrected number of points corrected (basically, sum of flags in corr)
-  \item Comments warning and notes about the dose-response curve
-  \item Settings input parameters for this run
+\item resp: corrected responses
+\item corr: flags for corrections
+\item ECxx: effective concentration values at various thresholds
+\item Cxx: concentrations for various absolute response levels
+\item Emax: maximum effective concentration, slope of the mid-curve (b/w EC25 and EC75)
+\item wConc: response-weighted concentration
+\item wResp: concentration-weighed response
+\item POD: point-of-departure (first concentration with response >TRSH)
+\item AUC: area-under-curve (in units of log-concentration X response)
+\item wAUC: AUC weighted by concentration range and POD / TLOG (-24)
+\item wAUC_pre: AUC weighted by concentration range and POD
+\item nCorrected: number of points corrected (basically, sum of flags in corr)
+\item Comments: warning and notes about the dose-response curve
+\item Settings: input parameters for this run
 }
 }
 \description{
-A function to process a given pair of concentration response data.
+The relationship between concentration and response has to be 1 to 1.
+The function is the backbone of \code{\link[=run_rcurvep]{run_rcurvep()}} and \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}}.
 }
 \examples{
+
 curvep(Conc = c(-8, -7, -6, -5, -4) , Resp = c(0, -3, -5, -15, -30))
+
+
+}
+\references{
+{
+\insertRef{PMID:20980217}{Rcurvep}\cr
+
+\insertRef{PMID:27518631}{Rcurvep}
+}
 }
 \seealso{
-\code{\link{run_rcurvep}} \code{\link{combi_run_rcurvep}}
-
-primary parameters:
+\code{\link[=run_rcurvep]{run_rcurvep()}} and \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}}
 }

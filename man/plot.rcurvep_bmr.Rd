@@ -7,23 +7,20 @@
 \method{plot}{rcurvep_bmr}(x, ...)
 }
 \arguments{
-\item{x}{the rcurvep_bmr object (see\code{\link{estimate_dataset_bmr}})}
+\item{x}{The rcurvep_bmr object from \code{\link[=estimate_dataset_bmr]{estimate_dataset_bmr()}}.}
 
-\item{...}{n_in_page, number of endpoints in a page}
+\item{...}{Allowed values: n_in_page, number of endpoints in a page.}
 }
 \value{
-a ggplot object
+A ggplot object.
 }
 \description{
 Plot BMR diagnostic curves
 }
 \examples{
+
 data(zfishdev_act)
-
-# use the highest concentration to replace value of the inactive
-sumd <- summarize_rcurvep_output(zfishdev_act, clean_only = TRUE)
-
-bmr_out <- estimate_dataset_bmr(sumd, plot = FALSE)
+bmr_out <- estimate_dataset_bmr(zfishdev_act, plot = FALSE)
 plot(bmr_out)
 
 }

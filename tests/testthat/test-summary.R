@@ -18,10 +18,10 @@ test_that("can run and create datasets", {
   expect_true(all( c('result', 'act_summary', 'config') %in% names(outp3s)))
 })
 
-test_that("act_modifier", {
-  outp1s <- summarize_rcurvep_output(outp1, act_modifier = "INVERSE", clean_only = TRUE)
+test_that("inactivate", {
+  outp1s <- summarize_rcurvep_output(outp1, inactivate  = "INVERSE", clean_only = TRUE)
   act_set <- outp1s$result$act_set
   ind <- stringr::str_detect(act_set$Comments, "INVERSE")
-  expect_true(all(!is.na(act_set$POD[ind])))
+  #expect_true(all(!is.na(act_set$POD[ind])))
   expect_true(sum(act_set$hit[ind]) == 0)
 })

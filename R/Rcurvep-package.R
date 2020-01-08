@@ -1,34 +1,59 @@
-#' Rcurvep: an R package for concentration response modeling using Curvep
+#' Rcurvep: Concentration-response data analysis using Curvep
+#' and other parameteric fitting approaches
 #'
-#' The package provides an R interface for processing concentration response data
-#' using Curvep, a response noise filtering algorithm.
+#' The package provides an R interface for processing concentration-response datasets
+#' using Curvep a response noise filtering algorithm
+#' and other parameteric fitting approaches (e.g. Hill equation).
+#' Also methods for calculating the confidence interval around the activity metrics are also provided.
+#' The methods are based on the bootstrap approach to get simulated datasets.
+#' The simulated datasets can be used to derive the noise threshold (or benchmark response BMR) in an assay endpoint.
+#' This threshold is critical in the toxicity studies to derive the point-of-departure (POD).
 #'
-#' With a predefined baseline noise threshold (or a minimum response threshold) in an experiment,
-#' the program can calculate activity (with confidence interval) based on original or simulated concentration response data.
+#' @details
+#' Different strategies are used to simulate the datasets:
+#' * Curvep - bootstrapping the responses of replicates at each concentration
+#' * Hill equation - bootstrapping the residuals and adding back to the fitted responses (by Hill) at each concentration
 #'
-#' If the baseline noise threshold is unknown, the above process can be repeated
-#' using a reasonable number of threshold candidates.
-#' The optimal threshold is identified as the lowest threshold
-#' where variance of potency estimation is sufficiently reduced and even stabilized,
-#' under the condiction that there are enough response variations induced by chemicals in the dataset.
+#' For Curvep the bootstrapping strategy is different depending on the type of datasets.
+#' Datasets can be grouped into three types:
 #'
-#' Currently simulated data can be generated from one of the three types of dataset:
-#'
-#' \itemize{
-#'   \item dichotomous binary incidence data by bootstraping incidence data (e.g., mortality data from alternative animal model data)
-#'   \item continuous data with high number of replicates by bootstraping experimental data (e.g., alternative animal model data)
-#'   \item continous data with low number of replicates by linear-fit of experimental data with vehicle control responses as random noise (e.g., in vitro data)
+#' \enumerate{
+#'   \item dichotomous binary incidence data (e.g. mortality data from alternative animal model data)
+#'   \item continuous data with high number of replicates (e.g. alternative animal model data)
+#'   \item continous data with low number of replicates (e.g. in vitro data)
 #' }
 #'
-#' create_dataset run_rcurvep summarize_rcurvep_output
-#' combi_run_rcurvep summarize_rcurvep_output
-#' estimate_dataset_bmr
+#' Bootstrapping strategies:
 #'
-#' To learn more about Rcurvep, start with the vignettes:
+#' \enumerate{
+#'   \item bootstrap incidence out of total animals per concentration then calculate percentage of incidence
+#'   \item bootstrap replicate responses per concentration directly
+#'   \item bootstrap vehicle control responses and add back to the fitted responses by linear regression per concentration
+#' }
+#'
+#' To learn more about Rcurvep start with the vignettes:
 #' `browseVignettes(package = "Rcurvep")`
+#'
+
+#'
+#'
+#' @references{
+#' ## Curvep
+#'   \insertRef{PMID:20980217}{Rcurvep}\cr
+#'
+#'   \insertRef{PMID:27518631}{Rcurvep}\cr
+#' ## Bootstrap
+#'   \insertRef{PMID:30944845}{Rcurvep}\cr
+#'
+#'   \insertRef{PMID:30321397}{Rcurvep}
+#' }
 #'
 #' @importFrom magrittr "%>%"
 #' @importFrom rlang .data
+#' @importFrom Rdpack reprompt
+#' @importFrom methods is
+#' @importFrom stats constrOptim cor dnorm dt fitted lm mad median na.omit nls optim predict quantile sd smooth.spline
+#' @importFrom utils data head modifyList tail
 #' @docType package
 #' @name Rcurvep
 NULL

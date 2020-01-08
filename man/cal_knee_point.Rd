@@ -2,38 +2,56 @@
 % Please edit documentation in R/rcurvep_bmr.R
 \name{cal_knee_point}
 \alias{cal_knee_point}
-\title{Calculate the knee point on the exponential-like curve using various approaches}
+\title{Calculate the knee point on the exponential-like curve}
 \usage{
 cal_knee_point(d, xaxis, yaxis, p1 = NULL, p2 = NULL, plot = TRUE)
 }
 \arguments{
-\item{d}{a tibble}
+\item{d}{A tibble.}
 
-\item{xaxis}{a chr column name in the `d` to be the x-axis in the exponential-like curve}
+\item{xaxis}{The column name in the \code{d} to be the x-axis in the exponential-like curve}
 
-\item{yaxis}{a chr column name in the `d` to be the y-axis in the exponential-like curve}
+\item{yaxis}{The column name in the \code{d} to be the y-axis in the exponential-like curve}
 
-\item{p1}{default = NULL, or an int to manually set the first index of line}
+\item{p1}{Default = NULL, or an integer value to manually set the first index of line.}
 
-\item{p2}{default = NULL, or an int to manually set the last index of line}
+\item{p2}{Default = NULL, or an integer value to manually set the last index of line.}
 
-\item{plot}{default = TRUE, plot the diagnostic plot}
+\item{plot}{Default = TRUE, plot the diagnostic plot.}
 }
 \value{
-a list with two components: stats and outcome
+A list with two components: stats and outcome.
+
+\itemize{
+\item stats: a tibble, including pooled variance (pvar),
+fitted responses (y_exp_fit, y_lm_fit), distance to the line (dist2l)
+\item outcome: a tibble, including estimated BMRs (bmr)
+}
+Suffix in the \emph{stats} and \emph{outcome} tibble: \emph{ori (original values), \emph{exp(exponential fit).
+prefix in the \emph{outcome} tibble: cor} (correlation between the fitted responses and the orignal responses),
+bmr} (benchmark response), qc (quality control).
 }
 \description{
-Two approaches are available: original value-based and exponential fit value-based
+Currently two methods have been implemented to get the "keen-point" from the variance(y) - threshold(x) curve.
+One is to use the original y values to draw a straight line between the lowest x value (p1) to highest x value (p2).
+The knee-point is the x that has the longest distance to the line.
+The other one is to fit the data first then use the fitted responses to do the same analysis.
+Currently the first method is preferred.
 }
 \examples{
 
 inp <- data.frame(
 x = seq(5, 95, by = 5),
-y = c(0.0537, 0.0281, 0.0119, 0.0109, 0.0062, 0.0043, 0.0043, 0.0042, 0.0041, 0.0043, 0.0044, 0.0044, 0.0046, 0.0051, 0.0055, 0.0057, 0.0072, 0.0068, 0.0035)
+y = c(0.0537, 0.0281, 0.0119, 0.0109, 0.0062, 0.0043, 0.0043, 0.0042,
+0.0041, 0.0043, 0.0044, 0.0044, 0.0046, 0.0051,
+0.0055, 0.0057, 0.0072, 0.0068, 0.0035)
 )
 
 out <- cal_knee_point(inp,"x", "y", plot = FALSE)
 plot(out)
 
 
+}
+\seealso{
+\code{\link[=estimate_dataset_bmr]{estimate_dataset_bmr()}}
 }
