@@ -58,6 +58,9 @@
 # Rcurvep 1.0.0
 * new: a rewrite of the project
 
+# Rcurvep 1.0.1
+* change: add bmr_ori_adj and bmr_exp_adj in the estimate_dataset_bmr() outcome
+
 
 # Todo
 * implement stratified bootstrap

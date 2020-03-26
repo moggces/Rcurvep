@@ -1,7 +1,7 @@
 Package: Rcurvep
 Type: Package
 Title: Concentration-response data analysis using Curvep and other parameteric fitting approaches 
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(person("Jui-Hua", "Hsieh", email = "juihua.hsieh@gmail.com", role = c("aut", "cre")), person("Alexander", "Sedykh", email = "sunirks@gmail.com", role = c("aut")))
 Description: The package provides an R interface for processing concentration-response datasets using Curvep, a response noise filtering algorithm, and other parameteric fitting approaches (e.g., Hill equation). Also, methods for calculating the confidence interval around the activity metrics are also provided. The methods are based on the bootstrap approach to simulate the datasets. The simulated datasets can be used to derive noise threshold in an assay endpoint. This threshold is critical in the toxicity studies to derive the point-of-departure (POD).
 License: MIT + file LICENSE

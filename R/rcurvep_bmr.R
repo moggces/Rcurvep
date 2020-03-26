@@ -27,6 +27,7 @@
 #' Suffix in the *stats* and *outcome* tibble: _ori (original values), _exp(exponential fit).
 #' prefix in the *outcome* tibble: cor_ (correlation between the fitted responses and the orignal responses),
 #' bmr_ (benchmark response), qc (quality control).
+#' For bmrs in _adj (adjustment), the improvment based on distance has to be larger than 5%, otherwise, one lower level of bmr is selected.
 #'
 #' @export
 #' @seealso [cal_knee_point()], [combi_run_rcurvep()]
@@ -221,9 +222,11 @@ create_bmr_report <- function(distd, xvar, yvar) {
 
   result <- tibble::tibble(
     bmr_ori = get_thres_at_max_dist2l(distd[[xvar]], distd[['dist2l_ori']]),
+    bmr_ori_adj = get_thres_at_max_dist2l(distd[[xvar]], distd[['dist2l_ori']], tolerance = 0.05),
     p1_ori = unique(distd$p1_ori),
     p2_ori = unique(distd$p2_ori),
     bmr_exp = get_thres_at_max_dist2l(distd[[xvar]],distd[['dist2l_exp']]),
+    bmr_exp_adj = get_thres_at_max_dist2l(distd[[xvar]], distd[['dist2l_exp']], tolerance = 0.05),
     p1_exp = unique(distd$p1_exp),
     p2_exp = unique(distd$p2_exp),
     cor_exp_fit = cal_cor_ori_fitted(distd[[yvar]], distd[['y_exp_fit']]),
@@ -468,17 +471,35 @@ cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
 
 #' Get the threshold at which has the max distance to the line
 #'
+#' if setting the tolerance to 0.05,
+#' the threshold that has the max distance, will need to improve 5% from previous threshold,
+#' otherwise a lower threshold is selected
+#'
 #' @param thres a vector of thresholds
 #' @param dist2l a vector of distances
+#' @param tolerance default = NA, 0.05 5% of improvement of distance
 #'
 #' @return a single value from the thres
 #' @keywords internal
 #' @noRd
 #'
-get_thres_at_max_dist2l <- function(thres, dist2l) {
-  ind_max <- thres[which.max(dist2l)]
-  if ( length(ind_max) == 0 ) ind_max <- as.numeric(NA)
-  return(ind_max)
+get_thres_at_max_dist2l <- function(thres, dist2l, tolerance = NA) {
+  ind_max <- which.max(dist2l)
+  if (length(ind_max) == 0 ) {
+    result <- NA_real_
+  } else {
+    if (is.na(tolerance)) {
+      result <- ind_max
+    } else {
+      tole_min <- min(which(c(diff(dist2l), NA)/dist2l < tolerance))
+      if (ind_max - tole_min == 1 ) { #tole_min < ind_max pretty dangerous
+        result <- tole_min
+      } else {
+        result <- ind_max
+      }
+    }
+  }
+  return(thres[result])
 }
 
 cal_cor_ori_fitted <- function(ori_vars, fitted_vars) {
