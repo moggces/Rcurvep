@@ -101,18 +101,19 @@ summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clea
 #' Depending on different settings (e.g., TRSH), the common column names change.
 #'
 #' @param lsets The result list from the [combi_run_rcurvep()] or [run_rcurvep()].
+#' @param config curvep_defaults()
 #'
 #' @return A vector of common column names in sets.
 #' @keywords internal
 #' @noRd
 
-get_base_cols <- function(lsets) {
+get_base_cols <- function(lsets, config = curvep_defaults()) {
 
   if (length(lsets) > 1) {
     result <- purrr::map(lsets, colnames) %>% purrr::reduce(., intersect)
   } else {
-    ind <- which(colnames(lsets[[1]]) %in% "chemical")
-    result <- colnames(lsets[[1]])[1:ind]
+    result <- intersect(colnames(lsets[[1]]), names(config))
+    result <- c(result, "chemical", "endpoint")
   }
   result <- result[!result %in% c('sample_id')]
 

@@ -58,6 +58,9 @@
 # Rcurvep 1.0.0
 * new: a rewrite of the project
 
+# Rcurvep 1.0.1
+* change: fix get_base_cols()
+
 
 # Todo
 * implement stratified bootstrap
