@@ -5,3 +5,5 @@
 ^data-raw$
 ..Rcheck
 ^\.travis\.yml$
+^doc$
+^Meta$
