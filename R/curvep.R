@@ -224,6 +224,7 @@ curvep <- function(Conc, Resp, Mask = NULL,
 	#--- pre-process curve
 	for (c in 1:nCols)
 	{
+	  if ( HTS[c] == DUMV) next
 		if ( HTS[c] >  mxr)	HTS[c] <- mxr #may be not right for gene expression data
 		if ( HTS[c] <  mnr)	HTS[c] <- mnr
 		if ( abs( HTS[c] ) < TRSH )	HTS[c] <- 0
