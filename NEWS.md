@@ -61,6 +61,9 @@
 # Rcurvep 1.0.1
 * change: fix get_base_cols()
 
+# Rcurvep 1.1
+* change fix a critical bug in curvep() related to the masking
+
 
 # Todo
 * implement stratified bootstrap
