@@ -42,7 +42,8 @@ curvep_defaults <- function() {
     TrustHi = TRUE,
     StrictImp = TRUE,
     DUMV = -999,
-    TLOG = -24
+    TLOG = -24,
+    seed = NULL
   )
 
   class(defaults) <- "curvep_config"

@@ -34,3 +34,16 @@ test_that("n_samples != NULL", {
 })
 
 
+
+test_that("seed is not null", {
+
+  thresholds <- c(5, 10)
+  n_samples <- 2
+  seed <- 300
+  outp1 <- combi_run_rcurvep(zfishbeh, n_samples = n_samples, TRSH = thresholds, seed = seed)
+  outp2 <- combi_run_rcurvep(zfishbeh, n_samples = n_samples, TRSH = thresholds, seed = seed)
+
+  expect_true(identical(outp1$result$resp_set, outp2$result$resp_set))
+  expect_true(outp1$config$seed == seed)
+})
+

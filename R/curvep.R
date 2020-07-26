@@ -113,7 +113,7 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #[[Rccp::export]]
 curvep <- function(Conc, Resp, Mask = NULL,
                     TRSH = 15, RNGE = -100, MXDV = 5, CARR = 0, BSFT = 3, USHP = 4,
-                    TrustHi = FALSE, StrictImp = TRUE, DUMV = -999, TLOG = -24)
+                    TrustHi = FALSE, StrictImp = TRUE, DUMV = -999, TLOG = -24, ...)
 # Conc - array of concentrations, e.g., in Molar units, can be log-transformed, in which case internal log-transformation is skipped
 # Resp - array of responses at corresponding concentrations, e.g., raw measurements or normalized to controls
 # !!!NB: Conc & Resp arrays should be in order from lo to hi concentrations
