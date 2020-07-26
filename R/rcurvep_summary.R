@@ -20,6 +20,7 @@
 #' @param d The rcurvep object from [combi_run_rcurvep()] and [run_rcurvep()].
 #' @param inactivate A character string, default = NULL,
 #'   to make the curve with this string in the Comments column as inactive.
+#'   or a vector of index for the rows in the act_set that needs to be inactive
 #' @param ci_level Default = 0.95 (95 percent of confidence interval).
 #' @param clean_only Default = FALSE, only the 1st, 2nd task will be performed (see Details).
 #'
@@ -44,6 +45,9 @@
 #' # unhit when comment has "INVERSE"
 #' out <- summarize_rcurvep_output(out, inactivate = "INVERSE")
 #'
+#' # unhit for certain rows in act_set
+#' out <- summarize_rcurvep_output(out, inactivate = c(2,3))
+#'
 #' # simulated datasets
 #' out <- combi_run_rcurvep(zfishbeh, n_samples = 3, TRSH = c(5, 10))
 #' out_res <- summarize_rcurvep_output(out)
@@ -51,6 +55,7 @@
 #'
 summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clean_only = FALSE) {
 
+  inactivate <- .check_inactivate(inactivate)
   d <- .check_combirun_out(d)
   lsets <- d$result
   lsets <- .check_result_sets(lsets)
@@ -58,11 +63,13 @@ summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clea
   # get the common column names (e.g., TRSH)
   base_cols <- get_base_cols(lsets)
 
+  # add the hit column in the act_set
+  lsets$act_set <- add_hit_actset(lsets$act_set)
+  lsets$act_set <- apply_comment_to_unhit_actset(lsets$act_set, inactivate = inactivate)
+  lsets$act_set <- adjust_rcurvep_comment(lsets$act_set, inactivate = inactivate)
+
   # nest the sets into columns
   lsets_n <- get_nested_joined_sets(lsets, base_cols)
-
-  # add the hit column in the act_set
-  lsets_n <- add_hit(lsets_n)
 
   # use the Comments column to unhit
   lsets_n <- apply_comment_to_unhit(lsets_n, inactivate = inactivate)
@@ -102,12 +109,13 @@ summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clea
 #'
 #' @param lsets The result list from the [combi_run_rcurvep()] or [run_rcurvep()].
 #' @param config curvep_defaults()
+#' @param remove_sample_id default = TRUE
 #'
 #' @return A vector of common column names in sets.
 #' @keywords internal
 #' @noRd
 
-get_base_cols <- function(lsets, config = curvep_defaults()) {
+get_base_cols <- function(lsets, config = curvep_defaults(), remove_sample_id = TRUE) {
 
   if (length(lsets) > 1) {
     result <- purrr::map(lsets, colnames) %>% purrr::reduce(., intersect)
@@ -115,7 +123,10 @@ get_base_cols <- function(lsets, config = curvep_defaults()) {
     result <- intersect(colnames(lsets[[1]]), names(config))
     result <- c(result, "chemical", "endpoint")
   }
-  result <- result[!result %in% c('sample_id')]
+  if (remove_sample_id) {
+    result <- result[!result %in% c('sample_id')]
+  }
+
 
   return(result)
 }
@@ -215,10 +226,10 @@ apply_comment_to_unhit <- function(nestd, inactivate) {
 
   result <- nestd
   if (!is.null(inactivate)) {
-    result <- nestd %>%
-      dplyr::mutate(
-        act_set = purrr::map(.data$act_set, apply_comment_to_unhit_actset, inactivate = inactivate)
-      )
+    # result <- nestd %>%
+    #   dplyr::mutate(
+    #     act_set = purrr::map(.data$act_set, apply_comment_to_unhit_actset, inactivate = inactivate)
+    #   )
     if (rlang::has_name(result, "resp_set")) {
       result <- result %>% dplyr::mutate(
         resp_set = purrr::map2(.data$resp_set, .data$act_set, apply_comment_to_unhit_nonactset))
@@ -260,6 +271,33 @@ apply_comment_to_unhit_actset <- function(act_set, inactivate) {
   return(result)
 }
 
+#' Add a noted flag on the Comments column
+#'
+#' @param act_set a tibble of the act_set
+#' @inheritParams summarize_rcurvep_output
+#'
+#' @return act_set with modified Commments column
+#' @keywords internal
+#' @noRd
+
+adjust_rcurvep_comment <- function(act_set, inactivate) {
+
+  if (is.character(inactivate)) {
+    inp <- stringr::str_detect(act_set$Comments, inactivate)
+  } else {
+    inp <- as.logical(replace(rep(0, nrow(act_set)), inactivate, 1))
+  }
+  result <- act_set %>%
+    dplyr::mutate(
+      Comments = dplyr::case_when(
+        inp ~ stringr::str_c(.data$Comments, "|custom"),
+        TRUE ~ Comments
+      )
+    )
+  return(result)
+
+}
+
 #' Replace the original value if there is a string in the comment.
 #'
 #' @inheritParams summarize_rcurvep_output
@@ -273,8 +311,13 @@ apply_comment_to_unhit_actset <- function(act_set, inactivate) {
 #'
 
 replace_active_value <- function(inactivate, comment, ori_value, new_value) {
+  inp <- inactivate
+  if (is.character(inactivate)) {
+    inp <- stringr::str_detect(comment, inactivate)
+  }
+
   result <- ori_value
-  result <- replace(result, stringr::str_detect(comment, inactivate), new_value)
+  result <- replace(result, inp, new_value)
   return(result)
 }
 
