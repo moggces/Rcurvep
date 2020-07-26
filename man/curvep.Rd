@@ -17,7 +17,8 @@ curvep(
   TrustHi = FALSE,
   StrictImp = TRUE,
   DUMV = -999,
-  TLOG = -24
+  TLOG = -24,
+  ...
 )
 }
 \arguments{
