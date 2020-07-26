@@ -125,13 +125,13 @@ cal_dataset_pvar <- function(act_set, base_cols) {
 #'
 cal_dataset_knee <- function(pvard, base_cols, p1, p2) {
   base_cols_f <- base_cols[!base_cols %in% c("chemical", "TRSH")]
-  suppressWarnings(knees <- pvard %>%
-    tidyr::nest(-c(base_cols_f), .key = "input") %>%
+  knees <- pvard %>%
+    tidyr::nest(input = -c(base_cols_f)) %>%
     dplyr::mutate(
       knee_out = purrr::map(
         .data$input,
         cal_knee_point, xaxis = "TRSH", yaxis = "pvar", p1 = p1, p2 = p2, plot = FALSE)
-    ))
+    )
   return(knees)
 }
 
@@ -145,10 +145,10 @@ cal_dataset_knee <- function(pvard, base_cols, p1, p2) {
 #' @noRd
 #'
 unnest_knee_data <- function(kneed, type = c("stats", "outcome")) {
-  suppressWarnings(result <- kneed %>%
+  result <- kneed %>%
     dplyr::mutate(temp = purrr::map(.data$knee_out, ~ .x[[type]])) %>%
     dplyr::select(-.data$knee_out, -.data$input) %>%
-    tidyr::unnest())
+    tidyr::unnest(cols = c("temp"))
   return(result)
 }
 

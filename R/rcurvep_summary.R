@@ -147,7 +147,7 @@ get_nested_joined_sets <- function(lsets, base_cols) {
   lsets_n <- purrr::map2(
     lsets, names(lsets),
     function(x, y, nest_cols)
-      suppressWarnings(tidyr::nest(x, -c(!!!nest_cols), .key = !!y)), nest_cols = base_cols)
+      tidyr::nest(x, !!y := -c(!!!nest_cols)), nest_cols = base_cols)
 
   # join all the sets
   result <- purrr::reduce(lsets_n, dplyr::left_join, by = base_cols)
@@ -168,9 +168,9 @@ get_nested_joined_sets <- function(lsets, base_cols) {
 #'
 unnest_joined_sets <- function(nested, base_cols, add_col) {
 
-  suppressWarnings(result <- nested %>%
+  result <- nested %>%
     dplyr::select(base_cols, add_col) %>%
-    tidyr::unnest())
+    tidyr::unnest(cols = add_col)
   return(result)
 }
 
@@ -494,7 +494,7 @@ summarize_actset_by_type <- function(act_set_grouped, type, ci_level) {
   } else if (type == "med_conf") {
     upper_bound <- 1 - (1 - ci_level)/2
     lower_bound <- (1 - ci_level)/2
-    ci_cols <- c('Emax', 'slope', 'AUC', 'wAUC', 'wAUC_prev','EC50','POD')
+    ci_cols <- c('Emax', 'slope', 'AUC', 'wAUC', 'wAUC_prev','EC50','POD', 'ECxx')
     suppressWarnings(result <- act_set_grouped %>%
       dplyr::summarise_at(
         dplyr::vars(tidyselect::one_of(ci_cols)),

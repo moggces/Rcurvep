@@ -97,7 +97,8 @@ merge_rcurvep_output <- function(d, keep_sets) {
 
   result <- purrr::map(
     keep_sets, function(x, tbl_names, obj)
-      suppressWarnings(obj[c("endpoint", "chemical", tbl_names[[x]])] %>% tidyr::unnest()),
+      obj[c("endpoint", "chemical", tbl_names[[x]])] %>%
+      tidyr::unnest(cols = tbl_names[[x]]),
     tbl_names = tbl_names,
     obj = d
   ) %>% rlang::set_names(keep_sets)
@@ -124,7 +125,7 @@ create_para_input <- function(paras, n_samples, d) {
     result <- expand.grid(paras) %>% tibble::as_tibble()
     result <- result %>%
       dplyr::left_join(
-        suppressWarnings(d %>% tidyr::nest(-.data$sample_id, .key = "data")),
+        d %>% tidyr::nest(data = -.data$sample_id),
         by = "sample_id"
       )
   }

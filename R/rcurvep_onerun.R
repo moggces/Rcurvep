@@ -157,13 +157,13 @@ create_resp_mask <- function(d, mask) {
   } else {
 
     # generate mask
-    suppressWarnings(result <- d %>%
+    result <- d %>%
       dplyr::arrange(.data$endpoint, .data$chemical, dplyr::desc(.data$conc)) %>%
-      tidyr::nest(-.data$endpoint, -.data$chemical, .key = "data") %>%
+      tidyr::nest(data = -c(.data$endpoint, .data$chemical)) %>%
       dplyr::mutate(
         mask = purrr::map(data, function(x, mask) replace(rep(0, nrow(x)), mask, 1), mask = mask)
       ) %>%
-      tidyr::unnest())
+      tidyr::unnest(cols = c("data", "mask"))
   }
   return(result)
 }
@@ -178,9 +178,9 @@ create_resp_mask <- function(d, mask) {
 
 cal_curvep_dataset <- function(d, config) {
   # prepare the list of data
-  suppressWarnings(d <- d %>%
+  d <- d %>%
     dplyr::arrange(.data$endpoint, .data$chemical, .data$conc) %>%
-    tidyr::nest(-.data$endpoint, -.data$chemical, .key = "input"))
+    tidyr::nest(input = -c(.data$endpoint, .data$chemical))
 
   # use the input and config to call_curvep
   result <- d %>%

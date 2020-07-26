@@ -61,13 +61,13 @@ get_dataset_linecoeff <- function(statsd, fit_type = c("ori", "exp")) {
   }
 
   # get intercept and slope
-  suppressWarnings(result <- statsd %>%
-    tidyr::nest(-c(!!!nest_cols), .key = "input") %>%
+  result <- statsd %>%
+    tidyr::nest(input = -c(!!!nest_cols)) %>%
     dplyr::mutate(
       temp = purrr::pmap(., ~ get_p1_p2_linecoeff(..4, "TRSH", "pvar", ..2, ..3))
     ) %>%
     dplyr::select(-.data$input) %>%
-    tidyr::unnest())
+    tidyr::unnest(cols = c("temp"))
 
   # add the type
   result <- result %>%

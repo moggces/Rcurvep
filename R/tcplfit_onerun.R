@@ -97,9 +97,9 @@ nest_fit_dataset <- function(d, nest_cols) {
 
   nest_colsq <- rlang::syms(c(nest_cols, 'conc'))
 
-  suppressWarnings(result <- d %>%
+  result <- d %>%
     dplyr::arrange(!!!nest_colsq) %>%
-    tidyr::nest(-tidyselect::one_of(nest_cols), .key = "input"))
+    tidyr::nest(input = -tidyselect::one_of(nest_cols))
 
   return(result)
 }
@@ -277,14 +277,14 @@ create_hillsimu_dataset <- function(fitd, n_samples, pdir) {
     )
 
   # create direction column and remove the original fit input and output
-  suppressWarnings(result <- result %>%
+  result <- result %>%
     dplyr::mutate(
       direction = purrr::map_dbl(
         .data$output, get_hillfit_direction, pdir = pdir)
     ) %>%
     dplyr::select(-.data$input, -.data$output) %>%
-    tidyr::unnest() %>%
-    dplyr::select(-.data$mask)) # do not need the mask anymore
+    tidyr::unnest(cols = "simud") %>%
+    dplyr::select(-.data$mask) # do not need the mask anymore
 
   return(result)
 }
