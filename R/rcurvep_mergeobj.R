@@ -10,15 +10,17 @@
 #'
 #' @examples
 #'
+#' data(zfishbeh)
+#'
 #' # combine default + mask
-#' out1 <- combi_run_rcurvep(dat, TRSH = 10)
-#' out2 <- combi_run_rcurvep(dat, TRSH = 10, mask = 1)
+#' out1 <- combi_run_rcurvep(zfishbeh, TRSH = 10)
+#' out2 <- combi_run_rcurvep(zfishbeh, TRSH = 10, mask = 1)
 #' m1 <- merge_rcurvep_obj(out1, out2)
 #'
 #' # use same set of samples to combine
-#' set.seed(300)
-#' out1 <- combi_run_rcurvep(dat, TRSH = 10, n_samples = 2)
-#'
+#' out1 <- combi_run_rcurvep(zfishbeh, TRSH = 10, n_samples = 2, seed = 300)
+#' out2 <- combi_run_rcurvep(zfishbeh, TRSH = 10, mask = 1, n_samples = 2, seed = 300)
+#' m1 <- merge_rcurvep_obj(out1, out2)
 #'
 merge_rcurvep_obj <- function(...) {
 

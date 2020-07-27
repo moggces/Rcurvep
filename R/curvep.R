@@ -95,6 +95,7 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #'   \item nCorrected: number of points corrected (basically, sum of flags in corr)
 #'   \item Comments: warning and notes about the dose-response curve
 #'   \item Settings: input parameters for this run
+#'   \item ...: to allow other parameters to pass
 #' }
 #' @export
 #' @references{

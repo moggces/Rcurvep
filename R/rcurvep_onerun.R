@@ -16,6 +16,7 @@
 #'   \item StrictImp: (default = TRUE) prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc.
 #'   \item DUMV: (default = -999) dummy value for inactive (not suggested to modify)
 #'   \item TLOG: (default = -24) denominator for calculation wAUC (not suggested to modify)
+#'   \item seed: (default = NA) can be set when bootstrapping samples
 #' }
 #' @export
 #' @examples
@@ -43,7 +44,7 @@ curvep_defaults <- function() {
     StrictImp = TRUE,
     DUMV = -999,
     TLOG = -24,
-    seed = NULL
+    seed = NA_integer_
   )
 
   class(defaults) <- "curvep_config"
