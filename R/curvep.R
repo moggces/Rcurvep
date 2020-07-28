@@ -78,6 +78,7 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #' @param StrictImp It prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc (default = TRUE).
 #' @param DUMV A dummy value, default = -999.
 #' @param TLOG A scaling factor for calculating the wAUC, default = -24.
+#' @param ... allow other parameters to pass
 #'
 #' @return A list with corrected concentration-response measurements and several calculated curve metrics.
 #' \itemize{
@@ -95,7 +96,7 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #'   \item nCorrected: number of points corrected (basically, sum of flags in corr)
 #'   \item Comments: warning and notes about the dose-response curve
 #'   \item Settings: input parameters for this run
-#'   \item ...: to allow other parameters to pass
+#'
 #' }
 #' @export
 #' @references{
