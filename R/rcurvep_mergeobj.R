@@ -42,6 +42,9 @@ merge_rcurvep_obj <- function(...) {
   lsets_m <- purrr::map(names_set, unnest_joined_sets, nested = potent_nested, base_cols = base_cols ) %>%
     rlang::set_names(names_set)
 
+  # there is extra wAUC column
+  lsets_m <- purrr::imap(lsets_m, remove_wAUC_col)
+
 
   # report the results
   result <- list(
@@ -52,6 +55,14 @@ merge_rcurvep_obj <- function(...) {
   # class
   class(result) <- c("rcurvep", class(result))
 
+  return(result)
+}
+
+remove_wAUC_col <- function(lset, lset_name) {
+  result <- lset
+  if (lset_name != "act_set") {
+    result <- result %>% dplyr::select(-.data$wAUC)
+  }
   return(result)
 }
 

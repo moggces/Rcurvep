@@ -457,8 +457,13 @@ summarize_actset_in <- function(act_set, ci_level) {
 
   # group data
   g_cols <- c('lowest_conc', 'highest_conc', 'n_conc', 'mean_conc_spacing')
-  g_cols_s <- rlang::syms(g_cols)
-  act_setg <- act_set %>% dplyr::group_by(!!!g_cols_s)
+  act_g_cols <- intersect(colnames(act_set), g_cols)
+  act_setg <- act_set %>%
+    dplyr::group_by_at(
+      dplyr::vars(
+        tidyselect::one_of(act_g_cols)
+      )
+    )
 
   # summarize by different types
   result <- purrr::reduce(
@@ -466,7 +471,7 @@ summarize_actset_in <- function(act_set, ci_level) {
       summarize_actset_by_type(act_setg, type = "med_only", ci_level = ci_level),
       summarize_actset_by_type(act_setg, type = "med_conf", ci_level = ci_level),
       summarize_actset_by_type(act_setg, type = "hit_conf", ci_level = ci_level)
-    ), .f = dplyr::left_join, by = g_cols)
+    ), .f = dplyr::left_join, by = act_g_cols)
 
   return(result)
 }
