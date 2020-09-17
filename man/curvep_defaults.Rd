@@ -20,6 +20,7 @@ A list of parameters with class as curvep_config.
 \item StrictImp: (default = TRUE) prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc.
 \item DUMV: (default = -999) dummy value for inactive (not suggested to modify)
 \item TLOG: (default = -24) denominator for calculation wAUC (not suggested to modify)
+\item seed: (default = NA) can be set when bootstrapping samples
 }
 }
 \description{

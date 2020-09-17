@@ -16,6 +16,7 @@
 #'   \item StrictImp: (default = TRUE) prevents extrapolating over concentration-range boundaries; used for POD, ECxx etc.
 #'   \item DUMV: (default = -999) dummy value for inactive (not suggested to modify)
 #'   \item TLOG: (default = -24) denominator for calculation wAUC (not suggested to modify)
+#'   \item seed: (default = NA) can be set when bootstrapping samples
 #' }
 #' @export
 #' @examples
@@ -42,7 +43,8 @@ curvep_defaults <- function() {
     TrustHi = TRUE,
     StrictImp = TRUE,
     DUMV = -999,
-    TLOG = -24
+    TLOG = -24,
+    seed = NA_integer_
   )
 
   class(defaults) <- "curvep_config"
@@ -156,13 +158,13 @@ create_resp_mask <- function(d, mask) {
   } else {
 
     # generate mask
-    suppressWarnings(result <- d %>%
+    result <- d %>%
       dplyr::arrange(.data$endpoint, .data$chemical, dplyr::desc(.data$conc)) %>%
-      tidyr::nest(-.data$endpoint, -.data$chemical, .key = "data") %>%
+      tidyr::nest(data = -c(.data$endpoint, .data$chemical)) %>%
       dplyr::mutate(
         mask = purrr::map(data, function(x, mask) replace(rep(0, nrow(x)), mask, 1), mask = mask)
       ) %>%
-      tidyr::unnest())
+      tidyr::unnest(cols = c("data", "mask"))
   }
   return(result)
 }
@@ -177,9 +179,9 @@ create_resp_mask <- function(d, mask) {
 
 cal_curvep_dataset <- function(d, config) {
   # prepare the list of data
-  suppressWarnings(d <- d %>%
+  d <- d %>%
     dplyr::arrange(.data$endpoint, .data$chemical, .data$conc) %>%
-    tidyr::nest(-.data$endpoint, -.data$chemical, .key = "input"))
+    tidyr::nest(input = -c(.data$endpoint, .data$chemical))
 
   # use the input and config to call_curvep
   result <- d %>%

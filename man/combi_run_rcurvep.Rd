@@ -71,11 +71,11 @@ out <- combi_run_rcurvep(
 
 # create the zfishdev_act dataset
 \donttest{
- set.seed(300)
+
  data(zfishdev_all)
  zfishdev_act <- combi_run_rcurvep(
    zfishdev_all, n_samples = 100, keep_sets = c("act_set"),TRSH = seq(5, 95, by = 5),
-   RNGE = 1000000, CARR = 20
+   RNGE = 1000000, CARR = 20, seed = 300
  )
 }
 

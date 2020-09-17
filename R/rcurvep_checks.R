@@ -297,3 +297,43 @@
   return(args)
 }
 
+#_mergeobj
+.check_objs_type <- function(objs) {
+
+  # check the class
+  objclass <- purrr::map_lgl(
+    objs, ~ any(stringr::str_detect(class(.x), "rcurvep")))
+
+  if (!all(objclass)) {
+    rlang::abort("all objects need to be rcurvep objects")
+  } else {
+
+    # check the calculation
+    objtype <- purrr::map_lgl(
+      objs, ~ "config" %in% names(.x)
+    )
+    objsize <- purrr::map_int(
+      objs, ~ length(.x$result)
+    )
+
+    if (!all(objtype)) {
+      rlang::abort(
+        "only results by curvep calculation are supported")
+    }
+    if (length(unique(objsize)) != 1) {
+      rlang::abort(
+        "different list size in results")
+    }
+  }
+
+  return(objs)
+}
+
+#_summary
+.check_inactivate <- function(inactivate) {
+  inactivate <- na.omit(inactivate)
+  if (!is.character(inactivate) & !rlang::is_integerish(inactivate) & !is.null(inactivate)) {
+    rlang::abort("only string or integer is allowed for inactivate")
+  }
+  return(inactivate)
+}

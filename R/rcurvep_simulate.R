@@ -134,7 +134,7 @@ simulate_resps <- function(d, dataset_type, n_samples, vdata) {
   if (rlang::has_name(d, "mask")) {
     baseq <- rlang::quos(.data$endpoint, .data$chemical, .data$conc, .data$mask)
   }
-  suppressWarnings(d <- d %>% tidyr::nest(-c(!!!baseq), .key = "data"))
+  d <- d %>% tidyr::nest(data = -c(!!!baseq))
 
 
   if (dataset_type == 'continuous') {
@@ -193,8 +193,8 @@ cal_lm_pred_resp <- function(d) {
   }
 
   # use lm fit then predict
-  suppressWarnings(result <- d %>%
-    tidyr::nest(-c(!!!baseq), .key = "lm_input") %>%
+  result <- d %>%
+    tidyr::nest(lm_input = -c(!!!baseq)) %>%
     dplyr::mutate(conc = purrr::map(.data$lm_input, ~ unique(.x$conc))) %>%
     dplyr::mutate(lm_model = purrr::map(.data$lm_input, ~ lm(resp ~ conc, data = .x))) %>%
     dplyr::mutate(
@@ -205,7 +205,7 @@ cal_lm_pred_resp <- function(d) {
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(-.data$lm_model, -.data$lm_input) %>%
-    tidyr::unnest())
+    tidyr::unnest(cols = c("conc", "resp"))
   return(result)
 }
 
@@ -311,11 +311,11 @@ create_n_errors <- function(vec, n = 100) {
 #' @noRd
 
 clean_add_sampleid <- function(d, n_samples) {
-  suppressWarnings(result <- d %>%
+  result <- d %>%
     dplyr::mutate(sample_id = list(1:n_samples)) %>%
     dplyr::select(-data) %>%
-    tidyr::unnest() %>%
-    dplyr::arrange(.data$sample_id))
+    tidyr::unnest(cols = c("resp", "sample_id")) %>%
+    dplyr::arrange(.data$sample_id)
   return(result)
 }
 

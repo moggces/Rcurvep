@@ -64,6 +64,13 @@
 # Rcurvep 1.1
 * change fix a critical bug in curvep() related to the masking
 
+# Rcurvep 1.2
+* new: allow to merge rcurvep objects, merge_rcurvep_obj()
+* new: allow to inactivate curves by row index and add flag in comments
+* new: add seed parameter in the curvep_defaults()
+* new: allow to input seed in the combi_run_rcurvep()
+* change: fix ECxx is missing when summarizing the bootstrap results of the fit
+
 
 # Todo
 * implement stratified bootstrap

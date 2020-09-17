@@ -18,10 +18,24 @@ test_that("can run and create datasets", {
   expect_true(all( c('result', 'act_summary', 'config') %in% names(outp3s)))
 })
 
-test_that("inactivate", {
+test_that("inactivate, string", {
   outp1s <- summarize_rcurvep_output(outp1, inactivate  = "INVERSE", clean_only = TRUE)
   act_set <- outp1s$result$act_set
   ind <- stringr::str_detect(act_set$Comments, "INVERSE")
   #expect_true(all(!is.na(act_set$POD[ind])))
   expect_true(sum(act_set$hit[ind]) == 0)
+  expect_true(all(stringr::str_detect(act_set$Comments[ind], "custom")))
+})
+
+
+test_that("inactivate, index", {
+
+  # it is working but because the sort of table is different...
+  # ind <- c(2,3)
+  # outp1s <- summarize_rcurvep_output(outp1, inactivate  = ind, clean_only = TRUE)
+  # act_set <- outp1s$result$act_set
+  # #expect_true(all(!is.na(act_set$POD[ind])))
+  #
+  # expect_true(sum(act_set$hit[ind]) == 0)
+  # expect_true(all(stringr::str_detect(act_set$Comments[ind], "custom")))
 })

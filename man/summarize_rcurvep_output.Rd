@@ -15,7 +15,8 @@ summarize_rcurvep_output(
 \item{d}{The rcurvep object from \code{\link[=combi_run_rcurvep]{combi_run_rcurvep()}} and \code{\link[=run_rcurvep]{run_rcurvep()}}.}
 
 \item{inactivate}{A character string, default = NULL,
-to make the curve with this string in the Comments column as inactive.}
+to make the curve with this string in the Comments column as inactive.
+or a vector of index for the rows in the act_set that needs to be inactive}
 
 \item{ci_level}{Default = 0.95 (95 percent of confidence interval).}
 
@@ -59,6 +60,9 @@ out_res <- summarize_rcurvep_output(out)
 
 # unhit when comment has "INVERSE"
 out <- summarize_rcurvep_output(out, inactivate = "INVERSE")
+
+# unhit for certain rows in act_set
+out <- summarize_rcurvep_output(out, inactivate = c(2,3))
 
 # simulated datasets
 out <- combi_run_rcurvep(zfishbeh, n_samples = 3, TRSH = c(5, 10))

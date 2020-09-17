@@ -17,7 +17,8 @@ curvep(
   TrustHi = FALSE,
   StrictImp = TRUE,
   DUMV = -999,
-  TLOG = -24
+  TLOG = -24,
+  ...
 )
 }
 \arguments{
@@ -64,6 +65,7 @@ A list with corrected concentration-response measurements and several calculated
 \item nCorrected: number of points corrected (basically, sum of flags in corr)
 \item Comments: warning and notes about the dose-response curve
 \item Settings: input parameters for this run
+\item ...: to allow other parameters to pass
 }
 }
 \description{

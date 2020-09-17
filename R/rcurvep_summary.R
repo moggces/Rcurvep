@@ -20,6 +20,7 @@
 #' @param d The rcurvep object from [combi_run_rcurvep()] and [run_rcurvep()].
 #' @param inactivate A character string, default = NULL,
 #'   to make the curve with this string in the Comments column as inactive.
+#'   or a vector of index for the rows in the act_set that needs to be inactive
 #' @param ci_level Default = 0.95 (95 percent of confidence interval).
 #' @param clean_only Default = FALSE, only the 1st, 2nd task will be performed (see Details).
 #'
@@ -44,6 +45,9 @@
 #' # unhit when comment has "INVERSE"
 #' out <- summarize_rcurvep_output(out, inactivate = "INVERSE")
 #'
+#' # unhit for certain rows in act_set
+#' out <- summarize_rcurvep_output(out, inactivate = c(2,3))
+#'
 #' # simulated datasets
 #' out <- combi_run_rcurvep(zfishbeh, n_samples = 3, TRSH = c(5, 10))
 #' out_res <- summarize_rcurvep_output(out)
@@ -51,6 +55,7 @@
 #'
 summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clean_only = FALSE) {
 
+  inactivate <- .check_inactivate(inactivate)
   d <- .check_combirun_out(d)
   lsets <- d$result
   lsets <- .check_result_sets(lsets)
@@ -58,11 +63,13 @@ summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clea
   # get the common column names (e.g., TRSH)
   base_cols <- get_base_cols(lsets)
 
+  # add the hit column in the act_set
+  lsets$act_set <- add_hit_actset(lsets$act_set)
+  lsets$act_set <- apply_comment_to_unhit_actset(lsets$act_set, inactivate = inactivate)
+  lsets$act_set <- adjust_rcurvep_comment(lsets$act_set, inactivate = inactivate)
+
   # nest the sets into columns
   lsets_n <- get_nested_joined_sets(lsets, base_cols)
-
-  # add the hit column in the act_set
-  lsets_n <- add_hit(lsets_n)
 
   # use the Comments column to unhit
   lsets_n <- apply_comment_to_unhit(lsets_n, inactivate = inactivate)
@@ -102,12 +109,13 @@ summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clea
 #'
 #' @param lsets The result list from the [combi_run_rcurvep()] or [run_rcurvep()].
 #' @param config curvep_defaults()
+#' @param remove_sample_id default = TRUE
 #'
 #' @return A vector of common column names in sets.
 #' @keywords internal
 #' @noRd
 
-get_base_cols <- function(lsets, config = curvep_defaults()) {
+get_base_cols <- function(lsets, config = curvep_defaults(), remove_sample_id = TRUE) {
 
   if (length(lsets) > 1) {
     result <- purrr::map(lsets, colnames) %>% purrr::reduce(., intersect)
@@ -115,7 +123,10 @@ get_base_cols <- function(lsets, config = curvep_defaults()) {
     result <- intersect(colnames(lsets[[1]]), names(config))
     result <- c(result, "chemical", "endpoint")
   }
-  result <- result[!result %in% c('sample_id')]
+  if (remove_sample_id) {
+    result <- result[!result %in% c('sample_id')]
+  }
+
 
   return(result)
 }
@@ -136,7 +147,7 @@ get_nested_joined_sets <- function(lsets, base_cols) {
   lsets_n <- purrr::map2(
     lsets, names(lsets),
     function(x, y, nest_cols)
-      suppressWarnings(tidyr::nest(x, -c(!!!nest_cols), .key = !!y)), nest_cols = base_cols)
+      tidyr::nest(x, !!y := -c(!!!nest_cols)), nest_cols = base_cols)
 
   # join all the sets
   result <- purrr::reduce(lsets_n, dplyr::left_join, by = base_cols)
@@ -157,9 +168,9 @@ get_nested_joined_sets <- function(lsets, base_cols) {
 #'
 unnest_joined_sets <- function(nested, base_cols, add_col) {
 
-  suppressWarnings(result <- nested %>%
+  result <- nested %>%
     dplyr::select(base_cols, add_col) %>%
-    tidyr::unnest())
+    tidyr::unnest(cols = add_col)
   return(result)
 }
 
@@ -215,10 +226,10 @@ apply_comment_to_unhit <- function(nestd, inactivate) {
 
   result <- nestd
   if (!is.null(inactivate)) {
-    result <- nestd %>%
-      dplyr::mutate(
-        act_set = purrr::map(.data$act_set, apply_comment_to_unhit_actset, inactivate = inactivate)
-      )
+    # result <- nestd %>%
+    #   dplyr::mutate(
+    #     act_set = purrr::map(.data$act_set, apply_comment_to_unhit_actset, inactivate = inactivate)
+    #   )
     if (rlang::has_name(result, "resp_set")) {
       result <- result %>% dplyr::mutate(
         resp_set = purrr::map2(.data$resp_set, .data$act_set, apply_comment_to_unhit_nonactset))
@@ -260,6 +271,33 @@ apply_comment_to_unhit_actset <- function(act_set, inactivate) {
   return(result)
 }
 
+#' Add a noted flag on the Comments column
+#'
+#' @param act_set a tibble of the act_set
+#' @inheritParams summarize_rcurvep_output
+#'
+#' @return act_set with modified Commments column
+#' @keywords internal
+#' @noRd
+
+adjust_rcurvep_comment <- function(act_set, inactivate) {
+
+  if (is.character(inactivate)) {
+    inp <- stringr::str_detect(act_set$Comments, inactivate)
+  } else {
+    inp <- as.logical(replace(rep(0, nrow(act_set)), inactivate, 1))
+  }
+  result <- act_set %>%
+    dplyr::mutate(
+      Comments = dplyr::case_when(
+        inp ~ stringr::str_c(.data$Comments, "|custom"),
+        TRUE ~ Comments
+      )
+    )
+  return(result)
+
+}
+
 #' Replace the original value if there is a string in the comment.
 #'
 #' @inheritParams summarize_rcurvep_output
@@ -273,8 +311,13 @@ apply_comment_to_unhit_actset <- function(act_set, inactivate) {
 #'
 
 replace_active_value <- function(inactivate, comment, ori_value, new_value) {
+  inp <- inactivate
+  if (is.character(inactivate)) {
+    inp <- stringr::str_detect(comment, inactivate)
+  }
+
   result <- ori_value
-  result <- replace(result, stringr::str_detect(comment, inactivate), new_value)
+  result <- replace(result, inp, new_value)
   return(result)
 }
 
@@ -414,8 +457,13 @@ summarize_actset_in <- function(act_set, ci_level) {
 
   # group data
   g_cols <- c('lowest_conc', 'highest_conc', 'n_conc', 'mean_conc_spacing')
-  g_cols_s <- rlang::syms(g_cols)
-  act_setg <- act_set %>% dplyr::group_by(!!!g_cols_s)
+  act_g_cols <- intersect(colnames(act_set), g_cols)
+  act_setg <- act_set %>%
+    dplyr::group_by_at(
+      dplyr::vars(
+        tidyselect::one_of(act_g_cols)
+      )
+    )
 
   # summarize by different types
   result <- purrr::reduce(
@@ -423,7 +471,7 @@ summarize_actset_in <- function(act_set, ci_level) {
       summarize_actset_by_type(act_setg, type = "med_only", ci_level = ci_level),
       summarize_actset_by_type(act_setg, type = "med_conf", ci_level = ci_level),
       summarize_actset_by_type(act_setg, type = "hit_conf", ci_level = ci_level)
-    ), .f = dplyr::left_join, by = g_cols)
+    ), .f = dplyr::left_join, by = act_g_cols)
 
   return(result)
 }
@@ -451,7 +499,7 @@ summarize_actset_by_type <- function(act_set_grouped, type, ci_level) {
   } else if (type == "med_conf") {
     upper_bound <- 1 - (1 - ci_level)/2
     lower_bound <- (1 - ci_level)/2
-    ci_cols <- c('Emax', 'slope', 'AUC', 'wAUC', 'wAUC_prev','EC50','POD')
+    ci_cols <- c('Emax', 'slope', 'AUC', 'wAUC', 'wAUC_prev','EC50','POD', 'ECxx')
     suppressWarnings(result <- act_set_grouped %>%
       dplyr::summarise_at(
         dplyr::vars(tidyselect::one_of(ci_cols)),
