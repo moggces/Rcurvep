@@ -4,8 +4,10 @@
 \name{zfishdev_act}
 \alias{zfishdev_act}
 \title{Activity output based on simulated datasets using zfishdev_all dataset}
-\format{A list of two named components: result and config.
-The result component is a list with one component: act_set.}
+\format{
+A list of two named components: result and config.
+The result component is a list with one component: act_set.
+}
 \usage{
 zfishdev_act
 }

@@ -50,6 +50,7 @@
 #'
 #' @importFrom magrittr "%>%"
 #' @importFrom rlang .data
+#' @importFrom rlang :=
 #' @importFrom Rdpack reprompt
 #' @importFrom methods is
 #' @importFrom stats constrOptim cor dnorm dt fitted lm mad median na.omit nls optim predict quantile sd smooth.spline

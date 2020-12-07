@@ -47,6 +47,8 @@ curvep(
 \item{DUMV}{A dummy value, default = -999.}
 
 \item{TLOG}{A scaling factor for calculating the wAUC, default = -24.}
+
+\item{...}{allow other parameters to pass}
 }
 \value{
 A list with corrected concentration-response measurements and several calculated curve metrics.
@@ -65,7 +67,7 @@ A list with corrected concentration-response measurements and several calculated
 \item nCorrected: number of points corrected (basically, sum of flags in corr)
 \item Comments: warning and notes about the dose-response curve
 \item Settings: input parameters for this run
-\item ...: to allow other parameters to pass
+
 }
 }
 \description{

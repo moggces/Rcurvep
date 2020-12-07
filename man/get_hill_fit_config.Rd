@@ -11,7 +11,7 @@ get_hill_fit_config(Conc, Resp, optimf = "tcplObjHill")
 
 \item{Resp}{A vector of numeric responses.}
 
-\item{optimf}{The default optimized function is \code{\link[tcpl:tcplObjHill]{tcpl::tcplObjHill()}}.
+\item{optimf}{The default optimized function is \code{\link[tcpl:Models]{tcpl::tcplObjHill()}}.
 but can be changed to ObjHillnorm().}
 }
 \value{
@@ -28,5 +28,5 @@ A list of input configurations.
 The function gives the default settings by using one set of concentration-response data.
 }
 \seealso{
-\code{\link[tcpl:tcplObjHill]{tcpl::tcplObjHill()}}, \code{\link[=fit_modls]{fit_modls()}}
+\code{\link[tcpl:Models]{tcpl::tcplObjHill()}}, \code{\link[=fit_modls]{fit_modls()}}
 }

@@ -4,7 +4,9 @@
 \name{zfishdev_all}
 \alias{zfishdev_all}
 \title{Full sets of concentration response datasets from zebrafish developmental toxicity assays}
-\format{A tibble with 512 rows and 5 columns:}
+\format{
+A tibble with 512 rows and 5 columns:
+}
 \source{
 Biobide study S-BBD-00016/15
 }

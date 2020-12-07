@@ -56,7 +56,7 @@
   min_n_conc <- d %>%
     dplyr::count(.data$endpoint, .data$chemical) %>%
     dplyr::pull(.data$n) %>%
-    min(.)
+    min()
 
 
   if (any(vec > min_n_conc)) {

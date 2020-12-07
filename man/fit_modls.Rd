@@ -76,5 +76,5 @@ fit_modls(concd, respd, maskd)
 
 }
 \seealso{
-\code{\link[tcpl:tcplObjHill]{tcpl::tcplObjHill()}}, \code{\link[tcpl:tcplObjCnst]{tcpl::tcplObjCnst()}}, \code{\link[=get_hill_fit_config]{get_hill_fit_config()}}
+\code{\link[tcpl:Models]{tcpl::tcplObjHill()}}, \code{\link[tcpl:Models]{tcpl::tcplObjCnst()}}, \code{\link[=get_hill_fit_config]{get_hill_fit_config()}}
 }

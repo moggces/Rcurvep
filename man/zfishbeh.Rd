@@ -4,13 +4,15 @@
 \name{zfishbeh}
 \alias{zfishbeh}
 \title{Subsets of concentration response datasets from zebrafish neurotoxicity assays}
-\format{A tibble with 2123 rows and 4 columns:
+\format{
+A tibble with 2123 rows and 4 columns:
 \describe{
 \item{endpoint}{endpoin name}
 \item{chemical}{chemical name + CASRN}
 \item{conc}{concentrations in log10(M) format}
 \item{resp}{responses after normalized using the vehicle control on each plate}
-}}
+}
+}
 \source{
 Biobide study S‐BBD‐0017/15
 }
