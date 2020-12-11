@@ -21,6 +21,11 @@ devtools::install_github("moggces/Rcurvep")
 devtools::install_github("moggces/Rcurvep", build_vignettes = TRUE)
 ```
 
+## Package structure
+
+![](man/figures/rcurvep_scheme2.png)
+
+
 ## Usage
 
 ### Run analysis

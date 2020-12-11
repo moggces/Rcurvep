@@ -20,6 +20,10 @@ devtools::install_github("moggces/Rcurvep")
 devtools::install_github("moggces/Rcurvep", build_vignettes = TRUE)
 ```
 
+## Package structure
+
+![](man/figures/rcurvep_scheme2.png)
+
 ## Usage
 
 ### Run analysis
@@ -40,7 +44,7 @@ out_bmr <- estimate_dataset_bmr(zfishdev_act)
 
     ## $`1`
 
-![](README_figs/README-unnamed-chunk-3-1.png)<!-- -->
+![](man/figures/bmr_diagnostic_plot_example.png)<!-- -->
 
 ## More Usage
 
