@@ -25,7 +25,7 @@
 #'   \item outcome: a tibble, including estimated BMRs (bmr)
 #' }
 #' Suffix in the *stats* and *outcome* tibble: _ori (original values), _exp(exponential fit).
-#' prefix in the *outcome* tibble: cor_ (correlation between the fitted responses and the orignal responses),
+#' prefix in the *outcome* tibble: cor_ (correlation between the fitted responses and the original responses),
 #' bmr_ (benchmark response), qc (quality control).
 #'
 #' @export

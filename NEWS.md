@@ -14,7 +14,7 @@
 # Rcurvep 0.3
 
 * new: simplify_output is added for run_curvep_job() to reduce the amount of output
-* change: levels in curvep() is seperated into ECxx, Cxx, and xx
+* change: levels in curvep() is separated into ECxx, Cxx, and xx
 * change: combine conc_hl to act function in extract_curvep_data()
 * change: input column became a list of list structure
 
@@ -27,7 +27,7 @@
 * new: add reparam_curvep_job() to recalculate based on run_curvep_job() complex output
 
 # Rcurvep 0.4.1
-* new: add the abline line that is used to calculate distance in the dignostic plot
+* new: add the abline line that is used to calculate distance in the diagnostic plot
 * new: add generate_diagnostic_plot() and cal_exponential_inflection()
 * new: add an comment (thresDistComment) that shows if the identified baseline threshold is usable
 * change: thresCurva approach is removed
@@ -40,7 +40,7 @@
 * change: p1, p2 => p1_raw, p2_raw; dist2l => dist2l_raw
 
 # Rcurvep 0.5.1
-* new: summarize_curvep_output() to get confidence interval of activites by bypassing the extract_curvep_data()
+* new: summarize_curvep_output() to get confidence interval of activities by bypassing the extract_curvep_data()
 * change: use SSasymp to fit the exponential decay curve
 
 # Rcurvep 0.5.2

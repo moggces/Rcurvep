@@ -6,7 +6,7 @@
 #' @format A tibble with 96 rows and 5 columns:
 #'
 #' \describe{
-#'   \item{endpoint}{endpoin name + at time point measured}
+#'   \item{endpoint}{endpoint name + at time point measured}
 #'   \item{chemical}{chemical name + CASRN}
 #'   \item{conc}{concentrations in log10(M) format}
 #'   \item{n_in}{number of incidence}
@@ -24,7 +24,7 @@
 #'
 #' @format A tibble with 2123 rows and 4 columns:
 #' \describe{
-#'   \item{endpoint}{endpoin name}
+#'   \item{endpoint}{endpoint name}
 #'   \item{chemical}{chemical name + CASRN}
 #'   \item{conc}{concentrations in log10(M) format}
 #'   \item{resp}{responses after normalized using the vehicle control on each plate}

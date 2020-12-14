@@ -46,7 +46,7 @@ str(zfishdev)
 
 ## Rcurvep method
 
-The Rcurvep is a tool to decide whether responses are monotonic (as the increase of concentration) based on a set of pre-defined parameters. The default setting of those parameters can be obtained through `curvep_defaults()`. The **TRSH** is the threshold parameter, below which, all responses are considered as noise. This threshold is particularly important for toxicologists, since the point-of-departure (POD) can be defined as the concentration at which response equivalent to this threshold. The threshold can also be called as benchmarck response (**BMR**).
+The Rcurvep is a tool to decide whether responses are monotonic (as the increase of concentration) based on a set of pre-defined parameters. The default setting of those parameters can be obtained through `curvep_defaults()`. The **TRSH** is the threshold parameter, below which, all responses are considered as noise. This threshold is particularly important for toxicologists, since the point-of-departure (POD) can be defined as the concentration at which response equivalent to this threshold. The threshold can also be called as benchmark response (**BMR**).
 
 
 ```{r}

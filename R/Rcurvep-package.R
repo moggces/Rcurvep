@@ -1,9 +1,9 @@
 #' Rcurvep: Concentration-response data analysis using Curvep
-#' and other parameteric fitting approaches
+#' and other parametric fitting approaches
 #'
 #' The package provides an R interface for processing concentration-response datasets
 #' using Curvep a response noise filtering algorithm
-#' and other parameteric fitting approaches (e.g. Hill equation).
+#' and other parametric fitting approaches (e.g. Hill equation).
 #' Also methods for calculating the confidence interval around the activity metrics are also provided.
 #' The methods are based on the bootstrap approach to get simulated datasets.
 #' The simulated datasets can be used to derive the noise threshold (or benchmark response BMR) in an assay endpoint.
@@ -20,7 +20,7 @@
 #' \enumerate{
 #'   \item dichotomous binary incidence data (e.g. mortality data from alternative animal model data)
 #'   \item continuous data with high number of replicates (e.g. alternative animal model data)
-#'   \item continous data with low number of replicates (e.g. in vitro data)
+#'   \item continuous data with low number of replicates (e.g. in vitro data)
 #' }
 #'
 #' Bootstrapping strategies:

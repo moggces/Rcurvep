@@ -1,5 +1,5 @@
 
-#' Create concentration-resonse datasets that can be applied in the `run_rcurvep()`
+#' Create concentration-response datasets that can be applied in the `run_rcurvep()`
 #'
 #' The input dataset is created either by summarizing the response data
 #' or by simulating the response data.
@@ -15,7 +15,7 @@
 #' * For dichotomous responses, bootstrap approach is used on the "n_in" vector
 #' to create a vector of percent response.
 #' * For continuous responses, options are a) direct sampling;
-#' b) responses from the linear fiting using the original data + error of responses based on the supplied vehicle control data
+#' b) responses from the linear fit using the original data + error of responses based on the supplied vehicle control data
 #'
 #' @param d Datasets with concentration-response data.
 #'   Examples are [zfishbeh] and [zfishdev].

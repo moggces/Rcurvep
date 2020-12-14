@@ -3,7 +3,7 @@
 
 The package provides an R interface for processing
 **concentration-response datasets** using Curvep, a response noise
-filtering algorithm, and other parameteric fitting approaches (e.g.,
+filtering algorithm, and other parametric fitting approaches (e.g.,
 Hill equation). Also, methods for calculating the confidence interval
 around the activity metrics are also provided. The methods are based on
 the bootstrap approach to get simulated datasets. The simulated datasets

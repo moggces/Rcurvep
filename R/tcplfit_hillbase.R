@@ -1,5 +1,5 @@
 
-#' Fit one concentration-response data using types of models
+#' Fit one set of concentration-response data using types of models
 #'
 #' A convenient function to fit data using available models
 #' and to sort the outcomes by AIC values.
@@ -30,12 +30,12 @@
 #'   Fit output from Hill equation
 #'   \itemize{
 #'     \item modl: model type, i.e., hill
-#'     \item fit: fitable?, 1 or 0
+#'     \item fit: fittable, 1 (yes) or 0 (no)
 #'     \item aic: AIC value
 #'     \item tp: model top, <0 means the fit for decreasing direction is preferred
-#'     \item ga: ac50
+#'     \item ga: ac50 (log10 scale)
 #'     \item gw: Hill coefficient
-#'     \item er: scale term
+#'     \item er: scale term for Student’s t distribution
 #'    }
 #'
 #' ## cnst
@@ -142,7 +142,7 @@ fit_modl_in <- function(Conc, Resp, modl, ...) {
 #'
 #' \describe{
 #'   \item{modl}{model type, i.e., hill}
-#'   \item{fit}{fitable?, 1 or 0}
+#'   \item{fit}{fittable, 1 (yes) or 0 (no)}
 #'   \item{aic}{AIC value}
 #'   \item{tp}{model top, <0 means the fit for decreasing direction is preferred}
 #'   \item{ga}{ac50}
@@ -435,7 +435,7 @@ mask_resp_conc <- function(Conc, Resp, Mask) {
 #'
 #' \describe{
 #'   \item{modl}{model type, i.e., cnst}
-#'   \item{fit}{fitable?, 1 or 0}
+#'   \item{fit}{fittable, 1 (yes) or 0 (no)}
 #'   \item{aic}{AIC value}
 #'   \item{er}{scale term}
 #' }

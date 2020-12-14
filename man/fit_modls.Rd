@@ -2,7 +2,7 @@
 % Please edit documentation in R/tcplfit_hillbase.R
 \name{fit_modls}
 \alias{fit_modls}
-\title{Fit one concentration-response data using types of models}
+\title{Fit one set of concentration-response data using types of models}
 \usage{
 fit_modls(Conc, Resp, Mask = NULL, modls = c("hill", "cnst"), ...)
 }
@@ -30,12 +30,12 @@ The models are sorted by their AIC values. Thus, the first component has the bes
 Fit output from Hill equation
 \itemize{
 \item modl: model type, i.e., hill
-\item fit: fitable?, 1 or 0
+\item fit: fittable, 1 (yes) or 0 (no)
 \item aic: AIC value
 \item tp: model top, <0 means the fit for decreasing direction is preferred
-\item ga: ac50
+\item ga: ac50 (log10 scale)
 \item gw: Hill coefficient
-\item er: scale term
+\item er: scale term for Student’s t distribution
 }
 }
 

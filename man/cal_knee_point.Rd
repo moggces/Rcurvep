@@ -28,7 +28,7 @@ fitted responses (y_exp_fit, y_lm_fit), distance to the line (dist2l)
 \item outcome: a tibble, including estimated BMRs (bmr)
 }
 Suffix in the \emph{stats} and \emph{outcome} tibble: \emph{ori (original values), \emph{exp(exponential fit).
-prefix in the \emph{outcome} tibble: cor} (correlation between the fitted responses and the orignal responses),
+prefix in the \emph{outcome} tibble: cor} (correlation between the fitted responses and the original responses),
 bmr} (benchmark response), qc (quality control).
 }
 \description{

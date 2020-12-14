@@ -41,7 +41,7 @@ These can be used to overwrite the default values.}
 \value{
 An rcurvep object. It has two components: result, config
 The result component is also a list of output sets depending on the parameter, \emph{keep_sets}.
-The config component is a \emph{curvep_config} obejct.\cr
+The config component is a \emph{curvep_config} object.\cr
 
 Often used columns in the \emph{act_set}: AUC (area under the curve), wAUC (weighted AUC),
 POD (point-of-departure), EC50 (Half maximal effective concentration),

@@ -2,7 +2,7 @@
 % Please edit documentation in R/rcurvep_simulate.R
 \name{create_dataset}
 \alias{create_dataset}
-\title{Create concentration-resonse datasets that can be applied in the \code{run_rcurvep()}}
+\title{Create concentration-response datasets that can be applied in the \code{run_rcurvep()}}
 \usage{
 create_dataset(d, n_samples = NULL, vdata = NULL)
 }
@@ -38,7 +38,7 @@ For the dataset that does not meet the requirement, the following strategies are
 \item For dichotomous responses, bootstrap approach is used on the "n_in" vector
 to create a vector of percent response.
 \item For continuous responses, options are a) direct sampling;
-b) responses from the linear fiting using the original data + error of responses based on the supplied vehicle control data
+b) responses from the linear fit using the original data + error of responses based on the supplied vehicle control data
 }
 }
 }

@@ -85,7 +85,7 @@ curvep_defaults <- function() {
 #'
 #' @return An rcurvep object. It has two components: result, config
 #'   The result component is also a list of output sets depending on the parameter, *keep_sets*.
-#'   The config component is a *curvep_config* obejct.\cr
+#'   The config component is a *curvep_config* object.\cr
 #'
 #'   Often used columns in the *act_set*: AUC (area under the curve), wAUC (weighted AUC),
 #'   POD (point-of-departure), EC50 (Half maximal effective concentration),
