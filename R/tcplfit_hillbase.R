@@ -35,7 +35,7 @@
 #'     \item tp: model top, <0 means the fit for decreasing direction is preferred
 #'     \item ga: ac50 (log10 scale)
 #'     \item gw: Hill coefficient
-#'     \item er: scale term for Student’s t distribution
+#'     \item er: scale term for Student's t distribution
 #'    }
 #'
 #' ## cnst

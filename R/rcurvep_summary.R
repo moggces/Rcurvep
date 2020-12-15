@@ -42,6 +42,7 @@
 #' out <- combi_run_rcurvep(zfishbeh, n_samples = NULL, TRSH = c(5, 10))
 #' out_res <- summarize_rcurvep_output(out)
 #'
+#'\dontrun{
 #' # unhit when comment has "INVERSE"
 #' out <- summarize_rcurvep_output(out, inactivate = "INVERSE")
 #'
@@ -51,7 +52,7 @@
 #' # simulated datasets
 #' out <- combi_run_rcurvep(zfishbeh, n_samples = 3, TRSH = c(5, 10))
 #' out_res <- summarize_rcurvep_output(out)
-#'
+#'}
 #'
 summarize_rcurvep_output <- function(d, inactivate = NULL, ci_level = 0.95, clean_only = FALSE) {
 

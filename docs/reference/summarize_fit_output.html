@@ -73,7 +73,7 @@ In addition, summary of activity data (e.g., confidence interval, hit confidence
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Rcurvep</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -188,6 +188,7 @@ For other activity metrics, if value is NA, 0 is used in the summary.</p>
 <span class='co'>## fit + bootstrap samples</span>
 <span class='va'>fitd2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='run_fit.html'>run_fit</a></span><span class='op'>(</span><span class='va'>zfishbeh</span>, n_samples <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 
+<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'># only to extract the activity data</span>
 <span class='va'>sumd1</span> <span class='op'>&lt;-</span> <span class='fu'>summarize_fit_output</span><span class='op'>(</span><span class='va'>fitd1</span>, extract_only <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 
@@ -201,7 +202,7 @@ For other activity metrics, if value is NA, 0 is used in the summary.</p>
 <span class='co'># calculate confidence intervals based on the bootstrap samples</span>
 <span class='va'>sumd2</span> <span class='op'>&lt;-</span> <span class='fu'>summarize_fit_output</span><span class='op'>(</span><span class='va'>fitd2</span><span class='op'>)</span>
 
-
+<span class='op'>}</span>
 
 </div></pre>
   </div>

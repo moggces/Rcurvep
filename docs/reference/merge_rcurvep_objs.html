@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculate the knee point on the exponential-like curve — cal_knee_point • Rcurvep</title>
+<title>Merge results from multiple rcurvep objects — merge_rcurvep_objs • Rcurvep</title>
 
 
 <!-- jquery -->
@@ -39,12 +39,9 @@
 
 
 
-<meta property="og:title" content="Calculate the knee point on the exponential-like curve — cal_knee_point" />
-<meta property="og:description" content="Currently two methods have been implemented to get the &quot;keen-point&quot; from the variance(y) - threshold(x) curve.
-One is to use the original y values to draw a straight line between the lowest x value (p1) to highest x value (p2).
-The knee-point is the x that has the longest distance to the line.
-The other one is to fit the data first then use the fitted responses to do the same analysis.
-Currently the first method is preferred." />
+<meta property="og:title" content="Merge results from multiple rcurvep objects — merge_rcurvep_objs" />
+<meta property="og:description" content="Sometimes user may want to try multiple curvep setting and pick the one that can capture the shape (wAUC != 0).
+The highest absolute wAUC from the chemical-endpoint(-sample_id) pair will be picked." />
 
 
 
@@ -122,76 +119,44 @@ Currently the first method is preferred." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculate the knee point on the exponential-like curve</h1>
+    <h1>Merge results from multiple rcurvep objects</h1>
     
-    <div class="hidden name"><code>cal_knee_point.Rd</code></div>
+    <div class="hidden name"><code>merge_rcurvep_objs.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Currently two methods have been implemented to get the "keen-point" from the variance(y) - threshold(x) curve.
-One is to use the original y values to draw a straight line between the lowest x value (p1) to highest x value (p2).
-The knee-point is the x that has the longest distance to the line.
-The other one is to fit the data first then use the fitted responses to do the same analysis.
-Currently the first method is preferred.</p>
+    <p>Sometimes user may want to try multiple curvep setting and pick the one that can capture the shape (wAUC != 0).
+The highest absolute wAUC from the chemical-endpoint(-sample_id) pair will be picked.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cal_knee_point</span><span class='op'>(</span><span class='va'>d</span>, <span class='va'>xaxis</span>, <span class='va'>yaxis</span>, p1 <span class='op'>=</span> <span class='cn'>NULL</span>, p2 <span class='op'>=</span> <span class='cn'>NULL</span>, plot <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>merge_rcurvep_objs</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>d</th>
-      <td><p>A tibble.</p></td>
-    </tr>
-    <tr>
-      <th>xaxis</th>
-      <td><p>The column name in the <code>d</code> to be the x-axis in the exponential-like curve</p></td>
-    </tr>
-    <tr>
-      <th>yaxis</th>
-      <td><p>The column name in the <code>d</code> to be the y-axis in the exponential-like curve</p></td>
-    </tr>
-    <tr>
-      <th>p1</th>
-      <td><p>Default = NULL, or an integer value to manually set the first index of line.</p></td>
-    </tr>
-    <tr>
-      <th>p2</th>
-      <td><p>Default = NULL, or an integer value to manually set the last index of line.</p></td>
-    </tr>
-    <tr>
-      <th>plot</th>
-      <td><p>Default = TRUE, plot the diagnostic plot.</p></td>
+      <th>...</th>
+      <td><p>rcurvep objects</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with two components: stats and outcome.</p>
-<ul>
-<li><p>stats: a tibble, including pooled variance (pvar),
-fitted responses (y_exp_fit, y_lm_fit), distance to the line (dist2l)</p></li>
-<li><p>outcome: a tibble, including estimated BMRs (bmr)</p></li>
-</ul><p>Suffix in the <em>stats</em> and <em>outcome</em> tibble: <em>ori (original values), <em>exp(exponential fit).
-prefix in the <em>outcome</em> tibble: cor</em> (correlation between the fitted responses and the original responses),
-bmr</em> (benchmark response), qc (quality control).</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p><code><a href='estimate_dataset_bmr.html'>estimate_dataset_bmr()</a></code></p></div>
+    <p>an updated rcurvep object with config = NULL</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='va'>inp</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>
-x <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>95</span>, by <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>,
-y <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.0537</span>, <span class='fl'>0.0281</span>, <span class='fl'>0.0119</span>, <span class='fl'>0.0109</span>, <span class='fl'>0.0062</span>, <span class='fl'>0.0043</span>, <span class='fl'>0.0043</span>, <span class='fl'>0.0042</span>,
-<span class='fl'>0.0041</span>, <span class='fl'>0.0043</span>, <span class='fl'>0.0044</span>, <span class='fl'>0.0044</span>, <span class='fl'>0.0046</span>, <span class='fl'>0.0051</span>,
-<span class='fl'>0.0055</span>, <span class='fl'>0.0057</span>, <span class='fl'>0.0072</span>, <span class='fl'>0.0068</span>, <span class='fl'>0.0035</span><span class='op'>)</span>
-<span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>zfishbeh</span><span class='op'>)</span>
 
-<span class='va'>out</span> <span class='op'>&lt;-</span> <span class='fu'>cal_knee_point</span><span class='op'>(</span><span class='va'>inp</span>,<span class='st'>"x"</span>, <span class='st'>"y"</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>out</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; $`1`</div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 38 row(s) containing missing values (geom_path).</span></div><div class='img'><img src='cal_knee_point-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; </div><div class='input'>
+<span class='co'># combine default + mask</span>
+<span class='va'>out1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='combi_run_rcurvep.html'>combi_run_rcurvep</a></span><span class='op'>(</span><span class='va'>zfishbeh</span>, TRSH <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>out2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='combi_run_rcurvep.html'>combi_run_rcurvep</a></span><span class='op'>(</span><span class='va'>zfishbeh</span>, TRSH <span class='op'>=</span> <span class='fl'>10</span>, mask <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
+<span class='va'>m1</span> <span class='op'>&lt;-</span> <span class='fu'>merge_rcurvep_objs</span><span class='op'>(</span><span class='va'>out1</span>, <span class='va'>out2</span><span class='op'>)</span>
+
+<span class='co'># use same set of samples to combine</span>
+<span class='va'>out1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='combi_run_rcurvep.html'>combi_run_rcurvep</a></span><span class='op'>(</span><span class='va'>zfishbeh</span>, TRSH <span class='op'>=</span> <span class='fl'>10</span>, n_samples <span class='op'>=</span> <span class='fl'>2</span>, seed <span class='op'>=</span> <span class='fl'>300</span><span class='op'>)</span>
+<span class='va'>out2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='combi_run_rcurvep.html'>combi_run_rcurvep</a></span><span class='op'>(</span><span class='va'>zfishbeh</span>, TRSH <span class='op'>=</span> <span class='fl'>10</span>, mask <span class='op'>=</span> <span class='fl'>1</span>, n_samples <span class='op'>=</span> <span class='fl'>2</span>, seed <span class='op'>=</span> <span class='fl'>300</span><span class='op'>)</span>
+<span class='va'>m1</span> <span class='op'>&lt;-</span> <span class='fu'>merge_rcurvep_objs</span><span class='op'>(</span><span class='va'>out1</span>, <span class='va'>out2</span><span class='op'>)</span>
 
 </div></pre>
   </div>

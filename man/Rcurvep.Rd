@@ -54,7 +54,7 @@ To learn more about Rcurvep start with the vignettes:
 
 \insertRef{PMID:30944845}{Rcurvep}\cr
 
-\insertRef{PMID:30321397}{Rcurvep}
+\insertRef{PMID:30321397}{Rcurvep}\cr
 }
 }
 }

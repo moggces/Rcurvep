@@ -30,7 +30,7 @@
 #'   \item{resp}{responses after normalized using the vehicle control on each plate}
 #' }
 #'
-#' @source Biobide study S‐BBD‐0017/15
+#' @source Biobide study S-BBD-0017/15
 
 "zfishbeh"
 

@@ -49,6 +49,7 @@ fitd1 <- run_fit(zfishbeh)
 ## fit + bootstrap samples
 fitd2 <- run_fit(zfishbeh, n_samples = 3)
 
+\dontrun{
 # only to extract the activity data
 sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE)
 
@@ -62,7 +63,7 @@ sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE, thr_resp  = 40)
 # calculate confidence intervals based on the bootstrap samples
 sumd2 <- summarize_fit_output(fitd2)
 
-
+}
 
 }
 \seealso{

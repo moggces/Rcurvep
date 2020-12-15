@@ -45,7 +45,7 @@
 #' ## Bootstrap
 #'   \insertRef{PMID:30944845}{Rcurvep}\cr
 #'
-#'   \insertRef{PMID:30321397}{Rcurvep}
+#'   \insertRef{PMID:30321397}{Rcurvep}\cr
 #' }
 #'
 #' @importFrom magrittr "%>%"
@@ -58,3 +58,4 @@
 #' @docType package
 #' @name Rcurvep
 NULL
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))

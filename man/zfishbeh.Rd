@@ -14,7 +14,7 @@ A tibble with 2123 rows and 4 columns:
 }
 }
 \source{
-Biobide study S‐BBD‐0017/15
+Biobide study S-BBD-0017/15
 }
 \usage{
 zfishbeh

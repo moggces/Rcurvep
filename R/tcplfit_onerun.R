@@ -298,6 +298,7 @@ create_hillsimu_dataset <- function(fitd, n_samples, pdir) {
 #'
 #' @return The vector of responses.
 #' @keywords internal
+#' @noRd
 
 create_hillsimu_resp <- function(inp, out) {
   result <- inp
@@ -374,6 +375,7 @@ get_hillfit_direction <- function(out, pdir) {
 #' ## fit + bootstrap samples
 #' fitd2 <- run_fit(zfishbeh, n_samples = 3)
 #'
+#'\dontrun{
 #' # only to extract the activity data
 #' sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE)
 #'
@@ -387,7 +389,7 @@ get_hillfit_direction <- function(out, pdir) {
 #' # calculate confidence intervals based on the bootstrap samples
 #' sumd2 <- summarize_fit_output(fitd2)
 #'
-#'
+#'}
 #'
 summarize_fit_output <- function(d, thr_resp = 20, perc_resp = 10, ci_level = 0.95, extract_only = FALSE) {
 

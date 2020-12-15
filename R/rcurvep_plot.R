@@ -191,7 +191,7 @@ plot_diagnostic <- function(plotd, lined, endpoints) {
   linddf <- lined %>% dplyr::filter(.data$facet_endpoint %in% endpoints)
 
   # base line + dot
-  p <- ggplot2::ggplot(plotdf, ggplot2::aes(x = TRSH, y = value, color = type))
+  p <- ggplot2::ggplot(plotdf, ggplot2::aes(x = .data$TRSH, y = .data$value, color = .data$type))
   p <- p + ggplot2::geom_point(size = 2) +
     ggplot2::scale_color_manual(
       values = c("pvar" = "black", "dist2l_ori" = "black", "dist2l_exp" = "red")
@@ -200,16 +200,16 @@ plot_diagnostic <- function(plotd, lined, endpoints) {
 
   # exp fit y
   p <- p + ggplot2::geom_line(
-    ggplot2::aes(x = TRSH, y = y_exp_fit), linetype = "solid", color = "red")
+    ggplot2::aes(x = .data$TRSH, y = .data$y_exp_fit), linetype = "solid", color = "red")
 
   # the p1-p2 line
   p <- p + ggplot2::geom_abline(
       data = linddf %>% dplyr::filter(.data$fit_type == "ori"), ggplot2::aes(
-        slope = slope, intercept = intercept), linetype = "dashed", color = "black"
+        slope = .data$slope, intercept = .data$intercept), linetype = "dashed", color = "black"
     ) +
     ggplot2::geom_abline(
       data = linddf %>% dplyr::filter(.data$fit_type == "exp"), ggplot2::aes(
-        slope = slope, intercept = intercept), linetype = "dashed", color = "red"
+        slope = .data$slope, intercept = .data$intercept), linetype = "dashed", color = "red"
     )
 
   p <- p + ggplot2::facet_grid(type ~ facet_endpoint, scales = "free")

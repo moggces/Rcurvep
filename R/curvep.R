@@ -728,8 +728,7 @@ curvep <- function(Conc, Resp, Mask = NULL,
 		#gather settings in one list:
 		sett <- list(TRSH = TRSH, RNGE = RNGE, MXDV = MXDV, CARR=CARR, BSFT=BSFT, USHP=USHP, TrustHi = TrustHi, StrictImp = StrictImp, DUMV = DUMV, TLOG = TLOG)
 
-		return
-		(
+		return(
 
 		  list(resp = HTS, corr = Corrections, #levels = data.frame(xx = rlevels, ECxx =ECs, Cxx =CAs, row.names = paste(rlevels, "%", sep='')),
 		       ECxx = ECs, Cxx = CAs, xx = rlevels,

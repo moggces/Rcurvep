@@ -285,8 +285,8 @@ qc_data <- function(exp_cor, linear_cor) {
 add_fitted_y <- function(d, xvar, yvar) {
   result <- d %>%
     dplyr::mutate(
-      y_exp_fit =  try(fitted(cal_exponential_fit(.[[xvar]], .[[yvar]])), silent = TRUE),
-      y_lm_fit = fitted(cal_linear_fit(.[[xvar]], .[[yvar]]))
+      y_exp_fit =  try(fitted(cal_exponential_fit(.data[[xvar]], .data[[yvar]])), silent = TRUE),
+      y_lm_fit = fitted(cal_linear_fit(.data[[xvar]], .data[[yvar]]))
     ) %>%
     dplyr::mutate_at("y_exp_fit", as.numeric)
   return(result)
@@ -338,7 +338,7 @@ add_dist_2_line <- function(fitd, xvar, yvar, p1, p2) {
 add_curvature <- function(d, xvar, yvar) {
   result <- d %>%
     dplyr::mutate(
-      curva = cal_curvature(.[[xvar]], .[[yvar]])
+      curva = cal_curvature(.data[[xvar]], .data[[yvar]])
     )
   return(result)
 }
@@ -439,8 +439,8 @@ cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
 
   while (p1 < p2)
   {
-    l1 <- d[p1, ] %>% purrr::as_vector(.)
-    l2 <- d[p2, ] %>% purrr::as_vector(.)
+    l1 <- d[p1, ] %>% purrr::as_vector()
+    l2 <- d[p2, ] %>% purrr::as_vector()
 
     dists <- apply(d, 1, function(x) {
       x <- purrr::as_vector(x)
@@ -452,7 +452,7 @@ cal_dist2l <- function(thres, vars, p1 = NULL, p2 = NULL) {
     })
 
     dists[!(seq(1:length(dists)) %in% p1:p2)] <- NA
-    l3 <- d[which.max(dists),] %>% purrr::as_vector(.)
+    l3 <- d[which.max(dists),] %>% purrr::as_vector()
     if (abs(l3[2] - l2[2]) < abs(l3[2] - l1[2])) {
       break
     } else
