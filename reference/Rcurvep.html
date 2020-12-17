@@ -6,8 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rcurvep: Concentration-response data analysis using Curvep
-and other parametric fitting approaches — Rcurvep • Rcurvep</title>
+<title>Rcurvep: Concentration-Response Data Analysis using Curvep — Rcurvep • Rcurvep</title>
 
 
 <!-- jquery -->
@@ -40,15 +39,13 @@ and other parametric fitting approaches — Rcurvep • Rcurvep</title>
 
 
 
-<meta property="og:title" content="Rcurvep: Concentration-response data analysis using Curvep
-and other parametric fitting approaches — Rcurvep" />
-<meta property="og:description" content="The package provides an R interface for processing concentration-response datasets
-using Curvep a response noise filtering algorithm
-and other parametric fitting approaches (e.g. Hill equation).
-Also methods for calculating the confidence interval around the activity metrics are also provided.
-The methods are based on the bootstrap approach to get simulated datasets.
-The simulated datasets can be used to derive the noise threshold (or benchmark response BMR) in an assay endpoint.
-This threshold is critical in the toxicity studies to derive the point-of-departure (POD)." />
+<meta property="og:title" content="Rcurvep: Concentration-Response Data Analysis using Curvep — Rcurvep" />
+<meta property="og:description" content="Provide an R interface for processing concentration-response datasets using Curvep, a response noise filtering algorithm. The algorithm was described in the publications (see references below).
+Other parametric fitting approaches (e.g., Hill equation) are also adopted for ease of comparison.
+Also, methods for calculating the confidence interval around the activity metrics are also provided.
+The methods are based on the bootstrap approach to simulate the datasets.
+The simulated datasets can be used to derive the baseline noise threshold in an assay endpoint.
+This threshold is critical in the toxicological studies to derive the point-of-departure (POD)." />
 
 
 
@@ -126,20 +123,18 @@ This threshold is critical in the toxicity studies to derive the point-of-depart
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Rcurvep: Concentration-response data analysis using Curvep
-and other parametric fitting approaches</h1>
+    <h1>Rcurvep: Concentration-Response Data Analysis using Curvep</h1>
     
     <div class="hidden name"><code>Rcurvep.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The package provides an R interface for processing concentration-response datasets
-using Curvep a response noise filtering algorithm
-and other parametric fitting approaches (e.g. Hill equation).
-Also methods for calculating the confidence interval around the activity metrics are also provided.
-The methods are based on the bootstrap approach to get simulated datasets.
-The simulated datasets can be used to derive the noise threshold (or benchmark response BMR) in an assay endpoint.
-This threshold is critical in the toxicity studies to derive the point-of-departure (POD).</p>
+    <p>Provide an R interface for processing concentration-response datasets using Curvep, a response noise filtering algorithm. The algorithm was described in the publications (see references below).
+Other parametric fitting approaches (e.g., Hill equation) are also adopted for ease of comparison.
+Also, methods for calculating the confidence interval around the activity metrics are also provided.
+The methods are based on the bootstrap approach to simulate the datasets.
+The simulated datasets can be used to derive the baseline noise threshold in an assay endpoint.
+This threshold is critical in the toxicological studies to derive the point-of-departure (POD).</p>
     </div>
 
 
@@ -163,7 +158,7 @@ Datasets can be grouped into three types:</p>
 <ol>
 <li><p>bootstrap incidence out of total animals per concentration then calculate percentage of incidence</p></li>
 <li><p>bootstrap replicate responses per concentration directly</p></li>
-<li><p>bootstrap vehicle control responses and add back to the fitted responses by linear regression per concentration</p></li>
+<li><p>bootstrap vehicle control responses and add back to the fitted responses by linear regression per concentration (experimental)</p></li>
 </ol>
 
 <p>To learn more about Rcurvep start with the vignettes:
