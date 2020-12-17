@@ -375,7 +375,7 @@ get_hillfit_direction <- function(out, pdir) {
 #' ## fit + bootstrap samples
 #' fitd2 <- run_fit(zfishbeh, n_samples = 3)
 #'
-#'\dontrun{
+#'\donttest{
 #' # only to extract the activity data
 #' sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE)
 #'

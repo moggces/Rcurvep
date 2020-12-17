@@ -2,14 +2,7 @@
 ## Overview
 
 The package provides an R interface for processing
-**concentration-response datasets** using Curvep, a response noise
-filtering algorithm, and other parametric fitting approaches (e.g.,
-Hill equation). Also, methods for calculating the confidence interval
-around the activity metrics are also provided. The methods are based on
-the bootstrap approach to get simulated datasets. The simulated datasets
-can be used to derive the noise threshold (or benchmark response, BMR)
-in an assay endpoint. This threshold is critical in the toxicity studies
-to derive the point-of-departure (POD).
+**concentration-response datasets** using Curvep, a response noise filtering algorithm. The algorithm was described in the publications (Sedykh A et al. (2011) [doi:10.1289/ehp.1002476](https://doi.org/10.1289/ehp.1002476) and Sedykh A (2016) [doi:10.1007/978-1-4939-6346-1_14](https://doi.org/10.1007/978-1-4939-6346-1_14)). Other parametric fitting approaches (e.g., Hill equation) are also adopted for ease of comparison. Also, methods for calculating the confidence interval around the activity metrics are also provided. The methods are based on the bootstrap approach to simulate the datasets (Hsieh J-H et al. [doi:10.1093/toxsci/kfy258](https://doi.org/10.1093/toxsci/kfy258)). The simulated datasets can be used to derive the baseline noise threshold in an assay endpoint. This threshold is critical in the toxicological studies to derive the point-of-departure (POD).
 
 ## Installation
 

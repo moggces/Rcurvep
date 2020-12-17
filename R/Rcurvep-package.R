@@ -1,13 +1,11 @@
-#' Rcurvep: Concentration-response data analysis using Curvep
-#' and other parametric fitting approaches
+#' Rcurvep: Concentration-Response Data Analysis using Curvep
 #'
-#' The package provides an R interface for processing concentration-response datasets
-#' using Curvep a response noise filtering algorithm
-#' and other parametric fitting approaches (e.g. Hill equation).
-#' Also methods for calculating the confidence interval around the activity metrics are also provided.
-#' The methods are based on the bootstrap approach to get simulated datasets.
-#' The simulated datasets can be used to derive the noise threshold (or benchmark response BMR) in an assay endpoint.
-#' This threshold is critical in the toxicity studies to derive the point-of-departure (POD).
+#' Provide an R interface for processing concentration-response datasets using Curvep, a response noise filtering algorithm. The algorithm was described in the publications (see references below).
+#' Other parametric fitting approaches (e.g., Hill equation) are also adopted for ease of comparison.
+#' Also, methods for calculating the confidence interval around the activity metrics are also provided.
+#' The methods are based on the bootstrap approach to simulate the datasets.
+#' The simulated datasets can be used to derive the baseline noise threshold in an assay endpoint.
+#' This threshold is critical in the toxicological studies to derive the point-of-departure (POD).
 #'
 #' @details
 #' Different strategies are used to simulate the datasets:
@@ -28,7 +26,7 @@
 #' \enumerate{
 #'   \item bootstrap incidence out of total animals per concentration then calculate percentage of incidence
 #'   \item bootstrap replicate responses per concentration directly
-#'   \item bootstrap vehicle control responses and add back to the fitted responses by linear regression per concentration
+#'   \item bootstrap vehicle control responses and add back to the fitted responses by linear regression per concentration (experimental)
 #' }
 #'
 #' To learn more about Rcurvep start with the vignettes:
