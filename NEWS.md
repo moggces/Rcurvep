@@ -71,6 +71,8 @@
 * new: allow to input seed in the combi_run_rcurvep()
 * change: fix ECxx is missing when summarizing the bootstrap results of the fit
 
+# Rcurvep 1.2.1
+* change: fix a bug in get_base_cols when only one set available (act_set, resp_set, fp_set) when doing the merge_rcurvep_objs
 
 # Todo
 * implement stratified bootstrap

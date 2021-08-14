@@ -122,7 +122,8 @@ get_base_cols <- function(lsets, config = curvep_defaults(), remove_sample_id = 
     result <- purrr::map(lsets, colnames) %>% purrr::reduce(., intersect)
   } else {
     result <- intersect(colnames(lsets[[1]]), names(config))
-    result <- c(result, "chemical", "endpoint")
+    add_cols <- intersect(c("chemical", "endpoint", "sample_id"), colnames(lsets[[1]]) )
+    result <- c(result, add_cols)
   }
   if (remove_sample_id) {
     result <- result[!result %in% c('sample_id')]
