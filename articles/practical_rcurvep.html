@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,23 +33,17 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Rcurvep</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -85,211 +81,212 @@
 
     
     
-<div id="install-the-package" class="section level2">
-<h2 class="hasAnchor">
-<a href="#install-the-package" class="anchor"></a>Install the package</h2>
+<div class="section level2">
+<h2 id="install-the-package">Install the package<a class="anchor" aria-label="anchor" href="#install-the-package"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># the development version from GitHub:</span>
-<span class="co"># install.packages("devtools")</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span><span class="op">)</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># the development version from GitHub:</span></span>
+<span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="load-the-library" class="section level2">
-<h2 class="hasAnchor">
-<a href="#load-the-library" class="anchor"></a>Load the library</h2>
+<div class="section level2">
+<h2 id="load-the-library">Load the library<a class="anchor" aria-label="anchor" href="#load-the-library"></a>
+</h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">Rcurvep</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">Rcurvep</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="load-the-sample-dataset" class="section level2">
-<h2 class="hasAnchor">
-<a href="#load-the-sample-dataset" class="anchor"></a>Load the sample dataset</h2>
+<div class="section level2">
+<h2 id="load-the-sample-dataset">Load the sample dataset<a class="anchor" aria-label="anchor" href="#load-the-sample-dataset"></a>
+</h2>
 <p><em>zfishdev</em> a subset of data from a 32-compound screen using zebrafish developmental assays. Our goal is to decide whether a compound is active in a particular toxicity endpoint. The <strong>active</strong> is determined by if the responses is monotonic (as the increase of concentration). In addition, the maximum response has to be larger than a certain response threshold.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># More details of the dataset can be found ?zfishdev.</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span> 
-<span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>
-<span class="co">#&gt; Classes 'tbl_df', 'tbl' and 'data.frame':    96 obs. of  5 variables:</span>
-<span class="co">#&gt;  $ endpoint: chr  "percent_affected_48" "percent_affected_48" "percent_affected_48" "percent_affected_48" ...</span>
-<span class="co">#&gt;  $ chemical: chr  "Caffeine|58-08-2" "Caffeine|58-08-2" "Caffeine|58-08-2" "Caffeine|58-08-2" ...</span>
-<span class="co">#&gt;  $ conc    : num  -4 -3.82 -3.52 -3.3 -3.12 -3 -2.82 -2.7 -7 -6.52 ...</span>
-<span class="co">#&gt;  $ n_in    : int  0 2 5 15 15 15 15 15 0 2 ...</span>
-<span class="co">#&gt;  $ N       : int  15 15 15 15 15 15 15 15 15 15 ...</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># More details of the dataset can be found ?zfishdev.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Classes 'tbl_df', 'tbl' and 'data.frame':    96 obs. of  5 variables:</span></span>
+<span><span class="co">#&gt;  $ endpoint: chr  "percent_affected_48" "percent_affected_48" "percent_affected_48" "percent_affected_48" ...</span></span>
+<span><span class="co">#&gt;  $ chemical: chr  "Caffeine|58-08-2" "Caffeine|58-08-2" "Caffeine|58-08-2" "Caffeine|58-08-2" ...</span></span>
+<span><span class="co">#&gt;  $ conc    : num  -4 -3.82 -3.52 -3.3 -3.12 -3 -2.82 -2.7 -7 -6.52 ...</span></span>
+<span><span class="co">#&gt;  $ n_in    : int  0 2 5 15 15 15 15 15 0 2 ...</span></span>
+<span><span class="co">#&gt;  $ N       : int  15 15 15 15 15 15 15 15 15 15 ...</span></span></code></pre></div>
 </div>
-<div id="rcurvep-method" class="section level2">
-<h2 class="hasAnchor">
-<a href="#rcurvep-method" class="anchor"></a>Rcurvep method</h2>
+<div class="section level2">
+<h2 id="rcurvep-method">Rcurvep method<a class="anchor" aria-label="anchor" href="#rcurvep-method"></a>
+</h2>
 <p>The Rcurvep is a tool to decide whether responses are monotonic (as the increase of concentration) based on a set of pre-defined parameters. The default setting of those parameters can be obtained through <code><a href="../reference/curvep_defaults.html">curvep_defaults()</a></code>. The <strong>TRSH</strong> is the threshold parameter, below which, all responses are considered as noise. This threshold is particularly important for toxicologists, since the point-of-departure (POD) can be defined as the concentration at which response equivalent to this threshold. The threshold can also be called as benchmark response (<strong>BMR</strong>).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/curvep_defaults.html">curvep_defaults</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; curvep configuration parameters</span>
-<span class="co">#&gt;          TRSH:    [15]</span>
-<span class="co">#&gt;          RNGE:    [-1e+06]</span>
-<span class="co">#&gt;          MXDV:    [5]</span>
-<span class="co">#&gt;          CARR:    [0]</span>
-<span class="co">#&gt;          BSFT:    [3]</span>
-<span class="co">#&gt;          USHP:    [4]</span>
-<span class="co">#&gt;       TrustHi:    [TRUE]</span>
-<span class="co">#&gt;     StrictImp:    [TRUE]</span>
-<span class="co">#&gt;          DUMV:    [-999]</span>
-<span class="co">#&gt;          TLOG:    [-24]</span>
-<span class="co">#&gt;          seed:    [NA]</span>
-<span class="co">#&gt; </span>
-<span class="co">#For details of parameters, see ?curvep.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/curvep_defaults.html">curvep_defaults</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; curvep configuration parameters</span></span>
+<span><span class="co">#&gt;          TRSH:    [15]</span></span>
+<span><span class="co">#&gt;          RNGE:    [-1e+06]</span></span>
+<span><span class="co">#&gt;          MXDV:    [5]</span></span>
+<span><span class="co">#&gt;          CARR:    [0]</span></span>
+<span><span class="co">#&gt;          BSFT:    [3]</span></span>
+<span><span class="co">#&gt;          USHP:    [4]</span></span>
+<span><span class="co">#&gt;       TrustHi:    [TRUE]</span></span>
+<span><span class="co">#&gt;     StrictImp:    [TRUE]</span></span>
+<span><span class="co">#&gt;          DUMV:    [-999]</span></span>
+<span><span class="co">#&gt;          TLOG:    [-24]</span></span>
+<span><span class="co">#&gt;          seed:    [NA]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#For details of parameters, see ?curvep.</span></span></code></pre></div>
 </div>
-<div id="run-rcurvep-on-datasets-using-combi_run_rcurvep" class="section level2">
-<h2 class="hasAnchor">
-<a href="#run-rcurvep-on-datasets-using-combi_run_rcurvep" class="anchor"></a>Run Rcurvep on datasets using combi_run_rcurvep()</h2>
+<div class="section level2">
+<h2 id="run-rcurvep-on-datasets-using-combi_run_rcurvep">Run Rcurvep on datasets using combi_run_rcurvep()<a class="anchor" aria-label="anchor" href="#run-rcurvep-on-datasets-using-combi_run_rcurvep"></a>
+</h2>
 <p>Since <em>zfishdev</em> does not contain a column with responses, <code><a href="../reference/create_dataset.html">create_dataset()</a></code> can be used to generate the responses for this particular type of data. However, this function is already incorporated.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span><span class="op">(</span>
-  <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span><span class="va">zfishdev</span>, RNGE <span class="op">=</span> <span class="fl">1000000</span><span class="op">)</span>,
-  <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span><span class="fu"><a href="../reference/create_dataset.html">create_dataset</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>, RNGE <span class="op">=</span> <span class="fl">1000000</span><span class="op">)</span>
-<span class="op">)</span>
-<span class="co">#&gt; [1] TRUE</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span><span class="va">zfishdev</span>, RNGE <span class="op">=</span> <span class="fl">1000000</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span><span class="fu"><a href="../reference/create_dataset.html">create_dataset</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>, RNGE <span class="op">=</span> <span class="fl">1000000</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>
-<div id="run-rcurvep-when-there-is-a-preferred-bmr" class="section level2">
-<h2 class="hasAnchor">
-<a href="#run-rcurvep-when-there-is-a-preferred-bmr" class="anchor"></a>Run Rcurvep when there is a preferred BMR</h2>
+<div class="section level2">
+<h2 id="run-rcurvep-when-there-is-a-preferred-bmr">Run Rcurvep when there is a preferred BMR<a class="anchor" aria-label="anchor" href="#run-rcurvep-when-there-is-a-preferred-bmr"></a>
+</h2>
 <p>If there is a preferred BMR, you can run the dataset using the threshold. The <strong>act_set</strong> in the result contains potency and efficacy information of the concentration-response data (aka curve).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span>
-  <span class="va">zfishdev</span>,
-  TRSH <span class="op">=</span> <span class="fl">25</span>, <span class="co"># BMR = 25</span>
-  RNGE <span class="op">=</span> <span class="fl">1000000</span> <span class="co"># increasing direction</span>
-<span class="op">)</span>
-<span class="va">out</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span>
-<span class="co">#&gt; Components in the list: result, config</span>
-<span class="co">#&gt; Components in the result: act_set, resp_set, fp_set</span>
-<span class="co">#&gt; </span>
-<span class="va">out</span><span class="op">$</span><span class="va">config</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; curvep configuration parameters</span>
-<span class="co">#&gt;          TRSH:    [25]</span>
-<span class="co">#&gt;          RNGE:    [1e+06]</span>
-<span class="co">#&gt;          MXDV:    [5]</span>
-<span class="co">#&gt;          CARR:    [0]</span>
-<span class="co">#&gt;          BSFT:    [3]</span>
-<span class="co">#&gt;          USHP:    [4]</span>
-<span class="co">#&gt;       TrustHi:    [TRUE]</span>
-<span class="co">#&gt;     StrictImp:    [TRUE]</span>
-<span class="co">#&gt;          DUMV:    [-999]</span>
-<span class="co">#&gt;          TLOG:    [-24]</span>
-<span class="co">#&gt;          seed:    [NA]</span>
-<span class="co">#&gt; </span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span></span>
+<span>  <span class="va">zfishdev</span>,</span>
+<span>  TRSH <span class="op">=</span> <span class="fl">25</span>, <span class="co"># BMR = 25</span></span>
+<span>  RNGE <span class="op">=</span> <span class="fl">1000000</span> <span class="co"># increasing direction</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">out</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span></span>
+<span><span class="co">#&gt; Components in the list: result, config</span></span>
+<span><span class="co">#&gt; Components in the result: act_set, resp_set, fp_set</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="va">out</span><span class="op">$</span><span class="va">config</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; curvep configuration parameters</span></span>
+<span><span class="co">#&gt;          TRSH:    [25]</span></span>
+<span><span class="co">#&gt;          RNGE:    [1e+06]</span></span>
+<span><span class="co">#&gt;          MXDV:    [5]</span></span>
+<span><span class="co">#&gt;          CARR:    [0]</span></span>
+<span><span class="co">#&gt;          BSFT:    [3]</span></span>
+<span><span class="co">#&gt;          USHP:    [4]</span></span>
+<span><span class="co">#&gt;       TrustHi:    [TRUE]</span></span>
+<span><span class="co">#&gt;     StrictImp:    [TRUE]</span></span>
+<span><span class="co">#&gt;          DUMV:    [-999]</span></span>
+<span><span class="co">#&gt;          TLOG:    [-24]</span></span>
+<span><span class="co">#&gt;          seed:    [NA]</span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
-<div id="summarize-activity-data-from-rcurvep" class="section level2">
-<h2 class="hasAnchor">
-<a href="#summarize-activity-data-from-rcurvep" class="anchor"></a>Summarize activity data from Rcurvep</h2>
+<div class="section level2">
+<h2 id="summarize-activity-data-from-rcurvep">Summarize activity data from Rcurvep<a class="anchor" aria-label="anchor" href="#summarize-activity-data-from-rcurvep"></a>
+</h2>
 <p>The results of the summary is saved in the tibble, <strong>act_summary</strong>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sum_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span>
-<span class="va">sum_out</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span>
-<span class="co">#&gt; Components in the list: result, config, act_summary</span>
-<span class="co">#&gt; Components in the result: act_set, resp_set, fp_set</span>
-<span class="co">#&gt; </span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sum_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
+<span><span class="va">sum_out</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span></span>
+<span><span class="co">#&gt; Components in the list: result, config, act_summary</span></span>
+<span><span class="co">#&gt; Components in the result: act_set, resp_set, fp_set</span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
-<div id="add-confidence-interval-for-activity-data-from-rcurvep" class="section level2">
-<h2 class="hasAnchor">
-<a href="#add-confidence-interval-for-activity-data-from-rcurvep" class="anchor"></a>Add confidence interval for activity data from Rcurvep</h2>
+<div class="section level2">
+<h2 id="add-confidence-interval-for-activity-data-from-rcurvep">Add confidence interval for activity data from Rcurvep<a class="anchor" aria-label="anchor" href="#add-confidence-interval-for-activity-data-from-rcurvep"></a>
+</h2>
 <p>The confidence interval is calculated using simulated datasets created by bootstrapping the original responses. By setting the parameter, <strong>n_samples</strong>, number of curves are simulated. The same <code><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output()</a></code> can be used to summarize the results.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">300</span><span class="op">)</span>
-<span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span>
-  <span class="va">zfishdev</span>,
-  n_samples <span class="op">=</span> <span class="fl">10</span>, <span class="co"># often 1000 samples are preferred</span>
-  TRSH <span class="op">=</span> <span class="fl">25</span>,
-  RNGE <span class="op">=</span> <span class="fl">1000000</span>,
-  keep_sets <span class="op">=</span> <span class="st">"act_set"</span>
-<span class="op">)</span>
-<span class="va">sum_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span>
-<span class="va">sum_out</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span>
-<span class="co">#&gt; Components in the list: result, config, act_summary</span>
-<span class="co">#&gt; Components in the result: act_set</span>
-<span class="co">#&gt; </span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">300</span><span class="op">)</span></span>
+<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span></span>
+<span>  <span class="va">zfishdev</span>,</span>
+<span>  n_samples <span class="op">=</span> <span class="fl">10</span>, <span class="co"># often 1000 samples are preferred</span></span>
+<span>  TRSH <span class="op">=</span> <span class="fl">25</span>,</span>
+<span>  RNGE <span class="op">=</span> <span class="fl">1000000</span>,</span>
+<span>  keep_sets <span class="op">=</span> <span class="st">"act_set"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sum_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
+<span><span class="va">sum_out</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span></span>
+<span><span class="co">#&gt; Components in the list: result, config, act_summary</span></span>
+<span><span class="co">#&gt; Components in the result: act_set</span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
-<div id="run-rcurvep-when-an-optimalpreferred-bmr-is-unknown" class="section level2">
-<h2 class="hasAnchor">
-<a href="#run-rcurvep-when-an-optimalpreferred-bmr-is-unknown" class="anchor"></a>Run Rcurvep when an optimal/preferred BMR is unknown</h2>
+<div class="section level2">
+<h2 id="run-rcurvep-when-an-optimalpreferred-bmr-is-unknown">Run Rcurvep when an optimal/preferred BMR is unknown<a class="anchor" aria-label="anchor" href="#run-rcurvep-when-an-optimalpreferred-bmr-is-unknown"></a>
+</h2>
 <p>The optimal BMR may be defined as the threshold at which the potency estimation is more accurate. The concept can be translated as the lowest threshold (which gives the highest potency), at which a decrease of variance in potency estimation is stabilized. By using the simulated datasets, the pooled variance across chemicals at a certain threshold can be estimated.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># The combi_run_rcurvep() can be used for a combination of Curvep parameters. </span>
-<span class="co"># finishing the code will take some time. </span>
-
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">300</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">zfishdev_all</span><span class="op">)</span>
-
-<span class="va">zfishdev_act</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span>
-  
-  <span class="va">zfishdev_all</span>, 
-  n_samples <span class="op">=</span> <span class="fl">100</span>, 
-  keep_sets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"act_set"</span><span class="op">)</span>,
-  TRSH <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">95</span>, by <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, <span class="co"># test all candidates, 5 to 95</span>
-  RNGE <span class="op">=</span> <span class="fl">1000000</span>, 
-  CARR <span class="op">=</span> <span class="fl">20</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># The combi_run_rcurvep() can be used for a combination of Curvep parameters. </span></span>
+<span><span class="co"># finishing the code will take some time. </span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">300</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">zfishdev_all</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">zfishdev_act</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span></span>
+<span>  </span>
+<span>  <span class="va">zfishdev_all</span>, </span>
+<span>  n_samples <span class="op">=</span> <span class="fl">100</span>, </span>
+<span>  keep_sets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"act_set"</span><span class="op">)</span>,</span>
+<span>  TRSH <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">95</span>, by <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, <span class="co"># test all candidates, 5 to 95</span></span>
+<span>  RNGE <span class="op">=</span> <span class="fl">1000000</span>, </span>
+<span>  CARR <span class="op">=</span> <span class="fl">20</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="estimate-the-bmr" class="section level2">
-<h2 class="hasAnchor">
-<a href="#estimate-the-bmr" class="anchor"></a>Estimate the BMR</h2>
+<div class="section level2">
+<h2 id="estimate-the-bmr">Estimate the BMR<a class="anchor" aria-label="anchor" href="#estimate-the-bmr"></a>
+</h2>
 <p>For the two endpoints, BMR = 25 (in <strong>bmr_ori</strong> column) is suggested for the <em>percent_affected_96</em> endpoint with an <em>OK</em> comment but for the <em>percent_mortality_96</em> endpoint, <em>check</em> is noted.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">zfishdev_act</span><span class="op">)</span>
-<span class="va">bmr_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_dataset_bmr.html">estimate_dataset_bmr</a></span><span class="op">(</span><span class="va">zfishdev_act</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="va">bmr_out</span><span class="op">$</span><span class="va">outcome</span>
-<span class="co">#&gt; # A tibble: 2 x 12</span>
-<span class="co">#&gt;     RNGE  CARR endpoint bmr_ori p1_ori p2_ori bmr_exp p1_exp p2_exp cor_exp_fit</span>
-<span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;  &lt;int&gt;  &lt;int&gt;   &lt;dbl&gt;  &lt;int&gt;  &lt;int&gt;       &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 1.00e6    20 percent…      25      1     19      20      1     19       0.994</span>
-<span class="co">#&gt; 2 1.00e6    20 percent…      55      6     19      50      1     19       0.789</span>
-<span class="co">#&gt; # … with 2 more variables: cor_lm_fit &lt;dbl&gt;, qc &lt;chr&gt;</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">zfishdev_act</span><span class="op">)</span></span>
+<span><span class="va">bmr_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_dataset_bmr.html">estimate_dataset_bmr</a></span><span class="op">(</span><span class="va">zfishdev_act</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">bmr_out</span><span class="op">$</span><span class="va">outcome</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 12</span></span></span>
+<span><span class="co">#&gt;      RNGE  CARR endpoint     bmr_ori p1_ori p2_ori bmr_exp p1_exp p2_exp cor_e…¹</span></span>
+<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1<span style="text-decoration: underline;">000</span>000    20 percent_aff…      25      1     19      20      1     19   0.994</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 1<span style="text-decoration: underline;">000</span>000    20 percent_mor…      55      6     19      50      1     19   0.789</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 2 more variables: cor_lm_fit &lt;dbl&gt;, qc &lt;chr&gt;, and abbreviated variable</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   name ¹​cor_exp_fit</span></span></span></code></pre></div>
 </div>
-<div id="display-the-diagnostic-curves-for-bmr-estimation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#display-the-diagnostic-curves-for-bmr-estimation" class="anchor"></a>Display the diagnostic curves for BMR estimation</h2>
+<div class="section level2">
+<h2 id="display-the-diagnostic-curves-for-bmr-estimation">Display the diagnostic curves for BMR estimation<a class="anchor" aria-label="anchor" href="#display-the-diagnostic-curves-for-bmr-estimation"></a>
+</h2>
 <p>It turns out for the <em>percent_mortality_96</em> endpoint, the shape is not in the right form (as the <em>percent_affected_96</em> endpoint).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">bmr_out</span><span class="op">)</span>
-<span class="co">#&gt; $`1`</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bmr_out</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $`1`</span></span></code></pre></div>
 <p><img src="practical_rcurvep_files/figure-html/unnamed-chunk-11-1.png" width="576" style="display: block; margin: auto;"></p>
 </div>
-<div id="run-parametric-fitting-on-datasets" class="section level2">
-<h2 class="hasAnchor">
-<a href="#run-parametric-fitting-on-datasets" class="anchor"></a>Run parametric fitting on datasets</h2>
+<div class="section level2">
+<h2 id="run-parametric-fitting-on-datasets">Run parametric fitting on datasets<a class="anchor" aria-label="anchor" href="#run-parametric-fitting-on-datasets"></a>
+</h2>
 <p>Since <em>zfishdev</em> does not contain a column with responses, <code><a href="../reference/create_dataset.html">create_dataset()</a></code> needs to be used to generate the responses for this particular type of data. Unlike <code><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep()</a></code>, <code><a href="../reference/create_dataset.html">create_dataset()</a></code> has to be called explicitly.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">fitd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_fit.html">run_fit</a></span><span class="op">(</span><span class="fu"><a href="../reference/create_dataset.html">create_dataset</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>, hill_pdir <span class="op">=</span> <span class="fl">1</span>, modls <span class="op">=</span> <span class="st">"hill"</span><span class="op">)</span>
-<span class="va">fitd</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span>
-<span class="co">#&gt; Components in the list: result, result_nested</span>
-<span class="co">#&gt; Components in the result: fit_set, resp_set</span>
-<span class="co">#&gt; </span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fitd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_fit.html">run_fit</a></span><span class="op">(</span><span class="fu"><a href="../reference/create_dataset.html">create_dataset</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>, hill_pdir <span class="op">=</span> <span class="fl">1</span>, modls <span class="op">=</span> <span class="st">"hill"</span><span class="op">)</span></span>
+<span><span class="va">fitd</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span></span>
+<span><span class="co">#&gt; Components in the list: result, result_nested</span></span>
+<span><span class="co">#&gt; Components in the result: fit_set, resp_set</span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
-<div id="summarize-parametric-fitting-results-using-a-preferred-bmr" class="section level2">
-<h2 class="hasAnchor">
-<a href="#summarize-parametric-fitting-results-using-a-preferred-bmr" class="anchor"></a>Summarize parametric fitting results using a preferred BMR</h2>
+<div class="section level2">
+<h2 id="summarize-parametric-fitting-results-using-a-preferred-bmr">Summarize parametric fitting results using a preferred BMR<a class="anchor" aria-label="anchor" href="#summarize-parametric-fitting-results-using-a-preferred-bmr"></a>
+</h2>
 <p>The results of the summary is saved in the tibble, <strong>act_summary</strong>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">fitd_sum_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_fit_output.html">summarize_fit_output</a></span><span class="op">(</span><span class="va">fitd</span>, thr_resp  <span class="op">=</span> <span class="fl">25</span><span class="op">)</span>
-<span class="va">fitd_sum_out</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span>
-<span class="co">#&gt; Components in the list: result, result_nested, act_summary</span>
-<span class="co">#&gt; Components in the result: fit_set, resp_set, act_set</span>
-<span class="co">#&gt; </span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fitd_sum_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_fit_output.html">summarize_fit_output</a></span><span class="op">(</span><span class="va">fitd</span>, thr_resp  <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span><span class="va">fitd_sum_out</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 4 endpoint(s) and 3 chemical(s)</span></span>
+<span><span class="co">#&gt; Components in the list: result, result_nested, act_summary</span></span>
+<span><span class="co">#&gt; Components in the result: fit_set, resp_set, act_set</span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
-<div id="add-confidence-interval-for-activity-data-from-parametric-fitting-strictly-to-hill-equation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#add-confidence-interval-for-activity-data-from-parametric-fitting-strictly-to-hill-equation" class="anchor"></a>Add confidence interval for activity data from parametric fitting (strictly to Hill equation)</h2>
+<div class="section level2">
+<h2 id="add-confidence-interval-for-activity-data-from-parametric-fitting-strictly-to-hill-equation">Add confidence interval for activity data from parametric fitting (strictly to Hill equation)<a class="anchor" aria-label="anchor" href="#add-confidence-interval-for-activity-data-from-parametric-fitting-strictly-to-hill-equation"></a>
+</h2>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">fitd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_fit.html">run_fit</a></span><span class="op">(</span><span class="fu"><a href="../reference/create_dataset.html">create_dataset</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>, hill_pdir <span class="op">=</span> <span class="fl">1</span>, n_samples <span class="op">=</span> <span class="fl">10</span>, modls <span class="op">=</span> <span class="st">"hill"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fitd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_fit.html">run_fit</a></span><span class="op">(</span><span class="fu"><a href="../reference/create_dataset.html">create_dataset</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>, hill_pdir <span class="op">=</span> <span class="fl">1</span>, n_samples <span class="op">=</span> <span class="fl">10</span>, modls <span class="op">=</span> <span class="st">"hill"</span><span class="op">)</span></span></code></pre></div>
 </div>
   </div>
 
@@ -304,11 +301,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Jui-Hua Hsieh, Alexander Sedykh.</p>
+  <p></p>
+<p>Developed by Jui-Hua Hsieh, Alexander Sedykh.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
@@ -316,6 +315,8 @@
 
   
 
+
+  
 
   </body>
 </html>
