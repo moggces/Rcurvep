@@ -23,10 +23,10 @@
 #'   \item stats: a tibble, including pooled variance (pvar),
 #'   fitted responses (y_exp_fit, y_lm_fit), distance to the line (dist2l)
 #'   \item outcome: a tibble, including estimated BMRs (bmr)
-#' }
-#' Suffix in the *stats* and *outcome* tibble: _ori (original values), _exp(exponential fit).
-#' prefix in the *outcome* tibble: cor_ (correlation between the fitted responses and the original responses),
-#' bmr_ (benchmark response), qc (quality control).
+#' };
+#' Suffix in the **stats** and **outcome** tibble: "ori" (original values), "exp"(exponential fit).
+#' prefix in the **outcome** tibble, "cor" (correlation between the fitted responses and the original responses),
+#' "bmr" (benchmark response), "qc" (quality control).
 #'
 #' @export
 #' @seealso [cal_knee_point()], [combi_run_rcurvep()]

@@ -72,6 +72,56 @@ All the dontrun blocks are replaced by the donttest blocks.
 #---------
 
 
+# v1.2.1
+
+## check results
+
+### Test environments
+
+#### local R installation, R 4.2.1
+
+0 errors, 0 warnings, 0 notes
+
+### Rhub  Windows Server 2022, R-devel, 64 bit
+
+0 errors, 0 warnings, 1 note
+
+
+❯ checking for detritus in the temp directory ... NOTE
+  Found the following files/directories:
+    'lastMiKTeXException'
+    
+Response:it seems to a bug/crash in miktex, suggested to be ignored ([R-hub issue #503](https://github.com/r-hub/rhub/issues/503)
+
+### Rhub  Ubuntu Linux 20.04.1 LTS, R-release, GCC
+
+0 errors, 0 warnings, 1 note
+
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: ‘Jui-Hua Hsieh <juihua.hsieh@gmail.com>’
+
+Found the following (possibly) invalid DOIs:
+  DOI: 10.1093/toxsci/kfy258
+    From: DESCRIPTION
+    Status: Forbidden
+    Message: 403
+    
+Response:the DOI link is working but it not open access.  
+    
+### Rhub Fedora Linux, R-devel, clang, gfortran
+
+0 errors, 0 warnings, 1 note
+
+* checking HTML version of manual ... NOTE
+Skipping checking HTML validation: no command 'tidy' found
+
+Response: it seems to the environment variable setting in R and the tidy command issue ([R release news](https://cran.r-project.org/doc/manuals/r-release/NEWS.html)
+
+
+### winbuilder
+
+0 errors, 0 warnings, 0 notes
+
 
 
 
