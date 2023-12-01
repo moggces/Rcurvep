@@ -66,11 +66,12 @@
 #' fit_modls(concd, respd, maskd)
 #'
 #'
-fit_modls <- function(Conc, Resp, Mask = NULL, modls = c("hill", "cnst"), ...) {
+fit_modls <- function(Conc, Resp, Mask = NULL, modls = c("hill", "cnst", "cc2"), ...) {
 
   # check the input
   args <- list(...)
-  modls <- match.arg(modls, c("hill", "cnst"), several.ok = TRUE)
+  modls <- match.arg(modls, c("hill", "cnst", "cc2"), several.ok = TRUE)
+  modls <- .check_modls_combi(modls)
   args <- .check_modls_args(args, modls)
   outd <- .check_mask_on_concresp(Conc, Resp, Mask)
 
@@ -115,7 +116,7 @@ fit_modl_in <- function(Conc, Resp, modl, ...) {
     result <- do.call(
       get(eval(func_name)), c(list(Resp = Resp), l_p)
     )
-  } else if (modl == "hill") {
+  } else if (modl %in% c("hill", "cc2")) {
     result <- do.call(
       get(eval(func_name)), c(list(Conc = Conc, Resp = Resp), l_p)
     )
