@@ -193,7 +193,7 @@ select_modl_aic <- function(lmodls) {
   if(length(lmodls) > 1) {
     aics <- purrr::map_dbl(lmodls, ~ .x[['aic']])
     if (all(is.na(aics))) {
-      result <- lmodls[[1]] # all NAs
+      result <- lmodls[[1]] # all NAs or cc2
     } else {
       result <- lmodls[[which.min(aics)]]
     }
@@ -305,7 +305,8 @@ fit_hill_modl_in <- function(Conc, Resp, pdir = c(1, -1), ...) {
     tp = hill_tp,
     ga = hill_ga,
     gw = hill_gw,
-    er = hill_er
+    er = hill_er,
+    bt = 0
   )
   return(result)
 }
