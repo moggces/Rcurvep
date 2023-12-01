@@ -297,6 +297,14 @@
   return(args)
 }
 
+#_hillbase
+.check_modls_combi <- function(modls) {
+  if (length(modls) > 1) {
+    if ('cc2' %in% modls) rlang::abort("Currently cc2 can only be used alone.")
+  }
+  return(modls)
+}
+
 #_mergeobj
 .check_objs_type <- function(objs) {
 
