@@ -63,13 +63,13 @@ fit_cc2_modl <- function(concs, resps, sdv = 5, rnge = 10) {
       cc2 = as.numeric(v[2]),
       emax = as.numeric(v[3]),
       gw = hillcoef,
-      'tp' = as.numeric(v[5]),
-      'bt' = as.numeric(v[12]),
-      'ga' = as.numeric(v[6]),
-      'masks' = masks,
-      'nMasks' = as.numeric(nmasks),
-      'pvalue' = as.numeric(v[10]),
-      'r2' = as.numeric(v[11])
+      tp = as.numeric(v[5]),
+      bt = as.numeric(v[12]),
+      ga = as.numeric(v[6]),
+      masks = masks,
+      nMasks = as.numeric(nmasks),
+      pvalue = as.numeric(v[10]),
+      r2 = as.numeric(v[11])
 
       # added output
       #
@@ -84,5 +84,3 @@ cc2_2_rank <- function() {
 
 }
 
-#test_fit
-#tcplHillVal(inp$conc, win_modl$tp, win_modl$ga, win_modl$gw)
