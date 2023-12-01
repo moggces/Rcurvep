@@ -1,9 +1,9 @@
 #' Title
 #'
-#' @param concs # need to be log10 to be consistent
-#' @param resps
-#' @param sdv
-#' @param rnge
+#' @param Conc # need to be log10 to be consistent
+#' @param Resp
+#' @param classSD
+#' @param minYrange
 #'
 #' @return
 #' @export
@@ -16,16 +16,16 @@
 #' respd <- c(-9.1669026,  1.2089576, -19.6264789, -56.8283945, -82.5833774)
 #'
 #'
-fit_cc2_modl <- function(concs, resps, sdv = 5, rnge = 10) {
+fit_cc2_modl <- function(Conc, Resp, classSD = 5, minYrange = 20) {
 
   # create java object and call
   cf <- rJava::.jnew('gov/nih/ncats/ifx/qhts/curvefitting/CurveClassFit3')
   # the input in M
-  concs <- 10^concs
+  Conc <- 10^Conc
 
   # call the curveclass2
   s <- rJava::.jcall(cf, returnSig = "S", method = "performCurveFitting",
-         concs, resps, sdv, rnge)
+                     Conc, Resp, classSD, minYrange)
 
   # the original output
   #c('ac50', 'curveClass2', 'efficacy', 'hillCoef',
@@ -39,7 +39,7 @@ fit_cc2_modl <- function(concs, resps, sdv = 5, rnge = 10) {
   # handle consistency
   aic <- NA_real_
   fit <- 1
-  hillcoef <- as.numeric(v[4])
+  suppressWarnings(hillcoef <- as.numeric(v[4])) #null to NA
   if(is.na(hillcoef)) fit <- 0
 
   # handle cc2 = 4 (no fit)
@@ -51,30 +51,30 @@ fit_cc2_modl <- function(concs, resps, sdv = 5, rnge = 10) {
   }
 
   return(
+    suppressWarnings( #null to NA
+      list(
 
-    list(
+        # consistency to tcpl
+        aic = aic,
+        fit = fit,
+        modl = "cc2",
 
-      # consistency to tcpl
-      aic = aic,
-      fit = fit,
-      modl = "cc2",
+        # original output
+        cc2 = as.numeric(v[2]),
+        #emax = as.numeric(v[3]),
+        gw = hillcoef,
+        tp = as.numeric(v[5]),
+        bt = as.numeric(v[12]),
+        ga = as.numeric(v[6]),
+        masks = masks,
+        nMasks = as.numeric(nmasks),
+        pvalue = as.numeric(v[10]),
+        r2 = as.numeric(v[11])
 
-      # original output
-      cc2 = as.numeric(v[2]),
-      emax = as.numeric(v[3]),
-      gw = hillcoef,
-      tp = as.numeric(v[5]),
-      bt = as.numeric(v[12]),
-      ga = as.numeric(v[6]),
-      masks = masks,
-      nMasks = as.numeric(nmasks),
-      pvalue = as.numeric(v[10]),
-      r2 = as.numeric(v[11])
+        # added output
+        #
 
-      # added output
-      #
-
-
+      )
     )
   )
 
