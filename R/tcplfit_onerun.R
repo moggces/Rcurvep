@@ -47,14 +47,15 @@
 #' fitd <- run_fit(zfishbeh, n_samples = 2)
 #'
 #'
-run_fit <- function(d, modls = c("hill", "cnst"), keep_sets = c('fit_set', 'resp_set'), n_samples = NULL, ...) {
+run_fit <- function(d, modls = c("hill", "cnst", "cc2"), keep_sets = c('fit_set', 'resp_set'), n_samples = NULL, ...) {
 
   # argument checks
   args <- list(...)
   d <- .check_dat_base(d, check_one_concresp = FALSE)
   d <- create_resp_mask(d, mask = 0) #only user put the mask column, disable the
   keep_sets <- .check_keep_sets(keep_sets, c('fit_set', 'resp_set'), must_set = "fit_set")
-  modls <- match.arg(modls, c("hill", "cnst"), several.ok = TRUE)
+  modls <- match.arg(modls, c("hill", "cnst", "cc2"), several.ok = TRUE)
+  modls <- .check_modls_combi(modls)
   n_samples <- .check_n_samples(n_samples)
 
   # currently only hill can be used to generate simulated samples
@@ -506,9 +507,10 @@ extract_fit_resp <- function(inp, out) {
 
     fit_resps <- rep(median(inp$resp), length(inp$conc))
 
-  } else if (win_modl$modl == "hill") {
+  } else if (win_modl$modl %in% c("hill", "cc2")) {
 
-    fit_resps <- tcplHillVal(inp$conc, win_modl$tp, win_modl$ga, win_modl$gw)
+    fit_resps <- tcplHillVal(inp$conc, win_modl$tp, win_modl$ga, win_modl$gw, win_modl$bt)
+
   }
 
   # add the results to a new column
@@ -556,18 +558,18 @@ extract_fit_activity <- function(inp, out, thr_resp, perc_resp) {
 
     }
 
-  } else if (win_modl$modl == "hill") {
-    Emax <- win_modl$tp
+  } else if (win_modl$modl %in% c("hill", "cc2")) {
+    Emax <- win_modl$tp - win_modl$bt
     EC50 <- win_modl$ga
     slope <- win_modl$gw
 
     if (!is.na(Emax)) {
       # perc_resp
-      ECxx <- tcplHillACXX(perc_resp, win_modl$tp, win_modl$ga, win_modl$gw)
+      ECxx <- tcplHillACXX(perc_resp, win_modl$tp, win_modl$ga, win_modl$gw, win_modl$bt)
 
       # thr_resp
       if (Emax < 0) thr_resp <- thr_resp*-1
-      if (abs(Emax) > abs(thr_resp)) POD <- tcplHillConc(thr_resp, win_modl$tp, win_modl$ga, win_modl$gw)
+      if (abs(Emax) > abs(thr_resp)) POD <- tcplHillConc(thr_resp, win_modl$tp, win_modl$ga, win_modl$gw, win_modl$bt)
 
       # hit?
       if (!is.na(POD) && POD < max(inp$conc)) hit <- 1
