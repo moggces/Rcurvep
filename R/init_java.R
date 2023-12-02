@@ -1,4 +1,4 @@
 .onLoad <- function(libname, pkgname) {
-  .jpackage(pkgname, lib.loc=libname)
-  .jaddClassPath('inst/java/curve-fitting.jar')
+  rJava::.jpackage(pkgname, lib.loc=libname)
+  rJava::.jaddClassPath('inst/java/curve-fitting.jar')
 }
