@@ -62,6 +62,8 @@
 #' # run hill only + increasing direction only
 #' fit_modls(concd, respd, modls = "hill", hill_pdir = 1)
 #'
+#' fit_modls(concd, respd, modls = "cc2", cc2_classSD = 10)
+#'
 #' # run with mask at the highest concentration
 #' fit_modls(concd, respd, maskd)
 #'
@@ -247,6 +249,9 @@ fit_hill_modl_in <- function(Conc, Resp, pdir = c(1, -1), ...) {
 
   conc <- na.omit(Conc)
   resp <- na.omit(Resp)
+
+  if(length(conc) != length(resp)) rlang::abort("The length of conc and resp is not the same after removing NA.")
+
 
   ## handle the cases of all NA ##
   ## special treatment ##
