@@ -300,7 +300,19 @@
 #_hillbase
 .check_modls_combi <- function(modls) {
   if (length(modls) > 1) {
-    if ('cc2' %in% modls) rlang::abort("Currently cc2 can only be used alone.")
+    if ('cc2' %in% modls) {
+      rlang::abort(">1 models are selected including cc2. Currently cc2 needs to be used alone.")
+    }
+  }
+  return(modls)
+}
+
+#_run_fit
+.check_modls_simu <- function(modls) {
+  if (length(modls) > 1) {
+    rlang::abort("Only hill or cc2 is allowed")
+  } else if (!modls %in% c('hill', 'cc2')) {
+    rlang::abort("Only hill or cc2 is allowed")
   }
   return(modls)
 }

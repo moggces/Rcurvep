@@ -44,7 +44,9 @@
 #' fitd <- run_fit(zfishbeh, modls = "hill", keep_sets = "fit_set", hill_pdir = -1)
 #'
 #' # fit to the bootstrap samples
-#' fitd <- run_fit(zfishbeh, n_samples = 2)
+#' fitd <- run_fit(zfishbeh, n_samples = 2, modls = "hill")
+#'
+#' fitd <- run_fit(zfishbeh, n_samples = 2, modls = "cc2")
 #'
 #'
 run_fit <- function(d, modls = c("hill", "cnst", "cc2"), keep_sets = c('fit_set', 'resp_set'), n_samples = NULL, ...) {
@@ -58,8 +60,8 @@ run_fit <- function(d, modls = c("hill", "cnst", "cc2"), keep_sets = c('fit_set'
   modls <- .check_modls_combi(modls)
   n_samples <- .check_n_samples(n_samples)
 
-  # currently only hill can be used to generate simulated samples
-  if (!is.null(n_samples)) modls <- 'hill'
+  # hill or cc2 can be used to generate simulated samples
+  if (!is.null(n_samples)) modls <- .check_modls_simu(modls)
 
   # nest the data and calculate fits
   nestd <- nest_fit_dataset(d, nest_cols = c("endpoint", "chemical"))
@@ -303,7 +305,7 @@ create_hillsimu_dataset <- function(fitd, n_samples, pdir) {
 
 create_hillsimu_resp <- function(inp, out) {
   result <- inp
-  yhat <- tcplHillVal(inp$conc, out[['hill']]$tp, out[['hill']]$ga, out[['hill']]$gw)
+  yhat <- tcplHillVal(inp$conc, out[[1]]$tp, out[[1]]$ga, out[[1]]$gw, out[[1]]$bt)
   resid <- inp$resp - yhat
   sampleresids <- sample(resid,length(resid),replace = TRUE)
   this_y <- yhat + sampleresids
@@ -326,7 +328,7 @@ create_hillsimu_resp <- function(inp, out) {
 #'
 get_hillfit_direction <- function(out, pdir) {
 
-  tp <- out[['hill']]$tp
+  tp <- out[[1]]$tp
 
   # if not null and
   if (!is.null(pdir)) {
