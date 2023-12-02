@@ -23,9 +23,21 @@ fit_cc2_modl <- function(Conc, Resp, classSD = 5, minYrange = 20) {
   # the input in M
   Conc <- 10^Conc
 
+  conc <- na.omit(Conc)
+  resp <- na.omit(Resp)
+
+  if(length(conc) != length(resp)) rlang::abort("The length of conc and resp is not the same after removing NA.")
+
+  ## handle the cases of all NA ##
+  ## special treatment ##
+  if (length(resp) == 0) {
+    conc <- 0
+    resp <- 0
+  }
+
   # call the curveclass2
   s <- rJava::.jcall(cf, returnSig = "S", method = "performCurveFitting",
-                     Conc, Resp, classSD, minYrange)
+                     conc, resp, classSD, minYrange)
 
   # the original output
   #c('ac50', 'curveClass2', 'efficacy', 'hillCoef',
@@ -46,7 +58,7 @@ fit_cc2_modl <- function(Conc, Resp, classSD = 5, minYrange = 20) {
   masks <- v[7] #null to "0 0 0 0"
   nmasks <- v[8] #NA to 0
   if (v[7] == "null") {
-    masks <- stringr::str_c(rep(0, length(concs)), collapse = " ")
+    masks <- stringr::str_c(rep(0, length(conc)), collapse = " ")
     nmasks <- 0
   }
 
