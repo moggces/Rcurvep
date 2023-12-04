@@ -311,7 +311,7 @@ fit_hill_modl_in <- function(Conc, Resp, pdir = c(1, -1), ...) {
     ga = hill_ga,
     gw = hill_gw,
     er = hill_er,
-    bt = 0
+    bt = ifelse(!is.na(hill_gw), 0, NA_real_)
   )
   return(result)
 }
