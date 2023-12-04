@@ -1,19 +1,59 @@
-#' Title
+#' Fit concentration-response data using Curve Class2 approach
 #'
-#' @param Conc # need to be log10 to be consistent
-#' @param Resp
-#' @param classSD
-#' @param minYrange
+#' Curve Class2 uses 4-parameter Hill model to fit the data.
+#' The algorithm assumes the responses are in percentile.
+#' Curve Class2 classifies the curves based on fit quality and response magnitude.
 #'
-#' @return
+#' \describe{
+#'   \item{cc2 = 1.1}{2-asymptote curve, pvalue < 0.05, emax > 6\*classSD}
+#'   \item{cc2 = 1.2}{2-asymptote curve, pvalue < 0.05, emax <= 6\*classSD & emax > 3\*classSD}
+#'   \item{cc2 = 1.3}{2-asymptote curve, pvalue >= 0.05, emax > 6\*classSD}
+#'   \item{cc2 = 1.4}{2-asymptote curve, pvalue >= 0.05, emax <= 6\*classSD & emax > 3\*classSD}
+#'   \item{cc2 = 2.1}{1-asymptote curve, pvalue < 0.05, emax > 6\*classSD}
+#'   \item{cc2 = 2.2}{1-asymptote curve, pvalue < 0.05, emax <= 6\*classSD & emax > 3\*classSD}
+#'   \item{cc2 = 2.3}{1-asymptote curve, pvalue >= 0.05, emax > 6\*classSD}
+#'   \item{cc2 = 2.4}{1-asymptote curve, pvalue >= 0.05, emax <= 6\*classSD & emax > 3\*classSD}
+#'   \item{cc2 = 3}{single point activity, pvalue = NA, emax > 3\*classSD}
+#'   \item{cc2 = 4}{inactive, pvalue  >= 0.05, emax <= 3\*classSD}
+#'   \item{cc2 = 5}{inconclusive, high bt, further investigation is needed}
+#' }
+#'
+#'
+#' @param Conc A vector of log10 concentrations.
+#' @param Resp A vector of numeric responses.
+#' @param classSD A standard deviation (SD) derived from the responses in the vehicle control.
+#'   it is used for classification of the curves. Default = 5%.
+#' @param minYrange A minimum response range (max activity - min activity) required to apply curve fitting.
+#'   Curve fitting will not be attempted if the response range is less than the cutoff.
+#'   Default = 20%.
+#' @return A list of output parameters from Curve Class2 model fit.
+#'   If the data are fit or not fittable (fit = 0), the default value for tp, ga, gw, bt pvalue, masks, nmasks is NA.
+#'   For cc2 = 4, it is still possible to have fit parameters.
+#'
+#'   \itemize{
+#'     \item modl: model type, i.e., cc2
+#'     \item fit: fittable, 1 (yes) or 0 (no)
+#'     \item aic: NA, it is not calculated for this model. The parameter is kept for compatability.
+#'     \item cc2: curve class2, default = 4
+#'     \item tp: model top, <0 means the fit for decreasing direction is preferred
+#'     \item ga: ac50 (log10 scale)
+#'     \item gw: Hill coefficient
+#'     \item bt: model bottom
+#'     \item pvalue: from F-test, for fit quality
+#'     \item r2: fitness
+#'     \item masks: a string to indicate at which positions of response are masked
+#'     \item nmasks: number of masked responses
+#'    }
 #' @export
 #'
+#' @references{
+#'   \insertRef{PMID:27518629}{Rcurvep}
+#' }
+#' @seealso  [fit_modls()]
 #' @examples
-#' concd <- c(-9, -8, -7, -6, -5, -4)
-#' respd <- c(0, 2, 30, 40, 50, 60)
 #'
-#' concd <- c(-11.635385, -9.249779, -7.341294, -5.432809, -4.478566)
-#' respd <- c(-9.1669026,  1.2089576, -19.6264789, -56.8283945, -82.5833774)
+#' fit_cc2_modl(c(-9, -8, -7, -6, -5, -4), c(0, 2, 30, 40, 50, 60))
+#'
 #'
 #'
 fit_cc2_modl <- function(Conc, Resp, classSD = 5, minYrange = 20) {
@@ -60,7 +100,7 @@ fit_cc2_modl <- function(Conc, Resp, classSD = 5, minYrange = 20) {
     )
   }
 
-  # handle (this has be checked in the input)
+  # handle different number of conc and resp
   if(length(conc) != length(resp)) {
     rlang::abort("The length of conc and resp is not the same after removing NA.")
   }
