@@ -139,19 +139,26 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
 
     args[['hill_pdir']] <- NULL
 
+    # use the expression to manage cc2 case to avoid warnings
+    pdir <- expression(hill_pdir = unique(.x$direction))
+    if(modls == "cc2") pdir <- NULL
+
     result <- nestd %>%
       dplyr::mutate(
         output = purrr::map(
           .data$input,
           ~ do.call(
             fit_modls,
-            c(list(Conc = .x$conc, Resp = .x$resp, hill_pdir = unique(.x$direction), Mask = NULL, modls = modls), args))
+            c(list(Conc = .x$conc, Resp = .x$resp,
+                   eval(pdir),
+                   Mask = NULL, modls = modls), args))
         )
       )
   }
 
   return(result)
 }
+
 
 
 #' Clean the dataset results after fitting based on multiple values of keep_sets.
