@@ -56,8 +56,10 @@
 #'
 #'
 #'
-fit_cc2_modl <- function(Conc, Resp, classSD = 5, minYrange = 20) {
+fit_cc2_modl <- function(Conc, Resp, classSD = 5, minYrange = 20, ...) {
 
+  args <- list(...)
+  args <- .check_modl_args_exist(list(NULL), args)
   # the input in M
   Conc <- 10^Conc
   conc <- na.omit(Conc)
