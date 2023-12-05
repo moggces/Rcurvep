@@ -7,8 +7,9 @@
 #'
 #'
 #' @details
-#' The backbone of fit using hill and cnst is based on the implementation from tcpl package.
+#' The backbone of fit method using hill (3-parameter Hill model) and cnst (constant model) is based on the implementation from tcpl package.
 #' But the lower bound of ga is lower by log10(1/100).
+#' The cc2 model is the 4-parameter Hill model from Curve Class2.
 #'
 #'
 
@@ -16,15 +17,20 @@
 #' @param Resp A vector of numeric responses.
 #' @param Mask Default = NULL or a vector of 1 or 0.
 #'   1 is for masking the respective response.
-#' @param modls The model types for the fitting. Multiple values are allowed.
-#'   Currently Hill model (hill) and constant model (cnst) are implemented.
-#'   Default = c("hill", "cnst").
+#' @param modls The model types for the fitting.
+#' Currently available models are 3-parameter Hill model (hill), constant model (cnst),
+#' and Curve Class2 4-parameter Hill model (cc2).
+#' Multiple values are only allowed for the hill and cnst combination.
+#'
 #' @param ... The named input configurations for replacing the default configurations.
 #'   The input configuration needs to add model type as the prefix.
 #'   For example, hill_pdir = -1 will set the Hill fit only to the decreasing direction.
+#'   Another common parameter for cc2 model is cc2_classSD.
+#'   The default value of cc2_classSD is 5%, which might be too small for noiser endpoints.
 #'
 #' @return A list of components named by the models.
-#'   The models are sorted by their AIC values. Thus, the first component has the best fit.
+#'   The models are sorted by their AIC values (when multiple models are used).
+#'   Thus, the first component has the best fit.
 #'
 #'  ## hill
 #'   Fit output from Hill equation
@@ -47,13 +53,31 @@
 #'     \item er: scale term
 #'   }
 #'
+#' ## cc2
+#'   Fit output from Curve Class 2 model
+#'   \itemize{
+#'     \item modl: model type, i.e., cc2
+#'     \item fit: fittable, 1 (yes) or 0 (no)
+#'     \item aic: NA, it is not calculated for this model. The parameter is kept for compatability.
+#'     \item cc2: curve class2, default = 4
+#'     \item tp: model top, <0 means the fit for decreasing direction is preferred
+#'     \item ga: ac50 (log10 scale)
+#'     \item gw: Hill coefficient
+#'     \item bt: model bottom
+#'     \item pvalue: from F-test, for fit quality
+#'     \item r2: fitness
+#'     \item masks: a string to indicate at which positions of response are masked
+#'     \item nmasks: number of masked responses
+#'    }
+#'
 #' @export
 #' @seealso [tcpl::tcplObjHill()], [tcpl::tcplObjCnst()], [get_hill_fit_config()]
+#'   [fit_cc2_modl()]
 #'
 #' @examples
 #'
 #' concd <- c(-9, -8, -7, -6, -5, -4)
-#' respd <- c(0, 2, 30, 40, 50, 60)
+#' respd <- c(0, 2, 30, 40, 50, 20)
 #' maskd <- c(0, 0, 0, 0, 0, 1)
 #'
 #' # run hill only
@@ -62,19 +86,23 @@
 #' # run hill only + increasing direction only
 #' fit_modls(concd, respd, modls = "hill", hill_pdir = 1)
 #'
+#' # run cc2 only + change of classSD
 #' fit_modls(concd, respd, modls = "cc2", cc2_classSD = 10)
 #'
+#' # run hill + cnst
+#' fit_modls(concd, respd, modls = c("hill", "cnst"))
+#'
 #' # run with mask at the highest concentration
-#' fit_modls(concd, respd, maskd)
+#' fit_modls(concd, respd, maskd, modls = "hill")
 #'
 #'
-fit_modls <- function(Conc, Resp, Mask = NULL, modls = c("hill", "cnst", "cc2"), ...) {
+fit_modls <- function(Conc, Resp, Mask = NULL, modls, ...) {
 
   # check the input
   args <- list(...)
-  modls <- match.arg(modls, c("hill", "cnst", "cc2"), several.ok = TRUE)
+  modls <- .check_modl_avail(c("hill", "cnst", "cc2"), modls)
   modls <- .check_modls_combi(modls)
-  args <- .check_modls_args(args, modls)
+  args <- .check_modls_args_prefix(args, modls)
   outd <- .check_mask_on_concresp(Conc, Resp, Mask)
 
 
@@ -140,7 +168,7 @@ fit_modl_in <- function(Conc, Resp, modl, ...) {
 #' @seealso [get_hill_fit_config()]
 #'
 #' @return A list of output parameters from Hill model fit.
-#'   If the data is not fittable, the default values for aic, tp, ga, er is NA_real_.
+#'   If the data is not fittable, the default values for aic, tp, ga, bt, er is NA_real_.
 #'   If both directions are used, only the direction with the best fit (by AIC) will be reported.
 #'
 #' \describe{
@@ -150,6 +178,7 @@ fit_modl_in <- function(Conc, Resp, modl, ...) {
 #'   \item{tp}{model top, <0 means the fit for decreasing direction is preferred}
 #'   \item{ga}{ac50}
 #'   \item{gw}{Hill coefficient}
+#'   \item{bt}{model bottom, 0 since this is a 3-parameter hill}
 #'   \item{er}{scale term}
 #' }
 #'
@@ -250,9 +279,6 @@ fit_hill_modl_in <- function(Conc, Resp, pdir = c(1, -1), ...) {
   conc <- na.omit(Conc)
   resp <- na.omit(Resp)
 
-  if(length(conc) != length(resp)) rlang::abort("The length of conc and resp is not the same after removing NA.")
-
-
   ## handle the cases of all NA ##
   ## special treatment ##
   if (length(resp) == 0) {
@@ -260,12 +286,16 @@ fit_hill_modl_in <- function(Conc, Resp, pdir = c(1, -1), ...) {
     resp <- 0
   }
 
+  # handle the cases of different number of conc and resp
+  if(length(conc) != length(resp)) rlang::abort("The length of conc and resp is not the same after removing NA.")
+
+
   # adjust the direction
   if (pdir == -1) resp <- resp*-1
 
   # replace the default config if needed
   config <- get_hill_fit_config(conc, resp)
-  config <- .check_hill_args(config, args)
+  config <- .check_modl_args_exist(config, args)
 
   # Input for optimization
   h <- config$theta
