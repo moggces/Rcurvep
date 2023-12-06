@@ -329,9 +329,11 @@
 #_run_fit
 .check_modls_simu <- function(modls) {
   if (length(modls) > 1) {
-    rlang::abort("Only hill or cc2 is allowed")
-  } else if (!modls %in% c('hill', 'cc2')) {
-    rlang::abort("Only hill or cc2 is allowed")
+    rlang::abort("Only hill is allowed")
+  # } else if (!modls %in% c('hill', 'cc2')) {
+  #   rlang::abort("Only hill or cc2 is allowed")
+  } else if (modls != "hill") {
+    rlang::abort("Only hill is allowed")
   }
   return(modls)
 }
