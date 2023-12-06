@@ -30,8 +30,7 @@
 #'   The result_nested component is a tibble with input data nested in a column, input,
 #'   and output data nested in a column, output.
 #'
-#'   @details
-#'
+#' @details
 #'   # Data structure
 #'   output
 #'     |- result (list)
@@ -392,7 +391,7 @@ get_hillfit_direction <- function(out, pdir) {
 #'   An act_set is added under the result component.
 #'   If (extract_only = FALSE), an act_summary is added.
 #'
-#'   @details
+#' @details
 #'   # Hit definition
 #'   ## cnst
 #'   If the cnst is the winning model and the median of responses larger than the thr_resp, it is considered as an hit.
