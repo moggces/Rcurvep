@@ -24,7 +24,7 @@ out5 <- combi_run_rcurvep(
   dat, n_samples = 2, TRSH = 10, RNGE = 100000, seed = 300)
 
 # hill fit
-out6 <- run_fit(zfishbeh, keep_sets = "fit_set")
+out6 <- run_fit(zfishbeh, keep_sets = "fit_set", modls = "hill")
 
 # decreasing/sampling but only act_set
 set.seed(300)
