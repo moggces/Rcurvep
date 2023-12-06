@@ -159,8 +159,8 @@ create_resp_mask <- function(d, mask) {
 
     # generate mask
     result <- d %>%
-      dplyr::arrange(.data$endpoint, .data$chemical, dplyr::desc(.data$conc)) %>%
-      tidyr::nest(data = -c(.data$endpoint, .data$chemical)) %>%
+      dplyr::arrange(endpoint, chemical, dplyr::desc(conc)) %>%
+      tidyr::nest(data = -c(endpoint, chemical)) %>%
       dplyr::mutate(
         mask = purrr::map(data, function(x, mask) replace(rep(0, nrow(x)), mask, 1), mask = mask)
       ) %>%
@@ -180,14 +180,14 @@ create_resp_mask <- function(d, mask) {
 cal_curvep_dataset <- function(d, config) {
   # prepare the list of data
   d <- d %>%
-    dplyr::arrange(.data$endpoint, .data$chemical, .data$conc) %>%
-    tidyr::nest(input = -c(.data$endpoint, .data$chemical))
+    dplyr::arrange(endpoint, chemical, conc) %>%
+    tidyr::nest(input = -c(endpoint, chemical))
 
   # use the input and config to call_curvep
   result <- d %>%
     dplyr::mutate(
       output = purrr::map(
-        .data$input,
+        input,
         function(x, config) call_curvep(x$conc, x$resp, x$mask, config), config = config)
     )
 
@@ -205,12 +205,12 @@ cal_curvep_dataset <- function(d, config) {
 clean_curvep_output <- function(d, config) {
   result <- d %>%
     dplyr::mutate(
-      out_resp = purrr::map(.data$output, extract_curvep_outresp),
-      in_summary = purrr::map(.data$input, extract_input_summary),
-      fingerprint = purrr::map(.data$output, extract_curvep_fingerprint, config = config),
-      activity = purrr::map(.data$output, extract_curvep_activity, config = config)
+      out_resp = purrr::map(output, extract_curvep_outresp),
+      in_summary = purrr::map(input, extract_input_summary),
+      fingerprint = purrr::map(output, extract_curvep_fingerprint, config = config),
+      activity = purrr::map(output, extract_curvep_activity, config = config)
     ) %>%
-    dplyr::select(-.data$output)
+    dplyr::select(-output)
   return(result)
 }
 
@@ -268,8 +268,8 @@ extract_curvep_outresp <- function(x) {
   result <- vals %>% tibble::as_tibble()
   result <- result %>%
     dplyr::rename(
-      corrected_resp = .data$resp,
-      correction = .data$corr
+      corrected_resp = resp,
+      correction = corr
     )
   return(result)
 }

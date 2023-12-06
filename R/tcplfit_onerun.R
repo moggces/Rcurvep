@@ -145,7 +145,7 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
     result <- nestd %>%
       dplyr::mutate(
         output = purrr::map(
-          .data$input,
+          input,
           ~ do.call(
             fit_modls,
             c(list(Conc = .x$conc, Resp = .x$resp, Mask = .x$mask, modls = modls), args)
@@ -163,7 +163,7 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
     result <- nestd %>%
       dplyr::mutate(
         output = purrr::map(
-          .data$input,
+          input,
           ~ do.call(
             fit_modls,
             c(list(Conc = .x$conc, Resp = .x$resp,
@@ -224,23 +224,23 @@ clean_fit_output_in <- function(fitd, keep_set, thr_resp = NULL, perc_resp = NUL
   if (keep_set == "fit_set") {
     result <- fitd %>%
       dplyr::mutate(
-        out_paras = purrr::map(.data$output, extract_fit_para)
+        out_paras = purrr::map(output, extract_fit_para)
       )
   }
   if (keep_set == 'resp_set') {
     result <- fitd %>%
       dplyr::mutate(
-        out_resps = purrr::map2(.data$input, .data$output, extract_fit_resp)
+        out_resps = purrr::map2(input, output, extract_fit_resp)
       )
   }
   if (keep_set == "act_set") {
     result <- fitd %>%
       dplyr::mutate(
-        in_summary = purrr::map(.data$input, extract_input_summary),
-        activity = purrr::map2(.data$input, .data$output, extract_fit_activity, thr_resp = thr_resp, perc_resp = perc_resp)
+        in_summary = purrr::map(input, extract_input_summary),
+        activity = purrr::map2(input, output, extract_fit_activity, thr_resp = thr_resp, perc_resp = perc_resp)
       )
   }
-  result <- result %>% dplyr::select(-.data$input, -.data$output)
+  result <- result %>% dplyr::select(-input, -output)
 
   return(result)
 }
@@ -297,7 +297,7 @@ create_hillsimu_dataset <- function(fitd, n_samples, pdir) {
   result <- fitd %>%
     dplyr::mutate(
       simud = purrr::map2(
-        .data$input, .data$output,
+        input, output,
         ~ dplyr::bind_rows(
           replicate(n_samples, create_hillsimu_resp(.x, .y), simplify = FALSE),
           .id = "sample_id"))
@@ -307,11 +307,11 @@ create_hillsimu_dataset <- function(fitd, n_samples, pdir) {
   result <- result %>%
     dplyr::mutate(
       direction = purrr::map_dbl(
-        .data$output, get_hillfit_direction, pdir = pdir)
+        output, get_hillfit_direction, pdir = pdir)
     ) %>%
-    dplyr::select(-.data$input, -.data$output) %>%
+    dplyr::select(-input, -output) %>%
     tidyr::unnest(cols = "simud") %>%
-    dplyr::select(-.data$mask) # do not need the mask anymore
+    dplyr::select(-mask) # do not need the mask anymore
 
   return(result)
 }
@@ -490,7 +490,7 @@ summarize_fit_output <- function(d, thr_resp = 20, perc_resp = 10, ci_level = 0.
 make_act_na_0 <- function(nestd) {
   result <- nestd %>%
     dplyr::mutate(
-      act_set = purrr::map(.data$act_set, make_act_na_0_in)
+      act_set = purrr::map(act_set, make_act_na_0_in)
     )
   return(result)
 }
@@ -531,7 +531,7 @@ tibble_fit_para <- function(modl) {
   pars <- tibble::as_tibble(modl)
   modl_type <- pars$modl
   result <- pars %>%
-    dplyr::select(-.data$modl) %>%
+    dplyr::select(-modl) %>%
     dplyr::rename_all(.funs = list(~ stringr::str_c(modl_type, "_", .)))
   return(result)
 }

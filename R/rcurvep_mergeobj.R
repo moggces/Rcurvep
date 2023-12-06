@@ -61,7 +61,7 @@ merge_rcurvep_objs <- function(...) {
 remove_wAUC_col <- function(lset, lset_name) {
   result <- lset
   if (lset_name != "act_set") {
-    result <- result %>% dplyr::select(-.data$wAUC)
+    result <- result %>% dplyr::select(-wAUC)
   }
   return(result)
 }
@@ -89,7 +89,7 @@ pick_row_by_wAUC <- function(d) {
   # group sort
   result <- d1 %>%
     dplyr::arrange(
-      dplyr::desc(abs(.data$wAUC)), .by_group = TRUE) %>%
+      dplyr::desc(abs(wAUC)), .by_group = TRUE) %>%
     dplyr::slice(1) %>%
     dplyr::ungroup()
 

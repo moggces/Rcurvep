@@ -7,7 +7,7 @@
 #' @inheritParams run_rcurvep
 #' @inherit run_rcurvep return
 #' @export
-#' @seealso [run_rcurvep()]
+#' @seealso [run_rcurvep()] [summarize_rcurvep_output()]
 #'
 #' @examples
 #'
@@ -125,7 +125,7 @@ create_para_input <- function(paras, n_samples, d) {
     result <- expand.grid(paras) %>% tibble::as_tibble()
     result <- result %>%
       dplyr::left_join(
-        d %>% tidyr::nest(data = -.data$sample_id),
+        d %>% tidyr::nest(data = -sample_id),
         by = "sample_id"
       )
   }
@@ -192,9 +192,9 @@ combi_run_curvep_in <- function(d, mask, n_samples, keep_sets, paras) {
 flat_result_tbl <- function(d, keep_set) {
   result <- d %>%
     dplyr::mutate(
-      temp = purrr::map(.data$rcurvep_obj, ~ .x[['result']][[keep_set]])
+      temp = purrr::map(rcurvep_obj, ~ .x[['result']][[keep_set]])
     ) %>%
-    dplyr::select(-.data$rcurvep_obj) %>%
+    dplyr::select(-rcurvep_obj) %>%
     tidyr::unnest("temp")
 
   return(result)
