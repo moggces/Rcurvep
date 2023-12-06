@@ -14,18 +14,31 @@
 #'   fit_set is a must.
 #' \itemize{
 #'   \item fit_set: a tibble with output from model fits
-#'   \item resp_set: a tibble with fitted response data from the winning model
+#'   \item resp_set: a tibble with fitted response data from the winning model.
+#'   If winning model is hill or cc2 and there is no fit, response is NA.
+#'   If winning model is cnst, median of all responses is reported for each concentration.
 #' }
 #' @param n_samples NULL (default) for no bootstrap samples are generated or number of samples to be generated from bootstrapping.
-#'   When n_samples is not NULL, fit_modls = "hill" will be set automatically.
+#'   When n_samples is not NULL, modls currently needs to be hill.
 #' @param ... The named input configurations for replacing the default configurations.
 #'   The input configuration needs to add model type as the prefix.
 #'   For example, hill_pdir = -1 will set the Hill fit only to the decreasing direction.
+#'   Add cc2_classSD = 10 will set the classification SD to 10%.
 #'
 #' @return A list of named components: result and result_nested.
 #'   The result component is also a list of output sets depending on the parameter, *keep_sets*.
 #'   The result_nested component is a tibble with input data nested in a column, input,
 #'   and output data nested in a column, output.
+#'
+#'   @details
+#'
+#'   # Data structure
+#'   output
+#'     |- result (list)
+#'     |   |- fit_set
+#'     |   |- resp_set
+#'     |
+#'     |- result_nested (tibble)
 #'
 #'   The prefix of the column names in the *fit_set* are the used models.
 #'   The *win_modl* is the winning model.
@@ -37,30 +50,34 @@
 #'
 #' @examples
 #'
-#' # default
-#' fitd <- run_fit(zfishbeh)
+#' # It is suggested to use na.omit on the dataset to see if any data will be removed
+#'
+#' # use hill + cnst model
+#' fitd <- run_fit(zfishbeh, modls = c("hill", "cnst"))
 #'
 #' # use only hill model and fit only to the decreasing direction, keep only the fit_set output
 #' fitd <- run_fit(zfishbeh, modls = "hill", keep_sets = "fit_set", hill_pdir = -1)
 #'
-#' # fit to the bootstrap samples
+#' # use cc2 model + higher classification SD
+#' fitd <- run_fit(zfishbeh, modls = "cc2", cc2_classSD = 10)
+#'
+#' # fit to the bootstrap samples using hill
 #' fitd <- run_fit(zfishbeh, n_samples = 2, modls = "hill")
 #'
-#' fitd <- run_fit(zfishbeh, n_samples = 2, modls = "cc2")
 #'
 #'
-run_fit <- function(d, modls = c("hill", "cnst", "cc2"), keep_sets = c('fit_set', 'resp_set'), n_samples = NULL, ...) {
+run_fit <- function(d, modls, keep_sets = c('fit_set', 'resp_set'), n_samples = NULL, ...) {
 
   # argument checks
   args <- list(...)
   d <- .check_dat_base(d, check_one_concresp = FALSE)
   d <- create_resp_mask(d, mask = 0) #only user put the mask column, disable the
   keep_sets <- .check_keep_sets(keep_sets, c('fit_set', 'resp_set'), must_set = "fit_set")
-  modls <- match.arg(modls, c("hill", "cnst", "cc2"), several.ok = TRUE)
+  modls <- .check_modl_avail(c("hill", "cnst", "cc2"), modls)
   modls <- .check_modls_combi(modls)
   n_samples <- .check_n_samples(n_samples)
 
-  # hill or cc2 can be used to generate simulated samples
+  # hill can be used to generate simulated samples
   if (!is.null(n_samples)) modls <- .check_modls_simu(modls)
 
   # nest the data and calculate fits
@@ -360,6 +377,7 @@ get_hillfit_direction <- function(out, pdir) {
 #'
 #' A tibble, act_set is generated. When (extract_only = FALSE), a tibble, act_summary is generated with confidence intervals of the activity metrics.
 #' The quantile approach is used to calculate the confidence interval.
+#' Currently only bootstrap calculations from hill can generate confidence interval
 #' For potency activity metrics, if value is NA, highest tested concentration is used in the summary.
 #' For other activity metrics, if value is NA, 0 is used in the summary.
 #'
@@ -373,6 +391,40 @@ get_hillfit_direction <- function(out, pdir) {
 #'   The result and result_nested are the copy from the output of [run_fit()].
 #'   An act_set is added under the result component.
 #'   If (extract_only = FALSE), an act_summary is added.
+#'
+#'   @details
+#'   # Hit definition
+#'   ## cnst
+#'   If the cnst is the winning model and the median of responses larger than the thr_resp, it is considered as an hit.
+#'   The median of responses is reported as Emax and the lowest tested concentration is reported as EC50, POD, ECxx.
+#'
+#'   ## hill
+#'   The hit (=1) is considered having POD < max tested concentration.
+#'
+#'   ## cc2
+#'   The hit value is from the cc2 value
+#'
+#'   # Output structure
+#'   output
+#'     |- result (list)
+#'     |   |- fit_set (tibble, all output from the respective fit model included)
+#'     |   |- resp_set (tibble)
+#'     |   |- act_set (tibble, EC50, ECxx, Emax, POD, slope, hit)
+#'     |
+#'     |- result_nested (tibble)
+#'     |- act_summary (tibble, confidence interval)
+#'
+#'   # activity metrics
+#' \describe{
+#'   \item{hit}{hit call, see above definition}
+#'   \item{EC50}{half maximal effect concentration}
+#'   \item{ECxx}{effect concentration at XX percent, depending on the perc_resp }
+#'   \item{POD}{point-of-departure, depending on the thr_resp}
+#'   \item{Emax}{max effect - min effect from the fit}
+#'   \item{slope}{slope factor from the fit}
+#' }
+#'
+#'
 #' @export
 #' @seealso [run_fit()]
 #' @examples
@@ -380,14 +432,18 @@ get_hillfit_direction <- function(out, pdir) {
 #' # generate some fit outputs
 #'
 #' ## fit only
-#' fitd1 <- run_fit(zfishbeh)
+#' fitd1 <- run_fit(zfishbeh, modls = "cc2")
 #'
 #' ## fit + bootstrap samples
-#' fitd2 <- run_fit(zfishbeh, n_samples = 3)
+#' fitd2 <- run_fit(zfishbeh, n_samples = 3, modls = "hill")
+#'
+#' ## fit using hill + cnst
+#' fitd3 <- run_fit(zfishbeh, modls = c("hill", "cnst"))
 #'
 #'\donttest{
 #' # only to extract the activity data
 #' sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE)
+#' sumd3 <- summarize_fit_output(fitd3, extract_only = TRUE)
 #'
 #' # calculate EC20 instead of default EC10
 #' sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE, perc_resp  = 20)
@@ -531,12 +587,17 @@ extract_fit_resp <- function(inp, out) {
 
 #' Extract activity from the model fits.
 #'
+#' @details
+#' # hit calling for different models
+#' ## cnst
+#' If the cnst is the winning model and the median of responses larger than the thr_resp, it is considered as an hit.
+#' The median of responses is reported as Emax and the lowest tested concentration is reported as EC50, POD, ECxx.
 #'
-#' If the cnst is the winning model and the median of responses larger than the thr_resp,
-#' it is considered as an hit.
-#' The median of responses is reported as Emax and
-#' the lowest concentration is the other potenty metrics.
-#' The hit is considered having POD < max tested concentration.
+#' ## hill
+#' The hit (1) is considered having POD < max tested concentration.
+#'
+#' ## cc2
+#' The hit value is from the cc2 value.
 #'
 #' @inheritParams create_hillsimu_resp
 #' @inheritParams summarize_fit_output
@@ -582,6 +643,11 @@ extract_fit_activity <- function(inp, out, thr_resp, perc_resp) {
 
       # hit?
       if (!is.na(POD) && POD < max(inp$conc)) hit <- 1
+    }
+
+    # use cc2 to as the hit
+    if(win_modl$modl == "cc2") {
+      hit <- win_modl$cc2
     }
   }
 
