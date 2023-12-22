@@ -171,7 +171,7 @@ get_nested_joined_sets <- function(lsets, base_cols) {
 unnest_joined_sets <- function(nested, base_cols, add_col) {
 
   result <- nested %>%
-    dplyr::select(base_cols, add_col) %>%
+    dplyr::select(tidyselect::all_of(base_cols), tidyselect::all_of(add_col)) %>%
     tidyr::unnest(cols = add_col)
   return(result)
 }
@@ -189,7 +189,7 @@ add_hit <- function(nestd) {
 
   result <- nestd %>%
     dplyr::mutate(
-      act_set = purrr::map(act_set, add_hit_actset)
+      act_set = purrr::map(.data$act_set, add_hit_actset)
     )
   return(result)
 }
@@ -209,7 +209,7 @@ add_hit_actset <- function(act_set) {
   result <- act_set %>%
     dplyr::mutate(
       hit = 0,
-      hit = replace(hit, wAUC != 0, 1)
+      hit = replace(.data$hit, .data$wAUC != 0, 1)
     )
   return(result)
 }
@@ -230,15 +230,15 @@ apply_comment_to_unhit <- function(nestd, inactivate) {
   if (!is.null(inactivate)) {
     # result <- nestd %>%
     #   dplyr::mutate(
-    #     act_set = purrr::map(act_set, apply_comment_to_unhit_actset, inactivate = inactivate)
+    #     act_set = purrr::map(.data$act_set, apply_comment_to_unhit_actset, inactivate = inactivate)
     #   )
     if (rlang::has_name(result, "resp_set")) {
       result <- result %>% dplyr::mutate(
-        resp_set = purrr::map2(resp_set, act_set, apply_comment_to_unhit_nonactset))
+        resp_set = purrr::map2(.data$resp_set, .data$act_set, apply_comment_to_unhit_nonactset))
     }
     if (rlang::has_name(result, "fp_set")) {
       result <- result %>% dplyr::mutate(
-        fp_set = purrr::map2(fp_set, act_set, apply_comment_to_unhit_nonactset))
+        fp_set = purrr::map2(.data$fp_set, .data$act_set, apply_comment_to_unhit_nonactset))
     }
   }
   return(result)
@@ -292,7 +292,7 @@ adjust_rcurvep_comment <- function(act_set, inactivate) {
   result <- act_set %>%
     dplyr::mutate(
       Comments = dplyr::case_when(
-        inp ~ stringr::str_c(Comments, "|custom"),
+        inp ~ stringr::str_c(.data$Comments, "|custom"),
         TRUE ~ Comments
       )
     )
@@ -343,7 +343,7 @@ apply_comment_to_unhit_nonactset <- function(nonact_set, act_set) {
   if (rlang::has_name(result, "sample_id")) {
 
     # get the sample_ids that hit = 0
-    ids <- act_set %>% dplyr::filter(hit == 0) %>% dplyr::pull(sample_id)
+    ids <- act_set %>% dplyr::filter(.data$hit == 0) %>% dplyr::pull(.data$sample_id)
 
     # modify the tibble
     if (length(ids) != 0) {
@@ -423,7 +423,7 @@ make_act_na_highconc_in <- function(act_set) {
 make_act_na_highconc <- function(nestd) {
   result <- nestd %>%
     dplyr::mutate(
-      act_set = purrr::map(act_set, make_act_na_highconc_in)
+      act_set = purrr::map(.data$act_set, make_act_na_highconc_in)
     )
   return(result)
 }
@@ -440,7 +440,7 @@ make_act_na_highconc <- function(nestd) {
 summarize_actsets <- function(nestd, ci_level) {
   result <- nestd %>%
     dplyr::mutate(
-      act_summary = purrr::map(act_set, summarize_actset_in, ci_level = ci_level)
+      act_summary = purrr::map(.data$act_set, summarize_actset_in, ci_level = ci_level)
     )
 
   return(result)
@@ -515,7 +515,7 @@ summarize_actset_by_type <- function(act_set_grouped, type, ci_level) {
     result <- act_set_grouped %>%
       dplyr::summarize(
         n_curves = dplyr::n(),
-        hit_confidence = sum(hit)/dplyr::n()
+        hit_confidence = sum(.data$hit)/dplyr::n()
       )
   }
 

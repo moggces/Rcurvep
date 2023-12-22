@@ -97,7 +97,7 @@ cal_dataset_pvar <- function(act_set, base_cols) {
   sdd <- act_set %>%
     dplyr::group_by(!!!base_colsq) %>%
     dplyr::summarise(
-      sd_pod = sd(POD), n_rep = dplyr::n()
+      sd_pod = sd(.data$POD), n_rep = dplyr::n()
     ) %>%
     dplyr::ungroup()
 
@@ -105,7 +105,7 @@ cal_dataset_pvar <- function(act_set, base_cols) {
   result <- sdd %>%
     dplyr::group_by(!!!base_cols_nochemq) %>%
     dplyr::summarize(
-      pvar  = sum((sd_pod^2)*(n_rep - 1))/(sum(n_rep) - dplyr::n())) %>%
+      pvar  = sum((.data$sd_pod^2)*(.data$n_rep - 1))/(sum(.data$n_rep) - dplyr::n())) %>%
     dplyr::ungroup()
 
   return(result)
@@ -126,10 +126,10 @@ cal_dataset_pvar <- function(act_set, base_cols) {
 cal_dataset_knee <- function(pvard, base_cols, p1, p2) {
   base_cols_f <- base_cols[!base_cols %in% c("chemical", "TRSH")]
   knees <- pvard %>%
-    tidyr::nest(input = -c(base_cols_f)) %>%
+    tidyr::nest(input = -c(tidyselect::all_of(base_cols_f))) %>%
     dplyr::mutate(
       knee_out = purrr::map(
-        input,
+        .data$input,
         cal_knee_point, xaxis = "TRSH", yaxis = "pvar", p1 = p1, p2 = p2, plot = FALSE)
     )
   return(knees)
@@ -146,8 +146,8 @@ cal_dataset_knee <- function(pvard, base_cols, p1, p2) {
 #'
 unnest_knee_data <- function(kneed, type = c("stats", "outcome")) {
   result <- kneed %>%
-    dplyr::mutate(temp = purrr::map(knee_out, ~ .x[[type]])) %>%
-    dplyr::select(-knee_out, -input) %>%
+    dplyr::mutate(temp = purrr::map(.data$knee_out, ~ .x[[type]])) %>%
+    dplyr::select(-.data$knee_out, -.data$input) %>%
     tidyr::unnest(cols = c("temp"))
   return(result)
 }
