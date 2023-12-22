@@ -26,6 +26,7 @@
 #' @param minYrange A minimum response range (max activity - min activity) required to apply curve fitting.
 #'   Curve fitting will not be attempted if the response range is less than the cutoff.
 #'   Default = 20%.
+#' @param ... for additional curve class2 parameters (currently none)
 #' @return A list of output parameters from Curve Class2 model fit.
 #'   If the data are fit or not fittable (fit = 0), the default value for tp, ga, gw, bt pvalue, masks, nmasks is NA.
 #'   For cc2 = 4, it is still possible to have fit parameters.
@@ -47,7 +48,7 @@
 #' @export
 #'
 #' @references{
-#'   \insertRef{PMID:27518629}{Rcurvep}
+#'   \insertRef{PMID:35294762}{Rcurvep}
 #' }
 #' @seealso  [fit_modls()]
 #' @examples
