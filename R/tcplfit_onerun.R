@@ -51,7 +51,7 @@
 #' @examples
 #'
 #' # It is suggested to use na.omit on the dataset to see if any data will be removed
-#'
+#'\donttest{
 #' # use hill + cnst model
 #' fitd <- run_fit(zfishbeh, modls = c("hill", "cnst"))
 #'
@@ -63,7 +63,7 @@
 #'
 #' # fit to the bootstrap samples using hill
 #' fitd <- run_fit(zfishbeh, n_samples = 2, modls = "hill")
-#'
+#'}
 #'
 #'
 run_fit <- function(d, modls, keep_sets = c('fit_set', 'resp_set'), n_samples = NULL, ...) {
@@ -431,6 +431,7 @@ get_hillfit_direction <- function(out, pdir) {
 #'
 #' # generate some fit outputs
 #'
+#'\donttest{
 #' ## fit only
 #' fitd1 <- run_fit(zfishbeh, modls = "cc2")
 #'
@@ -440,7 +441,7 @@ get_hillfit_direction <- function(out, pdir) {
 #' ## fit using hill + cnst
 #' fitd3 <- run_fit(zfishbeh, modls = c("hill", "cnst"))
 #'
-#'\donttest{
+#'
 #' # only to extract the activity data
 #' sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE)
 #' sumd3 <- summarize_fit_output(fitd3, extract_only = TRUE)
