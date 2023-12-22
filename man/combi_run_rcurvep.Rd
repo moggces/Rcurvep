@@ -81,5 +81,5 @@ out <- combi_run_rcurvep(
 
 }
 \seealso{
-\code{\link[=run_rcurvep]{run_rcurvep()}}
+\code{\link[=run_rcurvep]{run_rcurvep()}} \code{\link[=summarize_rcurvep_output]{summarize_rcurvep_output()}}
 }

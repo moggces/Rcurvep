@@ -4,7 +4,7 @@
 \alias{fit_modls}
 \title{Fit one set of concentration-response data using types of models}
 \usage{
-fit_modls(Conc, Resp, Mask = NULL, modls = c("hill", "cnst"), ...)
+fit_modls(Conc, Resp, Mask = NULL, modls, ...)
 }
 \arguments{
 \item{Conc}{A vector of log10 concentrations.}
@@ -14,17 +14,21 @@ fit_modls(Conc, Resp, Mask = NULL, modls = c("hill", "cnst"), ...)
 \item{Mask}{Default = NULL or a vector of 1 or 0.
 1 is for masking the respective response.}
 
-\item{modls}{The model types for the fitting. Multiple values are allowed.
-Currently Hill model (hill) and constant model (cnst) are implemented.
-Default = c("hill", "cnst").}
+\item{modls}{The model types for the fitting.
+Currently available models are 3-parameter Hill model (hill), constant model (cnst),
+and Curve Class2 4-parameter Hill model (cc2).
+Multiple values are only allowed for the hill and cnst combination.}
 
 \item{...}{The named input configurations for replacing the default configurations.
 The input configuration needs to add model type as the prefix.
-For example, hill_pdir = -1 will set the Hill fit only to the decreasing direction.}
+For example, hill_pdir = -1 will set the Hill fit only to the decreasing direction.
+Another common parameter for cc2 model is cc2_classSD.
+The default value of cc2_classSD is 5\%, which might be too small for noiser endpoints.}
 }
 \value{
 A list of components named by the models.
-The models are sorted by their AIC values. Thus, the first component has the best fit.
+The models are sorted by their AIC values (when multiple models are used).
+Thus, the first component has the best fit.
 \subsection{hill}{
 
 Fit output from Hill equation
@@ -49,19 +53,39 @@ Fit output from constant model
 \item er: scale term
 }
 }
+
+\subsection{cc2}{
+
+Fit output from Curve Class 2 model
+\itemize{
+\item modl: model type, i.e., cc2
+\item fit: fittable, 1 (yes) or 0 (no)
+\item aic: NA, it is not calculated for this model. The parameter is kept for compatability.
+\item cc2: curve class2, default = 4
+\item tp: model top, <0 means the fit for decreasing direction is preferred
+\item ga: ac50 (log10 scale)
+\item gw: Hill coefficient
+\item bt: model bottom
+\item pvalue: from F-test, for fit quality
+\item r2: fitness
+\item masks: a string to indicate at which positions of response are masked
+\item nmasks: number of masked responses
+}
+}
 }
 \description{
 A convenient function to fit data using available models
 and to sort the outcomes by AIC values.
 }
 \details{
-The backbone of fit using hill and cnst is based on the implementation from tcpl package.
+The backbone of fit method using hill (3-parameter Hill model) and cnst (constant model) is based on the implementation from tcpl package.
 But the lower bound of ga is lower by log10(1/100).
+The cc2 model is the 4-parameter Hill model from Curve Class2.
 }
 \examples{
 
 concd <- c(-9, -8, -7, -6, -5, -4)
-respd <- c(0, 2, 30, 40, 50, 60)
+respd <- c(0, 2, 30, 40, 50, 20)
 maskd <- c(0, 0, 0, 0, 0, 1)
 
 # run hill only
@@ -70,11 +94,18 @@ fit_modls(concd, respd, modls = "hill")
 # run hill only + increasing direction only
 fit_modls(concd, respd, modls = "hill", hill_pdir = 1)
 
+# run cc2 only + change of classSD
+fit_modls(concd, respd, modls = "cc2", cc2_classSD = 10)
+
+# run hill + cnst
+fit_modls(concd, respd, modls = c("hill", "cnst"))
+
 # run with mask at the highest concentration
-fit_modls(concd, respd, maskd)
+fit_modls(concd, respd, maskd, modls = "hill")
 
 
 }
 \seealso{
 \code{\link[tcpl:Models]{tcpl::tcplObjHill()}}, \code{\link[tcpl:Models]{tcpl::tcplObjCnst()}}, \code{\link[=get_hill_fit_config]{get_hill_fit_config()}}
+\code{\link[=fit_cc2_modl]{fit_cc2_modl()}}
 }

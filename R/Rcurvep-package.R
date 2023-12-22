@@ -1,6 +1,7 @@
 #' @keywords internal
 "_PACKAGE"
 
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 #' Rcurvep: Concentration-Response Data Analysis using Curvep
 #'
 #' Provide an R interface for processing concentration-response datasets using Curvep, a response noise filtering algorithm. The algorithm was described in the publications (see references below).
@@ -67,4 +68,4 @@
 #' @importFrom utils data head modifyList tail
 ## usethis namespace: end
 NULL
-if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
+
