@@ -17,6 +17,7 @@
 #' Different strategies are used to simulate the datasets:
 #' * Curvep - bootstrapping the responses of replicates at each concentration
 #' * Hill equation (3-parameter) - bootstrapping the residuals and adding back to the fitted responses (by Hill) at each concentration
+#' * Hill equation from Curve Class2 (4-parameter) - currently not available
 #'
 #' For Curvep the bootstrapping strategy is different depending on the type of datasets.
 #' Datasets can be grouped into three types:
@@ -66,3 +67,4 @@
 #' @importFrom utils data head modifyList tail
 ## usethis namespace: end
 NULL
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
