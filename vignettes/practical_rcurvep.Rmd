@@ -2,7 +2,7 @@
 title: "Practical applications using Rcurvep package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{practical_rcurvep}
+  %\VignetteIndexEntry{Practical applications using Rcurvep package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
