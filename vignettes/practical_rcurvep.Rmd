@@ -165,7 +165,7 @@ fitd1
 # can also use the curve class2 4-parameter hill with classification SD as 5% 
 # please ?fit_cc2_modl to understand curve classification
 #fitd2 <- run_fit(create_dataset(zfishdev), cc2_classSD = 5, modls = "cc2")
-fitd2 
+#fitd2 
 ```
 
 ## Summarize parametric fitting results using a preferred BMR
