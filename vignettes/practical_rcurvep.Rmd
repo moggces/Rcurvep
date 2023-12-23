@@ -164,7 +164,7 @@ fitd1
 
 # can also use the curve class2 4-parameter hill with classification SD as 5% 
 # please ?fit_cc2_modl to understand curve classification
-fitd2 <- run_fit(create_dataset(zfishdev), cc2_classSD = 5, modls = "cc2")
+#fitd2 <- run_fit(create_dataset(zfishdev), cc2_classSD = 5, modls = "cc2")
 fitd2 
 ```
 
@@ -183,7 +183,7 @@ fitd_sum_out1 <- summarize_fit_output(fitd1, thr_resp  = 10, perc_resp = 20, ext
 
 # cc2 (hill with 4-parameter + curve classification)
 # see 
-fitd_sum_out2 <- summarize_fit_output(fitd2, thr_resp  = 10, perc_resp = 20, extract_only = TRUE)
+#fitd_sum_out2 <- summarize_fit_output(fitd2, thr_resp  = 10, perc_resp = 20, extract_only = TRUE)
 
 ```
 
@@ -191,18 +191,18 @@ fitd_sum_out2 <- summarize_fit_output(fitd2, thr_resp  = 10, perc_resp = 20, ext
 
 ```{r}
 #EC20% concordance (when both methods provide values)
-cor(fitd_sum_out1$result$act_set$ECxx, fitd_sum_out2$result$act_set$ECxx, use = "pairwise.complete.obs")
+#cor(fitd_sum_out1$result$act_set$ECxx, fitd_sum_out2$result$act_set$ECxx, use = "pairwise.complete.obs")
 
 #BMC10% (when both methods provide values)
-cor(fitd_sum_out1$result$act_set$POD, fitd_sum_out2$result$act_set$POD, use = "pairwise.complete.obs")
+#cor(fitd_sum_out1$result$act_set$POD, fitd_sum_out2$result$act_set$POD, use = "pairwise.complete.obs")
 
 #EC50 (when both methods provide values)
-cor(fitd_sum_out1$result$act_set$EC50, fitd_sum_out2$result$act_set$EC50, use = "pairwise.complete.obs")
+#cor(fitd_sum_out1$result$act_set$EC50, fitd_sum_out2$result$act_set$EC50, use = "pairwise.complete.obs")
 
 
 # check number of curves consider as active by both
 sum(fitd_sum_out1$result$act_set$hit == 0) # no fit
-sum(fitd_sum_out2$result$act_set$hit == 4) # cc2 = 4 (inactive)
+#sum(fitd_sum_out2$result$act_set$hit == 4) # cc2 = 4 (inactive)
 
 ```
 
