@@ -126,7 +126,7 @@ cal_dataset_pvar <- function(act_set, base_cols) {
 cal_dataset_knee <- function(pvard, base_cols, p1, p2) {
   base_cols_f <- base_cols[!base_cols %in% c("chemical", "TRSH")]
   knees <- pvard %>%
-    tidyr::nest(input = -c(base_cols_f)) %>%
+    tidyr::nest(input = -c(tidyselect::all_of(base_cols_f))) %>%
     dplyr::mutate(
       knee_out = purrr::map(
         .data$input,

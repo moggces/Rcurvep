@@ -279,7 +279,9 @@
 }
 
 #_hillbase
-.check_hill_args <- function(ori, new) {
+# for hill model, f, theta, ui, ci can be modified
+# for cc2 model, currently no additional parameters
+.check_modl_args_exist <- function(ori, new) {
   if (!all(names(new) %in% names(ori))) {
     rlang::warn("The supplied arguments are not registered. No changes will be applied.")
   }
@@ -288,13 +290,52 @@
 }
 
 #_hillbase
-.check_modls_args <- function(args, modls) {
+.check_modls_args_prefix <- function(args, modls) {
 
   syn <- paste0("(", stringr::str_c(modls, collapse = "|"), ")")
   if (!all(stringr::str_detect(names(args), syn))) {
     rlang::warn("Some supplied arguments do not have model type as the prefix. No changes will be applied.")
   }
   return(args)
+}
+
+
+#_hillbase
+.check_modl_avail <- function(allowed, modls) {
+  if (!all(modls %in% allowed)) {
+    rlang::warn(
+      stringr::str_glue(
+        "{not_avail} not in the available model list.",
+        not_avail = stringr::str_c(setdiff(modls, allowed), collapse = " ")
+      )
+    )
+    result <- intersect(modls, allowed)
+  } else {
+    result <- modls
+  }
+  return(result)
+}
+
+#_hillbase
+.check_modls_combi <- function(modls) {
+  if (length(modls) > 1) {
+    if ('cc2' %in% modls) {
+      rlang::abort(">1 models are selected including cc2. Currently cc2 needs to be used alone.")
+    }
+  }
+  return(modls)
+}
+
+#_run_fit
+.check_modls_simu <- function(modls) {
+  if (length(modls) > 1) {
+    rlang::abort("Only hill is allowed")
+  # } else if (!modls %in% c('hill', 'cc2')) {
+  #   rlang::abort("Only hill or cc2 is allowed")
+  } else if (modls != "hill") {
+    rlang::abort("Only hill is allowed")
+  }
+  return(modls)
 }
 
 #_mergeobj

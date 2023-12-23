@@ -1,14 +1,23 @@
 Package: Rcurvep
 Type: Package
 Title: Concentration-Response Data Analysis using Curvep
-Version: 1.2.1
-Authors@R: c(person("Jui-Hua", "Hsieh", email = "juihua.hsieh@gmail.com", role = c("aut", "cre")), person("Alexander", "Sedykh", email = "sunirks@gmail.com", role = c("aut")))
-Description: Provide an R interface for processing concentration-response datasets using Curvep, a response noise filtering algorithm. The algorithm was described in the publications (Sedykh A et al. (2011) <doi:10.1289/ehp.1002476> and Sedykh A (2016) <doi:10.1007/978-1-4939-6346-1_14>). Other parametric fitting approaches (e.g., Hill equation) are also adopted for ease of comparison. Also, methods for calculating the confidence interval around the activity metrics are also provided. The methods are based on the bootstrap approach to simulate the datasets (Hsieh J-H et al. <doi:10.1093/toxsci/kfy258>). The simulated datasets can be used to derive the baseline noise threshold in an assay endpoint. This threshold is critical in the toxicological studies to derive the point-of-departure (POD).
+Version: 1.3.0
+Authors@R: c(
+        person("Jui-Hua", "Hsieh", email = "juihua.hsieh@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1620-1571")), 
+        person("Alexander", "Sedykh", role = c("aut")),
+        person("Fred", "Parham", role = c("ctb")),
+        person("Yuhong", "Wang", role = c("ctb")),
+        person("Tongan", "Zhao", role = c("aut")),
+        person("Ruili", "Huang", role = c("ctb"))
+        )
+Description: An R interface for processing concentration-response datasets using Curvep, a response noise filtering algorithm. The algorithm was described in the publications (Sedykh A et al. (2011) <doi:10.1289/ehp.1002476> and Sedykh A (2016) <doi:10.1007/978-1-4939-6346-1_14>). Other parametric fitting approaches (e.g., Hill equation) are also adopted for ease of comparison. 3-parameter Hill equation from 'tcpl' package (Filer D et al.,  <doi:10.1093/bioinformatics/btw680>) and 4-parameter Hill equation from Curve Class2 approach (Wang Y et al.,  <doi:10.2174/1875397301004010057>) are available. Also, methods for calculating the confidence interval around the activity metrics are also provided. The methods are based on the bootstrap approach to simulate the datasets (Hsieh J-H et al. <doi:10.1093/toxsci/kfy258>). The simulated datasets can be used to derive the baseline noise threshold in an assay endpoint. This threshold is critical in the toxicological studies to derive the point-of-departure (POD).
 Language: en-US
+BugReports: https://github.com/moggces/Rcurvep/issues
 License: MIT + file LICENSE
+URL: https://github.com/moggces/Rcurvep
 Encoding: UTF-8
 LazyData: true
-Imports: dplyr (>= 0.7),
+Imports: dplyr (>= 1.0.0),
     tibble,
     magrittr,
     tidyselect,
@@ -19,13 +28,15 @@ Imports: dplyr (>= 0.7),
     stringr,
     ggplot2,
     Rdpack,
-    methods
+    methods,
+    rJava
 RdMacros: Rdpack
 Suggests: testthat,
     knitr,
     rmarkdown,
     tcpl
 VignetteBuilder: knitr
-RoxygenNote: 7.2.1
+SystemRequirements: Java
+RoxygenNote: 7.2.3
 Depends: R (>= 3.5)
 Roxygen: list(markdown = TRUE)

@@ -15,7 +15,8 @@ tcplHillConc <- function(val, tp, ga, gw, bt = 0) {
 
 tcplHillACXX <- function(XX, tp, ga, gw, bt = 0) {
 
-  y <- tp * XX/100
+  #y <- tp * XX/100 incorrect calculation
+  y <- bt + (tp - bt) * XX/100
   ga - log10((tp - bt)/(y - bt) - 1)/gw
 
 }

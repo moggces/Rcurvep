@@ -212,7 +212,10 @@ plot_diagnostic <- function(plotd, lined, endpoints) {
         slope = .data$slope, intercept = .data$intercept), linetype = "dashed", color = "red"
     )
 
-  p <- p + ggplot2::facet_grid(type ~ facet_endpoint, scales = "free")
+  p <- p + ggplot2::facet_grid(type ~ facet_endpoint,
+                               labeller = ggplot2::labeller(
+                                 facet_endpoint = ggplot2::label_wrap_gen(width = 20)),
+                               scales = "free")
 
   return(p)
 }

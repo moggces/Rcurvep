@@ -15,9 +15,9 @@ summarize_fit_output(
 \arguments{
 \item{d}{The output from the \code{\link[=run_fit]{run_fit()}}.}
 
-\item{thr_resp}{The response cutoff to calculate the potency. Default = NULL.}
+\item{thr_resp}{The response cutoff to calculate the potency. Default = 20 (POD20)}
 
-\item{perc_resp}{The percentage cutoff to calculate the potency. Default = NULL.}
+\item{perc_resp}{The percentage cutoff to calculate the potency. Default = 10 (EC10).}
 
 \item{ci_level}{The confidence level for the activity metrics. Default is = 0.95.}
 
@@ -36,22 +36,68 @@ In addition, summary of activity data (e.g., confidence interval, hit confidence
 \details{
 A tibble, act_set is generated. When (extract_only = FALSE), a tibble, act_summary is generated with confidence intervals of the activity metrics.
 The quantile approach is used to calculate the confidence interval.
+Currently only bootstrap calculations from hill (3-parameter) can generate confidence interval
 For potency activity metrics, if value is NA, highest tested concentration is used in the summary.
 For other activity metrics, if value is NA, 0 is used in the summary.
 }
+\section{Hit definition}{
+\subsection{cnst}{
+
+If the cnst is the winning model and the median of responses larger than the thr_resp, it is considered as an hit.
+The median of responses is reported as Emax and the lowest tested concentration is reported as EC50, POD, ECxx.
+}
+
+\subsection{hill}{
+
+The hit (=1) is considered having POD < max tested concentration.
+}
+
+\subsection{cc2}{
+
+The hit value is from the cc2 value
+}
+}
+
+\section{Output structure}{
+output
+|- result (list)
+|   |- fit_set (tibble, all output from the respective fit model included)
+|   |- resp_set (tibble)
+|   |- act_set (tibble, EC50, ECxx, Emax, POD, slope, hit)
+|
+|- result_nested (tibble)
+|- act_summary (tibble, confidence interval)
+}
+
+\section{activity metrics}{
+\describe{
+\item{hit}{hit call, see above definition}
+\item{EC50}{half maximal effect concentration}
+\item{ECxx}{effect concentration at XX percent, depending on the perc_resp }
+\item{POD}{point-of-departure, depending on the thr_resp}
+\item{Emax}{max effect - min effect from the fit}
+\item{slope}{slope factor from the fit}
+}
+}
+
 \examples{
 
 # generate some fit outputs
 
+\donttest{
 ## fit only
-fitd1 <- run_fit(zfishbeh)
+fitd1 <- run_fit(zfishbeh, modls = "cc2")
 
 ## fit + bootstrap samples
-fitd2 <- run_fit(zfishbeh, n_samples = 3)
+fitd2 <- run_fit(zfishbeh, n_samples = 3, modls = "hill")
 
-\donttest{
+## fit using hill + cnst
+fitd3 <- run_fit(zfishbeh, modls = c("hill", "cnst"))
+
+
 # only to extract the activity data
 sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE)
+sumd3 <- summarize_fit_output(fitd3, extract_only = TRUE)
 
 # calculate EC20 instead of default EC10
 sumd1 <- summarize_fit_output(fitd1, extract_only = TRUE, perc_resp  = 20)

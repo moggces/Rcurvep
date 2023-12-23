@@ -1,8 +1,8 @@
 context("summary of model fit of a dataset")
 
 data("zfishbeh")
-fitd1 <- run_fit(zfishbeh)
-fitd2 <- run_fit(zfishbeh, n_samples = 3)
+fitd1 <- run_fit(zfishbeh, modls = "cc2")
+fitd2 <- run_fit(zfishbeh, n_samples = 3, modls = "hill")
 fitd3 <- run_fit(zfishbeh, modls = "cnst")
 
 

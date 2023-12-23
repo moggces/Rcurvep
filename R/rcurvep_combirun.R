@@ -7,7 +7,7 @@
 #' @inheritParams run_rcurvep
 #' @inherit run_rcurvep return
 #' @export
-#' @seealso [run_rcurvep()]
+#' @seealso [run_rcurvep()] [summarize_rcurvep_output()]
 #'
 #' @examples
 #'

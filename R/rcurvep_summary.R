@@ -171,7 +171,7 @@ get_nested_joined_sets <- function(lsets, base_cols) {
 unnest_joined_sets <- function(nested, base_cols, add_col) {
 
   result <- nested %>%
-    dplyr::select(base_cols, add_col) %>%
+    dplyr::select(tidyselect::all_of(base_cols), tidyselect::all_of(add_col)) %>%
     tidyr::unnest(cols = add_col)
   return(result)
 }

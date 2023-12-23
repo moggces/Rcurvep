@@ -74,5 +74,6 @@
 # Rcurvep 1.2.1
 * change: fix a bug in get_base_cols when only one set available (act_set, resp_set, fp_set) when doing the merge_rcurvep_objs
 
-
+# Rcurvep 1.3.0
+* new: add java curve class2 as the model
 

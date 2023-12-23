@@ -2,7 +2,7 @@
 title: "Practical applications using Rcurvep package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{practical_rcurvep}
+  %\VignetteIndexEntry{Practical applications using Rcurvep package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 # the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("moggces/Rcurvep")
-devtools::install_github("moggces/Rcurvep", build_vignettes = TRUE)
+devtools::install_github("moggces/Rcurvep", dependencies = TRUE, build_vignettes = TRUE)
 ```
 
 
@@ -46,7 +46,8 @@ str(zfishdev)
 
 ## Rcurvep method
 
-The Rcurvep is a tool to decide whether responses are monotonic (as the increase of concentration) based on a set of pre-defined parameters. The default setting of those parameters can be obtained through `curvep_defaults()`. The **TRSH** is the threshold parameter, below which, all responses are considered as noise. This threshold is particularly important for toxicologists, since the point-of-departure (POD) can be defined as the concentration at which response equivalent to this threshold. The threshold can also be called as benchmark response (**BMR**).
+The Rcurvep is a tool to decide whether responses are monotonic (as the increase of concentration) based on a set of pre-defined parameters. The default setting of those parameters can be obtained through `curvep_defaults()`. 
+The **TRSH** is the threshold parameter, below which, all responses are considered as noise. This threshold is particularly important for toxicologists, since the point-of-departure (POD) can be defined as the concentration at which response equivalent to this threshold. The threshold can also be called as benchmark response (**BMR**).
 
 
 ```{r}
@@ -156,8 +157,15 @@ plot(bmr_out)
 Since *zfishdev* does not contain a column with responses, `create_dataset()` needs to be used to generate the responses for this particular type of data. Unlike `combi_run_rcurvep()`, `create_dataset()` has to be called explicitly. 
 
 ```{r}
-fitd <- run_fit(create_dataset(zfishdev), hill_pdir = 1, modls = "hill")
-fitd
+# set the preferred direction as increasing hill_pdir = 1
+# this is to use the 3-parameter hill 
+fitd1 <- run_fit(create_dataset(zfishdev), hill_pdir = 1, modls = "hill")
+fitd1
+
+# can also use the curve class2 4-parameter hill with classification SD as 5% 
+# please ?fit_cc2_modl to understand curve classification
+fitd2 <- run_fit(create_dataset(zfishdev), cc2_classSD = 5, modls = "cc2")
+fitd2 
 ```
 
 ## Summarize parametric fitting results using a preferred BMR
@@ -166,13 +174,39 @@ The results of the summary is saved in the tibble, **act_summary**.
 
 
 ```{r}
-fitd_sum_out <- summarize_fit_output(fitd, thr_resp  = 25)
-fitd_sum_out
+
+# thr_resp will get BMC10% and perc_resp will get EC20%
+
+
+# hill with 3-parameter 
+fitd_sum_out1 <- summarize_fit_output(fitd1, thr_resp  = 10, perc_resp = 20, extract_only = TRUE)
+
+# cc2 (hill with 4-parameter + curve classification)
+fitd_sum_out2 <- summarize_fit_output(fitd2, thr_resp  = 10, perc_resp = 20, extract_only = TRUE)
+
+```
+
+## Inspect concordance between two parametric fits
+
+```{r}
+#EC20% concordance (when both methods provide values)
+cor(fitd_sum_out1$result$act_set$ECxx, fitd_sum_out2$result$act_set$ECxx, use = "pairwise.complete.obs")
+
+#BMC10% (when both methods provide values)
+cor(fitd_sum_out1$result$act_set$POD, fitd_sum_out2$result$act_set$POD, use = "pairwise.complete.obs")
+
+#EC50 (when both methods provide values)
+cor(fitd_sum_out1$result$act_set$EC50, fitd_sum_out2$result$act_set$EC50, use = "pairwise.complete.obs")
+
+
+# check number of curves consider as active by both
+sum(fitd_sum_out1$result$act_set$hit == 0) # no fit
+sum(fitd_sum_out2$result$act_set$hit == 4) # cc2 = 4 (inactive)
+
 ```
 
 
-## Add confidence interval for activity data from parametric fitting (strictly to Hill equation)
-
+## Add confidence interval for activity data from parametric fitting (currently is only available to 3-parameter Hill equation from tcpl)
 
 
 ```{r}
