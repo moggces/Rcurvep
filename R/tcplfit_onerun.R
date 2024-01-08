@@ -144,7 +144,7 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
   if (fit_type == "original") {
     result <- nestd %>%
       dplyr::mutate(
-        output = purrr::map(
+        output = furrr::future_map(
           .data$input,
           ~ do.call(
             fit_modls,
@@ -162,7 +162,7 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
 
     result <- nestd %>%
       dplyr::mutate(
-        output = purrr::map(
+        output = furrr::future_map(
           .data$input,
           ~ do.call(
             fit_modls,

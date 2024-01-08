@@ -77,3 +77,8 @@
 # Rcurvep 1.3.0
 * new: add java curve class2 as the model
 
+# Rcurvep 1.3.1
+* new: add a vignette for using parallel computing in Rcurvep package 
+* change: use furrr::future_pmap for the combi_run_curvep() and use furrr::future_map for the run_fit()
+
+

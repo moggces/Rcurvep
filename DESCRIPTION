@@ -1,7 +1,7 @@
 Package: Rcurvep
 Type: Package
 Title: Concentration-Response Data Analysis using Curvep
-Version: 1.3.0
+Version: 1.3.1
 Authors@R: c(
         person("Jui-Hua", "Hsieh", email = "juihua.hsieh@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1620-1571")), 
         person("Alexander", "Sedykh", role = c("aut")),
@@ -29,12 +29,14 @@ Imports: dplyr (>= 1.0.0),
     ggplot2,
     Rdpack,
     methods,
-    rJava
+    rJava,
+    furrr
 RdMacros: Rdpack
 Suggests: testthat,
     knitr,
     rmarkdown,
-    tcpl
+    tcpl,
+    future
 VignetteBuilder: knitr
 SystemRequirements: Java
 RoxygenNote: 7.2.3

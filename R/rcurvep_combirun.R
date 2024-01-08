@@ -171,7 +171,7 @@ pmap_run_rcurvep <- function(d, mask, n_samples, keep_sets, ...) {
 combi_run_curvep_in <- function(d, mask, n_samples, keep_sets, paras) {
   result <- paras %>%
     dplyr::mutate(
-      rcurvep_obj = purrr::pmap(
+      rcurvep_obj = furrr::future_pmap(
         ., ~ pmap_run_rcurvep(d = d, mask = mask, n_samples = n_samples, keep_sets = keep_sets, ...)
       )
     )

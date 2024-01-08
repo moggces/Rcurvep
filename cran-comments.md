@@ -123,6 +123,57 @@ Response: it seems to the environment variable setting in R and the tidy command
 0 errors, 0 warnings, 0 notes
 
 
+# v1.3.0
+
+### Test environments
+* local R installation, R 4.3.2
+* winbuilder: R Under development (unstable) (2023-12-21 r85716 ucrt)
+* github action: R CMD CHECK macos-latest (release)
+* github action: R CMD CHECK windows-latest (release)
+* github action: R CMD CHECK ubuntu-latest (devel)
+* github action: R CMD CHECK ubuntu-latest (release)
+* github action: R CMD CHECK ubuntu-latest (oldrel-1)
+
+#### local R installation, R 4.3.2
+
+❯ checking CRAN incoming feasibility ... [18s] NOTE
+  Maintainer: 'Jui-Hua Hsieh <juihua.hsieh@gmail.com>'
+  
+  Size of tarball: 5778286 bytes
+
+0 errors | 0 warnings | 1 note
+
+Response: this is because java source files are included in the ./java
+
+#### winbuilder
+
+0 errors | 0 warnings | 0 note
+
+#### github action R CMD CHECK
+
+0 errors | 0 warnings | 0 note
 
 
+# v1.3.1
 
+### Test environments
+* local R installation, R 4.3.2
+* winbuilder: R Under development (unstable) (2023-12-21 r85716 ucrt)
+* github action: R CMD CHECK macos-latest (release)
+* github action: R CMD CHECK windows-latest (release)
+* github action: R CMD CHECK ubuntu-latest (devel)
+* github action: R CMD CHECK ubuntu-latest (release)
+* github action: R CMD CHECK ubuntu-latest (oldrel-1)
+
+
+#### local R installation, R 4.3.2
+
+0 errors | 0 warnings | 0 notes 
+
+#### winbuilder
+
+0 errors | 0 warnings | 0 note
+
+#### github action R CMD CHECK
+
+0 errors | 0 warnings | 0 note
