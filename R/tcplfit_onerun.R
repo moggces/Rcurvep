@@ -649,7 +649,12 @@ extract_fit_activity <- function(inp, out, thr_resp, perc_resp) {
       if (abs(Emax) > abs(thr_resp)) POD <- tcplHillConc(thr_resp, win_modl$tp, win_modl$ga, win_modl$gw, win_modl$bt)
 
       # hit?
-      if (!is.na(POD) && POD < max(inp$conc)) hit <- 1
+      if (!is.na(POD) && POD < max(inp$conc)) {
+        if (win_modl$modl == "hill") {
+          fit_direction <- inp$direction[1] # cc2 is NULL
+          if(sign(fit_direction) == sign(Emax)) hit <- 1 #some bad fits went to another direction
+        }
+      }
     }
 
     # use cc2 to as the hit
