@@ -81,4 +81,7 @@
 * new: add a vignette for using parallel computing in Rcurvep package 
 * change: use furrr::future_pmap for the combi_run_curvep() and use furrr::future_map for the run_fit()
 
+# Rcurvep 1.3.2
+* change: fix a bug in the cal_fit_dataset when doing run_fit with hill bootstrap with a specific direction 
+* change: add more descriptions on CARR parameter
 
