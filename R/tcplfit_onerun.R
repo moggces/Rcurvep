@@ -157,18 +157,23 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
     args[['hill_pdir']] <- NULL
 
     # use the expression to manage cc2 case to avoid warnings
-    pdir <- expression(hill_pdir = unique(.x$direction))
-    if(modls == "cc2") pdir <- NULL
+    #pdir <- expression(hill_pdir = unique(.x$direction))
+    #if(modls == "cc2") pdir <- NULL
 
     result <- nestd %>%
       dplyr::mutate(
         output = furrr::future_map(
           .data$input,
-          ~ do.call(
+          ~ #{ #chatgpt suggestion
+            #pdir <- if (modls == "cc2") NULL else list(hill_pdir = unique(.x$direction))
+            do.call(
             fit_modls,
             c(list(Conc = .x$conc, Resp = .x$resp,
-                   eval(pdir),
-                   Mask = NULL, modls = modls), args))
+                   #eval(pdir),
+                   hill_pdir = unique(.x$direction), #it is also working
+                   Mask = NULL, modls = modls), args)
+            )
+          #}
         )
       )
   }
@@ -650,10 +655,12 @@ extract_fit_activity <- function(inp, out, thr_resp, perc_resp) {
 
       # hit?
       if (!is.na(POD) && POD < max(inp$conc)) {
-        if (win_modl$modl == "hill") {
-          fit_direction <- inp$direction[1] # cc2 is NULL
-          if(sign(fit_direction) == sign(Emax)) hit <- 1 #some bad fits went to another direction
-        }
+        # added to fix the bug but should not be needed
+        #if (win_modl$modl == "hill") {
+        #  fit_direction <- inp$direction[1] # cc2 is NULL
+        #  if(sign(fit_direction) == sign(Emax)) hit <- 1 #some bad fits went to another direction
+        #}
+        hit <- 1
       }
     }
 
