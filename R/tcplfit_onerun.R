@@ -156,27 +156,29 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
 
     args[['hill_pdir']] <- NULL
 
-    # use the expression to manage cc2 case to avoid warnings
-    #pdir <- expression(hill_pdir = unique(.x$direction))
-    #if(modls == "cc2") pdir <- NULL
+    # testing only purrr::map vs furrr::future_map
+    #if(args[['use_future_map']]) {
+      # use the expression to manage cc2 case to avoid warnings
+      #pdir <- expression(hill_pdir = unique(.x$direction))
+      #if(modls == "cc2") pdir <- NULL
 
-    result <- nestd %>%
-      dplyr::mutate(
-        output = furrr::future_map(
-          .data$input,
-          ~ #{ #chatgpt suggestion
-            #pdir <- if (modls == "cc2") NULL else list(hill_pdir = unique(.x$direction))
-            do.call(
-            fit_modls,
-            c(list(Conc = .x$conc, Resp = .x$resp,
-                   #eval(pdir),
-                   hill_pdir = unique(.x$direction), #it is also working
-                   Mask = NULL, modls = modls), args)
-            )
-          #}
+      result <- nestd %>%
+        dplyr::mutate(
+          output = furrr::future_map(
+            .data$input,
+            ~ #{ #chatgpt suggestion
+              #pdir <- if (modls == "cc2") NULL else list(hill_pdir = unique(.x$direction))
+              do.call(
+                fit_modls,
+                c(list(Conc = .x$conc, Resp = .x$resp,
+                       #eval(pdir),
+                       hill_pdir = unique(.x$direction), #it is also working
+                       Mask = NULL, modls = modls), args)
+              )
+            #}
+          )
         )
-      )
-  }
+    #} else if (!args[['use_future_map']]) {
 
   return(result)
 }
