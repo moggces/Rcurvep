@@ -272,7 +272,7 @@
   }
 
   if (length(conc) < 4) {
-    rlang::abort("at least four resps are needed.")
+    rlang::abort("at least four concentrations are needed.")
   }
 
   return(result)
