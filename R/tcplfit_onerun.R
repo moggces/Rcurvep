@@ -179,6 +179,7 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
           )
         )
     #} else if (!args[['use_future_map']]) {
+  }
 
   return(result)
 }
