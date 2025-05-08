@@ -156,21 +156,29 @@ cal_fit_dataset <- function(nestd, modls, args, fit_type = c("original", "hill_s
 
     args[['hill_pdir']] <- NULL
 
-    # use the expression to manage cc2 case to avoid warnings
-    pdir <- expression(hill_pdir = unique(.x$direction))
-    if(modls == "cc2") pdir <- NULL
+    # testing only purrr::map vs furrr::future_map
+    #if(args[['use_future_map']]) {
+      # use the expression to manage cc2 case to avoid warnings
+      #pdir <- expression(hill_pdir = unique(.x$direction))
+      #if(modls == "cc2") pdir <- NULL
 
-    result <- nestd %>%
-      dplyr::mutate(
-        output = furrr::future_map(
-          .data$input,
-          ~ do.call(
-            fit_modls,
-            c(list(Conc = .x$conc, Resp = .x$resp,
-                   eval(pdir),
-                   Mask = NULL, modls = modls), args))
+      result <- nestd %>%
+        dplyr::mutate(
+          output = furrr::future_map(
+            .data$input,
+            ~ #{ #chatgpt suggestion
+              #pdir <- if (modls == "cc2") NULL else list(hill_pdir = unique(.x$direction))
+              do.call(
+                fit_modls,
+                c(list(Conc = .x$conc, Resp = .x$resp,
+                       #eval(pdir),
+                       hill_pdir = unique(.x$direction), #it is also working
+                       Mask = NULL, modls = modls), args)
+              )
+            #}
+          )
         )
-      )
+    #} else if (!args[['use_future_map']]) {
   }
 
   return(result)
@@ -649,7 +657,14 @@ extract_fit_activity <- function(inp, out, thr_resp, perc_resp) {
       if (abs(Emax) > abs(thr_resp)) POD <- tcplHillConc(thr_resp, win_modl$tp, win_modl$ga, win_modl$gw, win_modl$bt)
 
       # hit?
-      if (!is.na(POD) && POD < max(inp$conc)) hit <- 1
+      if (!is.na(POD) && POD < max(inp$conc)) {
+        # added to fix the bug but should not be needed
+        #if (win_modl$modl == "hill") {
+        #  fit_direction <- inp$direction[1] # cc2 is NULL
+        #  if(sign(fit_direction) == sign(Emax)) hit <- 1 #some bad fits went to another direction
+        #}
+        hit <- 1
+      }
     }
 
     # use cc2 to as the hit

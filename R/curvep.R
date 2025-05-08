@@ -71,7 +71,7 @@ get_monotonics	<- function (vals, vdif = 0, bads = NULL)
 #' @param RNGE Target range of responses (default = -100).
 #' @param MXDV Maximum allowed deviation from monotonicity (default = 5).
 #'
-#' @param CARR Carryover detection threshold (default = 0, analysis skipped if set to 0)
+#' @param CARR Carryover detection threshold (default = 0, analysis skipped if set to 0). CARR is defined as a maximum expected magnitude of artifact response; it should be higher than baseline TRSH value, curves with active signal above baseline but below CARR at first few doses will be considered as carry-over cases. Also, curves with responses above CARR are treated as potent.
 #' @param BSFT For baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0).
 #' @param USHP For u-shape curves, min.#points to avoid flattening (default = 4, analysis skipped if set to 0).
 #' @param TrustHi For equal sets of corrections, trusts those retaining measurements at high concentrations (default = FALSE).

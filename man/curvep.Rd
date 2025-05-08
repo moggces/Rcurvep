@@ -34,7 +34,7 @@ curvep(
 
 \item{MXDV}{Maximum allowed deviation from monotonicity (default = 5).}
 
-\item{CARR}{Carryover detection threshold (default = 0, analysis skipped if set to 0)}
+\item{CARR}{Carryover detection threshold (default = 0, analysis skipped if set to 0). CARR is defined as a maximum expected magnitude of artifact response; it should be higher than baseline TRSH value, curves with active signal above baseline but below CARR at first few doses will be considered as carry-over cases. Also, curves with responses above CARR are treated as potent.}
 
 \item{BSFT}{For baseline shift issue, min.#points to detect baseline shift (default = 3, analysis skipped if set to 0).}
 

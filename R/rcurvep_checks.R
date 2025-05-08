@@ -272,7 +272,7 @@
   }
 
   if (length(conc) < 4) {
-    rlang::abort("at least four resps are needed.")
+    rlang::abort("at least four concentrations are needed.")
   }
 
   return(result)
@@ -293,7 +293,10 @@
 .check_modls_args_prefix <- function(args, modls) {
 
   syn <- paste0("(", stringr::str_c(modls, collapse = "|"), ")")
-  if (!all(stringr::str_detect(names(args), syn))) {
+  list_names <- names(args)
+  if (is.null(list_names) || any(list_names == "")) {
+    rlang::warn("Some supplied arguments are not named. No changes will be applied.")
+  } else if (!all(stringr::str_detect(list_names, syn)) ) {
     rlang::warn("Some supplied arguments do not have model type as the prefix. No changes will be applied.")
   }
   return(args)
