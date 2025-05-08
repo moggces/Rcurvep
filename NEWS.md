@@ -84,4 +84,5 @@
 # Rcurvep 1.3.2
 * change: fix a bug in the cal_fit_dataset when doing run_fit with hill bootstrap with a specific direction 
 * change: add more descriptions on CARR parameter
+* change: update the vignette for the parallel computing
 

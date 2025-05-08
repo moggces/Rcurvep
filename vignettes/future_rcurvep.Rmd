@@ -136,7 +136,7 @@ rmarkdown::paged_table(inp_tb)
 `n_sample = 1000` is preferred but for demonstration, `n_sample = 100` is used.
 
 In `combi_run_rcurvep` function, `future_pmap` function from **furrr** package is embedded. 
-Using `future_pmap` function again decreases the speed.
+Using `future_pmap` function unexpectedly decreased the speed.
 
 ```{r}
 # sequential run
@@ -163,7 +163,7 @@ par_run_bmr2 <- expression(
   future::plan(multisession, workers = 10),
   
   # calculation with additional future_pmap
-  future_pmap(inp_tb, ~ combi_run_rcurvep(..4, TRSH = ..3, RNGE = ..1, n_samples = 100, seed = 300, keep_sets = c("act_set")), .options = furrr_options(seed = 2023)),
+  future_pmap(inp_tb, ~ combi_run_rcurvep(..4, TRSH = ..3, RNGE = ..1, n_samples = 100, seed = 300, keep_sets = c("act_set")), .options = furrr_options(seed = 300)),
 
   future::plan(sequential)
 )
@@ -296,7 +296,7 @@ para_fit_hill_multi2 <- expression(
 # Calculate 10 times and compare the results
 
 Due to the long time, the results are pasted below. 
-Parallel calculation is faster with future_pmap function. 
+Parallel calculation is faster with `future_pmap` function. 
 It is possible because that only future_map function is used in the run_fit function.
 
 
