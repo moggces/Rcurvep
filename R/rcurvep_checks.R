@@ -294,7 +294,7 @@
 
   syn <- paste0("(", stringr::str_c(modls, collapse = "|"), ")")
   list_names <- names(args)
-  if (is.null(list_names) || any(list_names == "")) {
+  if (any(list_names == "")) {
     rlang::warn("Some supplied arguments are not named. No changes will be applied.")
   } else if (!all(stringr::str_detect(list_names, syn)) ) {
     rlang::warn("Some supplied arguments do not have model type as the prefix. No changes will be applied.")
