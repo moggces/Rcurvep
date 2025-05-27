@@ -8,8 +8,8 @@
 <title>Parallel Computing Examples Using Rcurvep • Rcurvep</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Parallel Computing Examples Using Rcurvep">
 </head>
 <body>
@@ -79,8 +79,13 @@
 <div class="section level2">
 <h2 id="when-no-preferred-bmr-and-would-like-to-do-a-exhaustive-search">When no preferred BMR and would like to do a exhaustive search<a class="anchor" aria-label="anchor" href="#when-no-preferred-bmr-and-would-like-to-do-a-exhaustive-search"></a>
 </h2>
-<p>This is a computationally intensive procedure. <code>n_sample = 100</code> is preferred but for demonstration, <code>n_sample = 10</code> is used. Expressions are used to delay the execution of commands.</p>
-<p>In <code>combi_run_rcurvep</code> function, <code>future_pmap</code> function from <strong>furrr</strong> package is embedded. Use <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">future::plan()</a></code> to control the types of calculation.</p>
+<p>This is a computationally intensive procedure.
+<code>n_sample = 100</code> is preferred but for demonstration,
+<code>n_sample = 10</code> is used. Expressions are used to delay the
+execution of commands.</p>
+<p>In <code>combi_run_rcurvep</code> function, <code>future_pmap</code>
+function from <strong>furrr</strong> package is embedded. Use
+<code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">future::plan()</a></code> to control the types of calculation.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># sequential run</span></span>
@@ -124,7 +129,8 @@
 <div class="section level2">
 <h2 id="calculate-10-times-and-compare-the-results">Calculate 10 times and compare the results<a class="anchor" aria-label="anchor" href="#calculate-10-times-and-compare-the-results"></a>
 </h2>
-<p>Due to the long time, the results are pasted below. Parallel calculation is faster.</p>
+<p>Due to the long time, the results are pasted below. Parallel
+calculation is faster.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">run_speed_multi_rcurvep</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="op">(</span></span>
@@ -169,8 +175,11 @@
 <div class="section level3">
 <h3 id="set-up-the-expressions">Set up the expressions<a class="anchor" aria-label="anchor" href="#set-up-the-expressions"></a>
 </h3>
-<p><code>n_sample = 1000</code> is preferred but for demonstration, <code>n_sample = 100</code> is used.</p>
-<p>In <code>combi_run_rcurvep</code> function, <code>future_pmap</code> function from <strong>furrr</strong> package is embedded. Using <code>future_pmap</code> function unexpectedly decreased the speed.</p>
+<p><code>n_sample = 1000</code> is preferred but for demonstration,
+<code>n_sample = 100</code> is used.</p>
+<p>In <code>combi_run_rcurvep</code> function, <code>future_pmap</code>
+function from <strong>furrr</strong> package is embedded. Using
+<code>future_pmap</code> function unexpectedly decreased the speed.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># sequential run</span></span>
 <span><span class="va">seq_run_bmr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span></span>
@@ -205,7 +214,8 @@
 <div class="section level2">
 <h2 id="calculate-10-times-and-compare-the-results-1">Calculate 10 times and compare the results<a class="anchor" aria-label="anchor" href="#calculate-10-times-and-compare-the-results-1"></a>
 </h2>
-<p>Due to the long time, the results are pasted below. Parallel calculation is faster when no additional future_pmap is used.</p>
+<p>Due to the long time, the results are pasted below. Parallel
+calculation is faster when no additional future_pmap is used.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run_speed_bmr_rcurvep</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval</a></span><span class="op">(</span><span class="va">seq_run_bmr</span><span class="op">)</span>,</span>
@@ -225,11 +235,15 @@
 <div class="section level2">
 <h2 id="fitting-based-on-simulated-curves-using-run_fit">Fitting based on simulated curves using run_fit<a class="anchor" aria-label="anchor" href="#fitting-based-on-simulated-curves-using-run_fit"></a>
 </h2>
-<p>In <code>run_fit</code> function, <code>future_map</code> function from <strong>furrr</strong> package are embedded. Use <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">future::plan()</a></code> to control the types of calculation.</p>
+<p>In <code>run_fit</code> function, <code>future_map</code> function
+from <strong>furrr</strong> package are embedded. Use
+<code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">future::plan()</a></code> to control the types of calculation.</p>
 <div class="section level3">
 <h3 id="set-up-the-expressions-1">Set up the expressions<a class="anchor" aria-label="anchor" href="#set-up-the-expressions-1"></a>
 </h3>
-<p><code>n_sample = 1000</code> is preferred but for demonstration, <code>n_sample = 100</code> is used. Also, <code>create_dataset</code> function is used to convert the incidence data into response data.</p>
+<p><code>n_sample = 1000</code> is preferred but for demonstration,
+<code>n_sample = 100</code> is used. Also, <code>create_dataset</code>
+function is used to convert the incidence data into response data.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># sequential run</span></span>
@@ -254,7 +268,8 @@
 <div class="section level2">
 <h2 id="calculate-10-times-and-compare-the-results-2">Calculate 10 times and compare the results<a class="anchor" aria-label="anchor" href="#calculate-10-times-and-compare-the-results-2"></a>
 </h2>
-<p>Due to the long time, the results are pasted below. Parallel calculation is faster.</p>
+<p>Due to the long time, the results are pasted below. Parallel
+calculation is faster.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run_speed_fit_hill_boot</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval</a></span><span class="op">(</span><span class="va">seq_fit_hill_boot</span><span class="op">)</span>,</span>
@@ -271,7 +286,9 @@
 <div class="section level2">
 <h2 id="fitting-based-on-simulated-curves-using-run_fit-and-pmap">Fitting based on simulated curves using run_fit and pmap<a class="anchor" aria-label="anchor" href="#fitting-based-on-simulated-curves-using-run_fit-and-pmap"></a>
 </h2>
-<p>We can also use similar syntax as <code>combi_run_rcurvep</code> to run multiple datasets by testing to include or not include future_pmap.</p>
+<p>We can also use similar syntax as <code>combi_run_rcurvep</code> to
+run multiple datasets by testing to include or not include
+future_pmap.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># make the incidence data as response data</span></span>
@@ -307,7 +324,10 @@
 <div class="section level2">
 <h2 id="calculate-10-times-and-compare-the-results-3">Calculate 10 times and compare the results<a class="anchor" aria-label="anchor" href="#calculate-10-times-and-compare-the-results-3"></a>
 </h2>
-<p>Due to the long time, the results are pasted below. Parallel calculation is faster with <code>future_pmap</code> function. It is possible because that only future_map function is used in the run_fit function.</p>
+<p>Due to the long time, the results are pasted below. Parallel
+calculation is faster with <code>future_pmap</code> function. It is
+possible because that only future_map function is used in the run_fit
+function.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run_speed_fit_hill_multi</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval</a></span><span class="op">(</span><span class="va">seq_fit_hill_multi</span><span class="op">)</span>,</span>
@@ -327,9 +347,15 @@
 <div class="section level2">
 <h2 id="fitting-based-on-original-data">Fitting based on original data<a class="anchor" aria-label="anchor" href="#fitting-based-on-original-data"></a>
 </h2>
-<p>In <code>run_fit</code> function, <code>future_map</code> from <strong>furrr</strong> package are embedded. Use <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">future::plan()</a></code> to control the types of calculation.</p>
-<p>Two parameters are tested: <em>hill</em> and <em>cc2</em>. <em>hill</em> is 3-parameter Hill equation implemented using R. <em>cc2</em> is 4-parameter Hill equation implemented using Java.</p>
-<p>The dataset - respd_1 - includes 3000 curves, is not available in the package. If the dataset is too small, it might not worthwhile to start the parallel computing.</p>
+<p>In <code>run_fit</code> function, <code>future_map</code> from
+<strong>furrr</strong> package are embedded. Use
+<code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">future::plan()</a></code> to control the types of calculation.</p>
+<p>Two parameters are tested: <em>hill</em> and <em>cc2</em>.
+<em>hill</em> is 3-parameter Hill equation implemented using R.
+<em>cc2</em> is 4-parameter Hill equation implemented using Java.</p>
+<p>The dataset - respd_1 - includes 3000 curves, is not available in the
+package. If the dataset is too small, it might not worthwhile to start
+the parallel computing.</p>
 <div class="section level3">
 <h3 id="use-modls-hill-parameter">Use <code>modls = hill</code> parameter<a class="anchor" aria-label="anchor" href="#use-modls-hill-parameter"></a>
 </h3>
@@ -355,7 +381,8 @@
 <div class="section level2">
 <h2 id="calculate-5-times-and-compare-the-results">Calculate 5 times and compare the results<a class="anchor" aria-label="anchor" href="#calculate-5-times-and-compare-the-results"></a>
 </h2>
-<p>Due to the long time, the results are pasted below. Parallel calculation is faster.</p>
+<p>Due to the long time, the results are pasted below. Parallel
+calculation is faster.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run_speed_hit_hill_ori</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval</a></span><span class="op">(</span><span class="va">seq_fit_hill_ori</span><span class="op">)</span>,</span>
@@ -393,7 +420,9 @@
 <div class="section level2">
 <h2 id="calculate-5-times-and-compare-the-results-1">Calculate 5 times and compare the results<a class="anchor" aria-label="anchor" href="#calculate-5-times-and-compare-the-results-1"></a>
 </h2>
-<p>Due to the long time, the results are pasted below. Parallel calculation does not improve much. It could be because the <strong>cc2</strong> is implemented using Java.</p>
+<p>Due to the long time, the results are pasted below. Parallel
+calculation does not improve much. It could be because the
+<strong>cc2</strong> is implemented using Java.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">run_speed_fit_cc2</span> <span class="op">&lt;-</span> <span class="fu">microbenchmark</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval</a></span><span class="op">(</span><span class="va">seq_fit_cc2</span><span class="op">)</span>,</span>

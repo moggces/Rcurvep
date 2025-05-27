@@ -1,12 +1,13 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://moggces.github.io/Rcurvep/404.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/LICENSE-text.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/articles/future_rcurvep.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/articles/index.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/articles/practical_rcurvep.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/authors.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/index.html</loc></url>
-<url><loc>https://moggces.github.io/Rcurvep/LICENSE-text.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/news/index.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/Rcurvep-package.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/cal_knee_point.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/combi_run_rcurvep.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/create_dataset.html</loc></url>
@@ -19,7 +20,6 @@
 <url><loc>https://moggces.github.io/Rcurvep/reference/index.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/merge_rcurvep_objs.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/plot.rcurvep_bmr.html</loc></url>
-<url><loc>https://moggces.github.io/Rcurvep/reference/Rcurvep-package.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/run_fit.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/run_rcurvep.html</loc></url>
 <url><loc>https://moggces.github.io/Rcurvep/reference/summarize_fit_output.html</loc></url>

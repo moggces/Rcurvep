@@ -8,8 +8,8 @@
 <title>Practical applications using Rcurvep package • Rcurvep</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Practical applications using Rcurvep package">
 </head>
 <body>
@@ -42,6 +42,9 @@
   </div>
 </nav><div class="container template-article">
 
+
+
+
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
@@ -60,8 +63,8 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the development version from GitHub:</span></span>
 <span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"moggces/Rcurvep"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="load-the-library">Load the library<a class="anchor" aria-label="anchor" href="#load-the-library"></a>
@@ -72,7 +75,12 @@
 <div class="section level2">
 <h2 id="load-the-sample-dataset">Load the sample dataset<a class="anchor" aria-label="anchor" href="#load-the-sample-dataset"></a>
 </h2>
-<p><em>zfishdev</em> a subset of data from a 32-compound screen using zebrafish developmental assays. Our goal is to decide whether a compound is active in a particular toxicity endpoint. The <strong>active</strong> is determined by if the responses is monotonic (as the increase of concentration). In addition, the maximum response has to be larger than a certain response threshold.</p>
+<p><em>zfishdev</em> a subset of data from a 32-compound screen using
+zebrafish developmental assays. Our goal is to decide whether a compound
+is active in a particular toxicity endpoint. The <strong>active</strong>
+is determined by if the responses is monotonic (as the increase of
+concentration). In addition, the maximum response has to be larger than
+a certain response threshold.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># More details of the dataset can be found ?zfishdev.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span> </span>
@@ -87,7 +95,15 @@
 <div class="section level2">
 <h2 id="rcurvep-method">Rcurvep method<a class="anchor" aria-label="anchor" href="#rcurvep-method"></a>
 </h2>
-<p>The Rcurvep is a tool to decide whether responses are monotonic (as the increase of concentration) based on a set of pre-defined parameters. The default setting of those parameters can be obtained through <code><a href="../reference/curvep_defaults.html">curvep_defaults()</a></code>. The <strong>TRSH</strong> is the threshold parameter, below which, all responses are considered as noise. This threshold is particularly important for toxicologists, since the point-of-departure (POD) can be defined as the concentration at which response equivalent to this threshold. The threshold can also be called as benchmark response (<strong>BMR</strong>).</p>
+<p>The Rcurvep is a tool to decide whether responses are monotonic (as
+the increase of concentration) based on a set of pre-defined parameters.
+The default setting of those parameters can be obtained through
+<code><a href="../reference/curvep_defaults.html">curvep_defaults()</a></code>. The <strong>TRSH</strong> is the
+threshold parameter, below which, all responses are considered as noise.
+This threshold is particularly important for toxicologists, since the
+point-of-departure (POD) can be defined as the concentration at which
+response equivalent to this threshold. The threshold can also be called
+as benchmark response (<strong>BMR</strong>).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/curvep_defaults.html">curvep_defaults</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -109,7 +125,10 @@
 <div class="section level2">
 <h2 id="run-rcurvep-on-datasets-using-combi_run_rcurvep">Run Rcurvep on datasets using combi_run_rcurvep()<a class="anchor" aria-label="anchor" href="#run-rcurvep-on-datasets-using-combi_run_rcurvep"></a>
 </h2>
-<p>Since <em>zfishdev</em> does not contain a column with responses, <code><a href="../reference/create_dataset.html">create_dataset()</a></code> can be used to generate the responses for this particular type of data. However, this function is already incorporated.</p>
+<p>Since <em>zfishdev</em> does not contain a column with responses,
+<code><a href="../reference/create_dataset.html">create_dataset()</a></code> can be used to generate the responses for
+this particular type of data. However, this function is already
+incorporated.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span><span class="va">zfishdev</span>, RNGE <span class="op">=</span> <span class="fl">1000000</span><span class="op">)</span>,</span>
@@ -120,7 +139,10 @@
 <div class="section level2">
 <h2 id="run-rcurvep-when-there-is-a-preferred-bmr">Run Rcurvep when there is a preferred BMR<a class="anchor" aria-label="anchor" href="#run-rcurvep-when-there-is-a-preferred-bmr"></a>
 </h2>
-<p>If there is a preferred BMR, you can run the dataset using the threshold. The <strong>act_set</strong> in the result contains potency and efficacy information of the concentration-response data (aka curve).</p>
+<p>If there is a preferred BMR, you can run the dataset using the
+threshold. The <strong>act_set</strong> in the result contains potency
+and efficacy information of the concentration-response data (aka
+curve).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span></span>
 <span>  <span class="va">zfishdev</span>,</span>
@@ -152,7 +174,8 @@
 <div class="section level2">
 <h2 id="summarize-activity-data-from-rcurvep">Summarize activity data from Rcurvep<a class="anchor" aria-label="anchor" href="#summarize-activity-data-from-rcurvep"></a>
 </h2>
-<p>The results of the summary is saved in the tibble, <strong>act_summary</strong>.</p>
+<p>The results of the summary is saved in the tibble,
+<strong>act_summary</strong>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sum_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
 <span><span class="va">sum_out</span></span>
@@ -165,7 +188,11 @@
 <div class="section level2">
 <h2 id="add-confidence-interval-for-activity-data-from-rcurvep">Add confidence interval for activity data from Rcurvep<a class="anchor" aria-label="anchor" href="#add-confidence-interval-for-activity-data-from-rcurvep"></a>
 </h2>
-<p>The confidence interval is calculated using simulated datasets created by bootstrapping the original responses. By setting the parameter, <strong>n_samples</strong>, number of curves are simulated. The same <code><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output()</a></code> can be used to summarize the results.</p>
+<p>The confidence interval is calculated using simulated datasets
+created by bootstrapping the original responses. By setting the
+parameter, <strong>n_samples</strong>, number of curves are simulated.
+The same <code><a href="../reference/summarize_rcurvep_output.html">summarize_rcurvep_output()</a></code> can be used to
+summarize the results.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">300</span><span class="op">)</span></span>
 <span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep</a></span><span class="op">(</span></span>
@@ -186,7 +213,12 @@
 <div class="section level2">
 <h2 id="run-rcurvep-when-an-optimalpreferred-bmr-is-unknown">Run Rcurvep when an optimal/preferred BMR is unknown<a class="anchor" aria-label="anchor" href="#run-rcurvep-when-an-optimalpreferred-bmr-is-unknown"></a>
 </h2>
-<p>The optimal BMR may be defined as the threshold at which the potency estimation is more accurate. The concept can be translated as the lowest threshold (which gives the highest potency), at which a decrease of variance in potency estimation is stabilized. By using the simulated datasets, the pooled variance across chemicals at a certain threshold can be estimated.</p>
+<p>The optimal BMR may be defined as the threshold at which the potency
+estimation is more accurate. The concept can be translated as the lowest
+threshold (which gives the highest potency), at which a decrease of
+variance in potency estimation is stabilized. By using the simulated
+datasets, the pooled variance across chemicals at a certain threshold
+can be estimated.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The combi_run_rcurvep() can be used for a combination of Curvep parameters. </span></span>
 <span><span class="co"># finishing the code will take some time. </span></span>
@@ -207,7 +239,10 @@
 <div class="section level2">
 <h2 id="estimate-the-bmr">Estimate the BMR<a class="anchor" aria-label="anchor" href="#estimate-the-bmr"></a>
 </h2>
-<p>For the two endpoints, BMR = 25 (in <strong>bmr_ori</strong> column) is suggested for the <em>percent_affected_96</em> endpoint with an <em>OK</em> comment but for the <em>percent_mortality_96</em> endpoint, <em>check</em> is noted.</p>
+<p>For the two endpoints, BMR = 25 (in <strong>bmr_ori</strong> column)
+is suggested for the <em>percent_affected_96</em> endpoint with an
+<em>OK</em> comment but for the <em>percent_mortality_96</em> endpoint,
+<em>check</em> is noted.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">zfishdev_act</span><span class="op">)</span></span>
 <span><span class="va">bmr_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_dataset_bmr.html">estimate_dataset_bmr</a></span><span class="op">(</span><span class="va">zfishdev_act</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -222,7 +257,9 @@
 <div class="section level2">
 <h2 id="display-the-diagnostic-curves-for-bmr-estimation">Display the diagnostic curves for BMR estimation<a class="anchor" aria-label="anchor" href="#display-the-diagnostic-curves-for-bmr-estimation"></a>
 </h2>
-<p>It turns out for the <em>percent_mortality_96</em> endpoint, the shape is not in the right form (as the <em>percent_affected_96</em> endpoint).</p>
+<p>It turns out for the <em>percent_mortality_96</em> endpoint, the
+shape is not in the right form (as the <em>percent_affected_96</em>
+endpoint).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bmr_out</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $`1`</span></span></code></pre></div>
@@ -231,7 +268,11 @@
 <div class="section level2">
 <h2 id="run-parametric-fitting-on-datasets">Run parametric fitting on datasets<a class="anchor" aria-label="anchor" href="#run-parametric-fitting-on-datasets"></a>
 </h2>
-<p>Since <em>zfishdev</em> does not contain a column with responses, <code><a href="../reference/create_dataset.html">create_dataset()</a></code> needs to be used to generate the responses for this particular type of data. Unlike <code><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep()</a></code>, <code><a href="../reference/create_dataset.html">create_dataset()</a></code> has to be called explicitly.</p>
+<p>Since <em>zfishdev</em> does not contain a column with responses,
+<code><a href="../reference/create_dataset.html">create_dataset()</a></code> needs to be used to generate the responses
+for this particular type of data. Unlike
+<code><a href="../reference/combi_run_rcurvep.html">combi_run_rcurvep()</a></code>, <code><a href="../reference/create_dataset.html">create_dataset()</a></code> has to
+be called explicitly.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set the preferred direction as increasing hill_pdir = 1</span></span>
 <span><span class="co"># this is to use the 3-parameter hill </span></span>
@@ -256,7 +297,8 @@
 <div class="section level2">
 <h2 id="summarize-parametric-fitting-results-using-a-preferred-bmr">Summarize parametric fitting results using a preferred BMR<a class="anchor" aria-label="anchor" href="#summarize-parametric-fitting-results-using-a-preferred-bmr"></a>
 </h2>
-<p>The results of the summary is saved in the tibble, <strong>act_summary</strong>.</p>
+<p>The results of the summary is saved in the tibble,
+<strong>act_summary</strong>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># thr_resp will get BMC10% and perc_resp will get EC20%</span></span>
@@ -292,7 +334,9 @@
 <span><span class="co">#&gt; [1] 7</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="add-confidence-interval-for-activity-data-from-parametric-fitting-currently-is-only-available-to-3-parameter-hill-equation-from-tcpl">Add confidence interval for activity data from parametric fitting (currently is only available to 3-parameter Hill equation from tcpl)<a class="anchor" aria-label="anchor" href="#add-confidence-interval-for-activity-data-from-parametric-fitting-currently-is-only-available-to-3-parameter-hill-equation-from-tcpl"></a>
+<h2 id="add-confidence-interval-for-activity-data-from-parametric-fitting-currently-is-only-available-to-3-parameter-hill-equation-from-tcpl">Add confidence interval for activity data from parametric fitting
+(currently is only available to 3-parameter Hill equation from
+tcpl)<a class="anchor" aria-label="anchor" href="#add-confidence-interval-for-activity-data-from-parametric-fitting-currently-is-only-available-to-3-parameter-hill-equation-from-tcpl"></a>
 </h2>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_fit.html">run_fit</a></span><span class="op">(</span><span class="fu"><a href="../reference/create_dataset.html">create_dataset</a></span><span class="op">(</span><span class="va">zfishdev</span><span class="op">)</span>, hill_pdir <span class="op">=</span> <span class="fl">1</span>, n_samples <span class="op">=</span> <span class="fl">10</span>, modls <span class="op">=</span> <span class="st">"hill"</span><span class="op">)</span></span></code></pre></div>
