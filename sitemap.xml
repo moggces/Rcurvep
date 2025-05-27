@@ -1,90 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/articles/future_rcurvep.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/practical_rcurvep.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Rcurvep-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cal_knee_point.html</loc>
-  </url>
-  <url>
-    <loc>/reference/combi_run_rcurvep.html</loc>
-  </url>
-  <url>
-    <loc>/reference/create_dataset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/curvep.html</loc>
-  </url>
-  <url>
-    <loc>/reference/curvep_defaults.html</loc>
-  </url>
-  <url>
-    <loc>/reference/estimate_dataset_bmr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_cc2_modl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_modls.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_hill_fit_config.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/merge_rcurvep_objs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot.rcurvep_bmr.html</loc>
-  </url>
-  <url>
-    <loc>/reference/run_fit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/run_rcurvep.html</loc>
-  </url>
-  <url>
-    <loc>/reference/summarize_fit_output.html</loc>
-  </url>
-  <url>
-    <loc>/reference/summarize_rcurvep_output.html</loc>
-  </url>
-  <url>
-    <loc>/reference/zfishbeh.html</loc>
-  </url>
-  <url>
-    <loc>/reference/zfishdev.html</loc>
-  </url>
-  <url>
-    <loc>/reference/zfishdev_act.html</loc>
-  </url>
-  <url>
-    <loc>/reference/zfishdev_all.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://moggces.github.io/Rcurvep/404.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/articles/future_rcurvep.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/articles/index.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/articles/practical_rcurvep.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/authors.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/index.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/LICENSE-text.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/news/index.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/cal_knee_point.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/combi_run_rcurvep.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/create_dataset.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/curvep.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/curvep_defaults.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/estimate_dataset_bmr.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/fit_cc2_modl.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/fit_modls.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/get_hill_fit_config.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/index.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/merge_rcurvep_objs.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/plot.rcurvep_bmr.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/Rcurvep-package.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/run_fit.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/run_rcurvep.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/summarize_fit_output.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/summarize_rcurvep_output.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/zfishbeh.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/zfishdev.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/zfishdev_act.html</loc></url>
+<url><loc>https://moggces.github.io/Rcurvep/reference/zfishdev_all.html</loc></url>
 </urlset>
+
