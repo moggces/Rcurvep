@@ -14,7 +14,7 @@ Description: An R interface for processing concentration-response datasets using
 Language: en-US
 BugReports: https://github.com/moggces/Rcurvep/issues
 License: MIT + file LICENSE
-URL: https://github.com/moggces/Rcurvep
+URL: https://github.com/moggces/Rcurvep, https://moggces.github.io/Rcurvep
 Encoding: UTF-8
 LazyData: true
 Imports: dplyr (>= 1.0.0),

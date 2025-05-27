@@ -1,4 +1,39 @@
-url: ~
+# _pkgdown.yml
+
+home:
+  title: "Rcurvep"
+  tagline: "Concentration-Response Data Analysis using Curvep"
+
+url: "https://moggces.github.io/Rcurvep/"
+repo:
+  github: moggces/Rcurvep
+  branch: master
+
+deploy:
+  branch: gh-pages
+
+authors:
+  - name: "Jui-Hua Hsieh"
+    roles: [aut, cre]
+    email: "juihua.hsieh@gmail.com"
+
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left:
+      - home
+      - reference
+      - articles
+      - news
+    right:
+      - github
+
+articles:
+  - title: "Practical Applications"
+    contents:
+      - practical_rcurvep
+  - title: "Parallel Computing Examples"
+    contents:
+      - future_rcurvep

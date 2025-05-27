@@ -12,6 +12,7 @@ An R interface for processing concentration-response datasets using Curvep, a re
 Useful links:
 \itemize{
   \item \url{https://github.com/moggces/Rcurvep}
+  \item \url{https://moggces.github.io/Rcurvep}
   \item Report bugs at \url{https://github.com/moggces/Rcurvep/issues}
 }
 

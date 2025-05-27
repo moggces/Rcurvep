@@ -169,15 +169,10 @@ unnest_knee_data <- function(kneed, type = c("stats", "outcome")) {
 #'
 #' inp <- data.frame(
 #' x = seq(5, 95, by = 5),
-#' y = c(0.0537, 0.0281, 0.0119, 0.0109, 0.0062, 0.0043, 0.0043, 0.0042,
-#' 0.0041, 0.0043, 0.0044, 0.0044, 0.0046, 0.0051,
-#' 0.0055, 0.0057, 0.0072, 0.0068, 0.0035)
-#' )
+#' y = c(0.0537, 0.0281, 0.0119, 0.0109, 0.0062, 0.0043, 0.0043, 0.0042, 0.0041, 0.0043, 0.0044, 0.0044, 0.0046, 0.0051, 0.0055, 0.0057, 0.0072, 0.0068, 0.0035))
 #'
 #' out <- cal_knee_point(inp,"x", "y", plot = FALSE)
 #' plot(out)
-#'
-#'
 cal_knee_point <- function(d, xaxis, yaxis, p1 = NULL, p2 = NULL, plot = TRUE) {
 
   xvar_c <- as.character(xaxis)
